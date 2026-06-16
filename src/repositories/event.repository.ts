@@ -1,6 +1,6 @@
 /**
  * Repository Layer - EduOS
- * 数据访问层抽象 - 统一 Event 模型，读写项目内 data/eduos.json
+ * 数据访问层抽象 - 统一 Event 模型，经 /api/data 持久化
  */
 
 import type { GrowthEvent, EventFilters, CreateEventInput, EventSource } from "@/types";

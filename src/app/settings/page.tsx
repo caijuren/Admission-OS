@@ -99,7 +99,7 @@ export default function SettingsPage() {
                 <Database className="h-4 w-4 text-[#23B87A]" />
                 <div>
                   <strong>数据存储</strong>
-                  <span>基础配置写入 data/eduos.json；阅读和成绩记录同步进入成长档案。</span>
+                  <span>基础配置写入 Supabase Postgres；阅读和成绩记录同步进入成长档案。</span>
                 </div>
               </div>
               <div className="settings-info-row">
@@ -164,7 +164,7 @@ export default function SettingsPage() {
               <Save className="w-4 h-4 mr-2" />
               保存配置
             </Button>
-            {saved && <p className="text-sm text-[#4CD7A4]">已保存到 data/eduos.json</p>}
+            {saved && <p className="text-sm text-[#4CD7A4]">已保存到数据库</p>}
           </div>
         </main>
       </form>

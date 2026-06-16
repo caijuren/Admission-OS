@@ -1,128 +1,10 @@
-import { promises as fs } from "fs";
-import path from "path";
 import { NextResponse } from "next/server";
+import { readData, writeData, type EduosData } from "@/lib/server/data-store";
 import type { GrowthEvent } from "@/types";
-
-export type EduosProfile = {
-  id: string;
-  name: string;
-  school: string;
-  grade: string;
-  targetSchool: string;
-  currentStage: string;
-  progress: number;
-  quote: string;
-};
-
-export type JourneyMilestone = {
-  title: string;
-  subtitle: string;
-  status: "done" | "active" | "next" | "target";
-};
-
-export type PlanGoal = {
-  id: string;
-  title: string;
-  type: "north" | "phase" | "subject" | "project" | "habit";
-  period: string;
-  progress: number;
-  status: "进行中" | "规划中" | "重点推进";
-  description: string;
-  parentId?: string;
-  focus?: string[];
-};
-
-export type PlanTask = {
-  id: string;
-  goalId: string;
-  goalIds?: string[];
-  phaseId?: string;
-  category: string;
-  title: string;
-  description: string;
-  target: number;
-  current: number;
-  unit: string;
-  dailyTarget: string;
-  status: "ahead" | "normal" | "behind";
-  priority: "高" | "中" | "低";
-};
-
-export type PlanLog = {
-  id: string;
-  goalId: string;
-  date: string;
-  category: string;
-  summary: string;
-  amount: string;
-  note: string;
-};
-
-export type PlanPhase = {
-  id: string;
-  goalId: string;
-  title: string;
-  period: string;
-  description: string;
-  order: number;
-};
-
-export type PathwayTarget = {
-  dimension: string;
-  goal: string;
-  status: "达标" | "进行中" | "待配置" | "落后";
-  linkedGoalId?: string;
-};
-
-export type PathwayStage = {
-  id: string;
-  title: string;
-  period: string;
-  status: "done" | "current" | "next" | "future";
-  summary: string;
-  targets: PathwayTarget[];
-};
-
-export type EduosData = {
-  profile: EduosProfile;
-  journey: {
-    milestones: JourneyMilestone[];
-  };
-  events: GrowthEvent[];
-  pathwayStages?: PathwayStage[];
-  goals?: PlanGoal[];
-  goalTasks?: PlanTask[];
-  goalLogs?: PlanLog[];
-  goalPhases?: PlanPhase[];
-};
-
-const dataPath = path.join(process.cwd(), "data", "eduos.json");
 
 function dataErrorResponse(error: unknown) {
   console.error("Data API error:", error);
   return NextResponse.json({ error: "Failed to read or write Admission OS data." }, { status: 500 });
-}
-
-async function readSeedData(): Promise<EduosData> {
-  const raw = await fs.readFile(dataPath, "utf8");
-  return JSON.parse(raw) as EduosData;
-}
-
-async function readFileData(): Promise<EduosData> {
-  return readSeedData();
-}
-
-async function writeFileData(data: EduosData) {
-  await fs.mkdir(path.dirname(dataPath), { recursive: true });
-  await fs.writeFile(dataPath, `${JSON.stringify(data, null, 2)}\n`, "utf8");
-}
-
-async function readData(): Promise<EduosData> {
-  return readFileData();
-}
-
-async function writeData(data: EduosData) {
-  await writeFileData(data);
 }
 
 export async function GET() {
@@ -160,7 +42,15 @@ export async function PATCH(request: Request) {
 
 export async function POST(request: Request) {
   try {
-    const body = await request.json() as { event?: GrowthEvent; events?: GrowthEvent[]; pathwayStages?: PathwayStage[]; goals?: PlanGoal[]; goalTasks?: PlanTask[]; goalLogs?: PlanLog[]; goalPhases?: PlanPhase[] };
+    const body = await request.json() as {
+      event?: GrowthEvent;
+      events?: GrowthEvent[];
+      pathwayStages?: EduosData["pathwayStages"];
+      goals?: EduosData["goals"];
+      goalTasks?: EduosData["goalTasks"];
+      goalLogs?: EduosData["goalLogs"];
+      goalPhases?: EduosData["goalPhases"];
+    };
     const data = await readData();
 
     if (body.events) {
