@@ -165,12 +165,13 @@ export class AnalyticsService {
     thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
     const startDate = thirtyDaysAgo.toISOString().split("T")[0];
 
-    const { data: dailyStats, error } = await supabase
+    const { data, error } = await supabase
       .from("usage_daily")
       .select("*")
       .eq("student_id", studentId)
       .gte("date", startDate)
       .order("date", { ascending: true });
+    const dailyStats = (data || []) as DailyStats[];
 
     if (error) {
       console.error("Error fetching daily stats:", error);
@@ -183,7 +184,10 @@ export class AnalyticsService {
 
     const pageNames = ["dashboard", "timeline", "portfolio", "reading", "grades", "goals", "weekly"];
     const pageStats = pageNames.map(page => {
-      const visits = dailyStats?.reduce((sum, d) => sum + (d[`${page}_visits` as keyof DailyStats] || 0), 0) || 0;
+      const visits = dailyStats.reduce((sum, d) => {
+        const value = d[`${page}_visits` as keyof DailyStats];
+        return sum + (typeof value === "number" ? value : 0);
+      }, 0);
       return {
         page,
         visits,

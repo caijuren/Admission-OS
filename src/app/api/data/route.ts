@@ -1,6 +1,5 @@
 import { promises as fs } from "fs";
 import path from "path";
-import { createClient } from "@supabase/supabase-js";
 import { NextResponse } from "next/server";
 import type { GrowthEvent } from "@/types";
 
@@ -98,32 +97,6 @@ export type EduosData = {
 };
 
 const dataPath = path.join(process.cwd(), "data", "eduos.json");
-const stateKey = process.env.ADMISSION_OS_STATE_KEY || "default";
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || "";
-const supabaseServiceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY || "";
-const appEnv = process.env.NEXT_PUBLIC_APP_ENV || process.env.NODE_ENV;
-const forceSupabase = process.env.ADMISSION_OS_DATA_DRIVER === "supabase";
-const shouldUseSupabase = Boolean(supabaseUrl && supabaseServiceRoleKey);
-const mustUseSupabase = forceSupabase || appEnv === "production";
-
-function getSupabaseAdmin() {
-  if (!shouldUseSupabase) return null;
-  return createClient(supabaseUrl, supabaseServiceRoleKey, {
-    auth: {
-      autoRefreshToken: false,
-      persistSession: false,
-    },
-  });
-}
-
-function missingSupabaseResponse() {
-  return NextResponse.json(
-    {
-      error: "Supabase is required in production. Configure NEXT_PUBLIC_SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY.",
-    },
-    { status: 503 }
-  );
-}
 
 function dataErrorResponse(error: unknown) {
   console.error("Data API error:", error);
@@ -144,81 +117,15 @@ async function writeFileData(data: EduosData) {
   await fs.writeFile(dataPath, `${JSON.stringify(data, null, 2)}\n`, "utf8");
 }
 
-async function readSupabaseData(): Promise<EduosData> {
-  const supabase = getSupabaseAdmin();
-  if (!supabase) {
-    throw new Error("Supabase admin client is not configured");
-  }
-
-  const { data, error } = await supabase
-    .from("app_state")
-    .select("data")
-    .eq("key", stateKey)
-    .maybeSingle();
-
-  if (error) {
-    throw error;
-  }
-
-  if (data?.data) {
-    return data.data as EduosData;
-  }
-
-  const seedData = await readSeedData();
-  await writeSupabaseData(seedData);
-  return seedData;
-}
-
-async function writeSupabaseData(data: EduosData) {
-  const supabase = getSupabaseAdmin();
-  if (!supabase) {
-    throw new Error("Supabase admin client is not configured");
-  }
-
-  const { error } = await supabase
-    .from("app_state")
-    .upsert(
-      {
-        key: stateKey,
-        data,
-        updated_at: new Date().toISOString(),
-      },
-      { onConflict: "key" }
-    );
-
-  if (error) {
-    throw error;
-  }
-}
-
 async function readData(): Promise<EduosData> {
-  if (shouldUseSupabase) {
-    return readSupabaseData();
-  }
-
-  if (mustUseSupabase) {
-    throw new Error("Supabase is required but not configured");
-  }
-
   return readFileData();
 }
 
 async function writeData(data: EduosData) {
-  if (shouldUseSupabase) {
-    await writeSupabaseData(data);
-    return;
-  }
-
-  if (mustUseSupabase) {
-    throw new Error("Supabase is required but not configured");
-  }
-
   await writeFileData(data);
 }
 
 export async function GET() {
-  if (!shouldUseSupabase && mustUseSupabase) return missingSupabaseResponse();
-
   try {
     const data = await readData();
     return NextResponse.json(data);
@@ -228,8 +135,6 @@ export async function GET() {
 }
 
 export async function PATCH(request: Request) {
-  if (!shouldUseSupabase && mustUseSupabase) return missingSupabaseResponse();
-
   try {
     const patch = await request.json() as Partial<EduosData>;
     const data = await readData();
@@ -254,8 +159,6 @@ export async function PATCH(request: Request) {
 }
 
 export async function POST(request: Request) {
-  if (!shouldUseSupabase && mustUseSupabase) return missingSupabaseResponse();
-
   try {
     const body = await request.json() as { event?: GrowthEvent; events?: GrowthEvent[]; pathwayStages?: PathwayStage[]; goals?: PlanGoal[]; goalTasks?: PlanTask[]; goalLogs?: PlanLog[]; goalPhases?: PlanPhase[] };
     const data = await readData();

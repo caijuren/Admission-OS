@@ -3,7 +3,20 @@ import { createClient } from "@supabase/supabase-js";
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || "";
 const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || "";
 
-export const supabase = createClient(supabaseUrl, supabaseAnonKey);
+function getSupabaseClient() {
+  if (!supabaseUrl || !supabaseAnonKey) {
+    throw new Error("Supabase is not configured. Set NEXT_PUBLIC_SUPABASE_URL and NEXT_PUBLIC_SUPABASE_ANON_KEY to use Supabase repositories.");
+  }
+
+  return createClient(supabaseUrl, supabaseAnonKey);
+}
+
+export const supabase = new Proxy({} as any, {
+  get(_target, prop) {
+    const client = getSupabaseClient();
+    return client[prop as keyof typeof client];
+  },
+});
 
 export async function getStudent(): Promise<import("@/types").Student | null> {
   const { data, error } = await supabase
