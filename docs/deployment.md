@@ -1,16 +1,32 @@
-# Admission OS 1.0 Deployment
+# Admission OS 1.1 Deployment
 
 ## Production Data Store
 
-Admission OS 1.0 uses Supabase Postgres as the production data store. The app no longer writes production data to `data/eduos.json`.
+Admission OS 1.1 uses Supabase Auth and Supabase Postgres. Production data is no longer written to `data/eduos.json`.
 
-The current 1.0 schema stores the full application state in `public.app_state.data` as `jsonb`. This keeps the first database migration small while moving all live data into Postgres. Later versions can split this state into normalized tables for users, students, events, goals, tasks, and reports.
+Each authenticated user gets an isolated row in `public.app_state`:
+
+```text
+user_id + key -> data jsonb
+```
+
+The 1.1 schema still stores the full application state as `jsonb` for a low-risk migration. Later versions can split this into normalized tables for students, events, goals, tasks, and reports.
 
 ## Supabase Setup
 
-Run the SQL in `supabase/schema.sql` in the Supabase SQL editor before deploying.
+1. Enable email/password signups in Supabase Auth.
+2. Run the SQL in `supabase/schema.sql` in the Supabase SQL editor.
+3. Configure the app environment variables on the server.
 
-The production API uses `SUPABASE_SERVICE_ROLE_KEY` on the server to read and write `public.app_state`. Do not expose this key in the browser.
+If you already deployed 1.0/1.0.3 and have an existing `public.app_state` row without `user_id`, create your first Supabase user, copy its user id, and assign the old row before applying the final `not null`/primary-key migration:
+
+```sql
+update public.app_state
+set user_id = 'YOUR_SUPABASE_USER_ID'
+where user_id is null;
+```
+
+For a fresh deployment, run `supabase/schema.sql` directly.
 
 ## Environment Variables
 
@@ -24,16 +40,18 @@ NEXT_PUBLIC_SUPABASE_ANON_KEY=your-anon-key
 SUPABASE_SERVICE_ROLE_KEY=your-service-role-key
 ADMISSION_OS_DATA_DRIVER=database
 ADMISSION_OS_STATE_KEY=default
+NEXT_PUBLIC_SITE_URL=https://your-domain.example
 PORT=3010
 ```
 
-`ADMISSION_OS_STATE_KEY` selects the app state row in `public.app_state`. Keep it as `default` for the 1.0 single-tenant deployment.
+Never expose `SUPABASE_SERVICE_ROLE_KEY` in browser code or public logs.
 
-## Initial Data
+## Auth Flow
 
-On the first successful `/api/data` request, if no row exists for `ADMISSION_OS_STATE_KEY`, the app seeds Supabase from `data/eduos.json`. After that, all updates are persisted in Postgres.
-
-Keep `data/eduos.json` as the seed snapshot, not as production storage.
+- `/login` supports email/password registration and login.
+- Protected pages redirect anonymous users to `/login`.
+- `/api/data` rejects anonymous requests and reads/writes only the current user's `app_state` row.
+- On a user's first successful `/api/data` request, the app seeds that user's row from `data/eduos.json`.
 
 ## Verification
 
@@ -72,12 +90,12 @@ If you do not set `SERVER_NAME`, the script only starts PM2 on `127.0.0.1:3010` 
 
 ## Backup Notes
 
-Enable Supabase database backups before opening access to other users. For a quick manual snapshot of the 1.0 state:
+Enable Supabase database backups before opening access to users. For a quick manual snapshot:
 
 ```sql
-select key, data, version, updated_at
+select user_id, key, data, version, updated_at
 from public.app_state
-where key = 'default';
+order by updated_at desc;
 ```
 
-Before major changes, export that row from Supabase or take a database backup.
+Before major changes, export `public.app_state` or take a database backup.

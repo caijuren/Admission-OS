@@ -112,7 +112,7 @@ function isDatabaseRequired() {
   return process.env.NODE_ENV === "production" || process.env.ADMISSION_OS_DATA_DRIVER === "database";
 }
 
-export async function readData(): Promise<EduosData> {
+export async function readData(userId: string): Promise<EduosData> {
   if (!isDatabaseConfigured()) {
     if (isDatabaseRequired()) {
       throw new Error("Production data store requires NEXT_PUBLIC_SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY.");
@@ -125,6 +125,7 @@ export async function readData(): Promise<EduosData> {
   const { data, error } = await supabase
     .from("app_state")
     .select("data")
+    .eq("user_id", userId)
     .eq("key", appStateKey)
     .maybeSingle();
 
@@ -137,11 +138,11 @@ export async function readData(): Promise<EduosData> {
   }
 
   const seedData = await readSeedData();
-  await writeData(seedData);
+  await writeData(userId, seedData);
   return seedData;
 }
 
-export async function writeData(data: EduosData) {
+export async function writeData(userId: string, data: EduosData) {
   if (!isDatabaseConfigured()) {
     if (isDatabaseRequired()) {
       throw new Error("Production data store requires NEXT_PUBLIC_SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY.");
@@ -154,6 +155,7 @@ export async function writeData(data: EduosData) {
   const { error } = await supabase
     .from("app_state")
     .upsert({
+      user_id: userId,
       key: appStateKey,
       data,
       updated_at: new Date().toISOString(),

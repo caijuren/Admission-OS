@@ -753,6 +753,23 @@
   padding: 10px;
   background: #f8fafc;
   border: 1px solid var(--line-soft);
+  cursor: pointer;
+  position: relative;
+  text-align: left;
+  transition: background 180ms ease, border-color 180ms ease;
+  width: calc(100% - 24px);
+}
+
+.sidebar-profile:hover {
+  background: #f1f5f9;
+  border-color: rgba(91, 107, 245, 0.22);
+}
+
+.sidebar-profile button {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  cursor: pointer;
 }
 
 .sidebar-avatar {
@@ -896,6 +913,123 @@
   padding: 18px 22px 30px;
   position: relative;
   z-index: 1;
+}
+
+.auth-page {
+  min-height: 100vh;
+  display: grid;
+  place-items: center;
+  padding: 24px;
+  background:
+    linear-gradient(90deg, rgba(241, 245, 249, 0.92) 0 1px, transparent 1px) 0 0 / 28px 28px,
+    linear-gradient(180deg, #f8fafc 0%, #f3f6fb 100%);
+}
+
+.auth-panel {
+  width: min(100%, 420px);
+  display: grid;
+  gap: 18px;
+  padding: 24px;
+  border-radius: 16px;
+  background: rgba(255, 255, 255, 0.96);
+  border: 1px solid var(--line-soft);
+  box-shadow: var(--eduos-shadow-lg);
+}
+
+.auth-brand {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.auth-brand > span {
+  width: 42px;
+  height: 42px;
+  border-radius: 12px;
+  display: grid;
+  place-items: center;
+  color: #ffffff;
+  background: linear-gradient(135deg, #4f5de0, #6878ff);
+  box-shadow: 0 12px 24px rgba(91, 107, 245, 0.22);
+}
+
+.auth-brand strong {
+  display: block;
+  color: #1f2a44;
+  font-size: 20px;
+  font-weight: 900;
+}
+
+.auth-brand p {
+  margin-top: 4px;
+  color: #7b8497;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.auth-tabs {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 6px;
+  padding: 5px;
+  border-radius: 12px;
+  background: #f1f5f9;
+}
+
+.auth-tabs button {
+  min-height: 38px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  border-radius: 9px;
+  color: #64748b;
+  font-size: 13px;
+  font-weight: 900;
+  transition: all 180ms ease;
+}
+
+.auth-tabs button.active {
+  color: #4f5de0;
+  background: #ffffff;
+  box-shadow: 0 8px 18px rgba(28, 35, 64, 0.06);
+}
+
+.auth-form {
+  display: grid;
+  gap: 14px;
+}
+
+.auth-form label {
+  display: grid;
+  gap: 7px;
+}
+
+.auth-form label span {
+  color: #344054;
+  font-size: 12px;
+  font-weight: 900;
+}
+
+.auth-error,
+.auth-message {
+  margin: 0;
+  border-radius: 10px;
+  padding: 10px 12px;
+  font-size: 13px;
+  font-weight: 800;
+}
+
+.auth-error {
+  color: #b42318;
+  background: #fff1f0;
+  border: 1px solid #ffd6d0;
+}
+
+.auth-message {
+  color: #047857;
+  background: #ecfdf5;
+  border: 1px solid #bbf7d0;
 }
 
 .design-page {

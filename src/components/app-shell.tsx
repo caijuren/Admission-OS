@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useEffect, useState } from "react";
+import { FormEvent, useEffect, useState } from "react";
 import {
   BarChart3,
   BookOpen,
@@ -34,9 +34,22 @@ export function AppShell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const [profile, setProfile] = useState<StudentProfile>({ ...DEFAULT_PROFILE, ...seedData.profile });
 
+  const publicShell = pathname === "/login" || pathname === "/privacy";
+
   useEffect(() => {
+    if (publicShell) return;
     getProductConfig().then((config) => setProfile(config.profile));
-  }, []);
+  }, [publicShell]);
+
+  async function handleLogout(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    await fetch("/api/auth/logout", { method: "POST" });
+    window.location.href = "/login";
+  }
+
+  if (publicShell) {
+    return <>{children}</>;
+  }
 
   return (
     <div className="app-frame">
@@ -66,15 +79,16 @@ export function AppShell({ children }: { children: React.ReactNode }) {
           })}
         </nav>
 
-        <Link href="/settings" className="sidebar-profile">
+        <form onSubmit={handleLogout} className="sidebar-profile">
           <div className="sidebar-avatar">
             {profile.name ? profile.name.slice(0, 1) : <UserRound className="h-4 w-4" />}
           </div>
           <div>
             <strong>{profile.name}</strong>
-            <span>点这里修改档案/头像</span>
+            <span>退出登录</span>
           </div>
-        </Link>
+          <button type="submit" aria-label="退出登录" />
+        </form>
       </aside>
 
       <main className="app-main">{children}</main>
