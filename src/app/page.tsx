@@ -69,11 +69,11 @@ const pathwayStageLabels: Record<PathwayStage["status"], string> = {
 };
 
 const pathwayNodePositions = [
-  { left: 26.22, top: 95.88, cardX: -78, cardY: -154 },
-  { left: 38.62, top: 85.91, cardX: -76, cardY: -166 },
-  { left: 51.25, top: 77.12, cardX: 34, cardY: -136 },
-  { left: 62.56, top: 61.9, cardX: 42, cardY: -126 },
-  { left: 71.13, top: 33.45, cardX: 46, cardY: 16 },
+  { left: 26.22, top: 95.88, cardX: -166, cardY: -178 },
+  { left: 38.62, top: 85.91, cardX: -170, cardY: -178 },
+  { left: 51.25, top: 77.12, cardX: 70, cardY: -188 },
+  { left: 62.56, top: 61.9, cardX: 70, cardY: -176 },
+  { left: 71.13, top: 33.45, cardX: 64, cardY: 42 },
 ];
 
 const initialPathwayStages = (seedData.pathwayStages || []) as PathwayStage[];

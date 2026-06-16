@@ -5,7 +5,7 @@ export default function PrivacyPage() {
         <h1>隐私与数据说明</h1>
         <p>
           Admission OS 用于家庭内部记录升学规划、校内成绩、阅读表达、项目荣誉和阶段复盘。
-          当前版本默认通过家庭访问码保护，不开放公开注册。
+          当前版本为单家庭自用部署，不开放公开注册。
         </p>
 
         <section>
@@ -21,8 +21,7 @@ export default function PrivacyPage() {
         <section>
           <h2>访问控制</h2>
           <p>
-            当前系统使用访问码限制访问。上线环境必须配置服务端环境变量
-            <code>ADMISSION_OS_ACCESS_CODE</code>，不要把访问码写入前端公开变量。
+            当前部署未启用站内登录。建议通过服务器安全组、反向代理访问控制或后续账号体系限制访问范围。
           </p>
         </section>
 

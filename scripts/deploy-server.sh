@@ -68,23 +68,14 @@ fi
 cd "$APP_DIR"
 
 if [ ! -f ".env.production" ]; then
-  ADMISSION_OS_ACCESS_CODE_VALUE="$(prompt_value ADMISSION_OS_ACCESS_CODE "ADMISSION_OS_ACCESS_CODE" true)"
-
   cat > .env.production <<ENV
 NEXT_PUBLIC_STUDENT_ID=${NEXT_PUBLIC_STUDENT_ID:-1}
 NEXT_PUBLIC_APP_ENV=production
-ADMISSION_OS_ACCESS_CODE=$ADMISSION_OS_ACCESS_CODE_VALUE
 ADMISSION_OS_DATA_DRIVER=file
 PORT=$APP_PORT
 ENV
   chmod 600 .env.production
   echo "Created .env.production"
-fi
-
-if grep -q '^ADMISSION_OS_ACCESS_CODE=$' .env.production; then
-  echo "ADMISSION_OS_ACCESS_CODE is empty in .env.production"
-  echo "Edit $APP_DIR/.env.production before starting production."
-  exit 1
 fi
 
 echo "==> Installing dependencies"

@@ -8,7 +8,7 @@ The default production setup uses a local JSON file:
 /srv/apps/admission-os/data/eduos.json
 ```
 
-This is the simplest option for a single-user private server. It avoids database setup and keeps the app deployable with only one private access code.
+This is the simplest option for a single-user private server. It avoids database setup and keeps the app deployable with only local file storage.
 
 ## Environment Variables
 
@@ -17,12 +17,9 @@ Production requires:
 ```bash
 NEXT_PUBLIC_STUDENT_ID=1
 NEXT_PUBLIC_APP_ENV=production
-ADMISSION_OS_ACCESS_CODE=
 ADMISSION_OS_DATA_DRIVER=file
 PORT=3010
 ```
-
-`ADMISSION_OS_ACCESS_CODE` is the login code for the site. Keep it private.
 
 ## Verification
 
@@ -49,12 +46,6 @@ Run on the server after pushing the repository to GitHub:
 ```bash
 export REPO_URL=https://github.com/caijuren/Admission-OS.git
 bash <(curl -fsSL https://raw.githubusercontent.com/caijuren/Admission-OS/main/scripts/deploy-server.sh)
-```
-
-The script will ask only for:
-
-```text
-ADMISSION_OS_ACCESS_CODE
 ```
 
 If you have a dedicated domain for this app, also set:
