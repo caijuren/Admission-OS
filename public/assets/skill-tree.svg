@@ -1,0 +1,111 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 500 450" fill="none">
+  <defs>
+    <radialGradient id="sunGlow" cx="50%" cy="20%" r="60%">
+      <stop offset="0%" stop-color="#FFF7ED"/>
+      <stop offset="100%" stop-color="#F8FAFC"/>
+    </radialGradient>
+    <linearGradient id="trunk" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%" stop-color="#92400E"/>
+      <stop offset="100%" stop-color="#78350F"/>
+    </linearGradient>
+    <linearGradient id="leaf1" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#6EE7B7"/>
+      <stop offset="100%" stop-color="#34D399"/>
+    </linearGradient>
+    <linearGradient id="leaf2" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#A7F3D0"/>
+      <stop offset="100%" stop-color="#6EE7B7"/>
+    </linearGradient>
+    <filter id="softGlow">
+      <feGaussianBlur stdDeviation="2" result="blur"/>
+      <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+    <filter id="dropShadow">
+      <feDropShadow dx="0" dy="2" stdDeviation="3" flood-opacity="0.15"/>
+    </filter>
+  </defs>
+
+  <!-- Background -->
+  <rect width="500" height="450" fill="url(#sunGlow)"/>
+
+  <!-- Ground -->
+  <ellipse cx="250" cy="410" rx="200" ry="30" fill="#E2E8F0"/>
+
+  <!-- Tree trunk -->
+  <rect x="232" y="200" width="36" height="200" rx="10" fill="url(#trunk)"/>
+  <!-- Trunk texture -->
+  <line x1="242" y1="220" x2="242" y2="390" stroke="#78350F" stroke-width="1" opacity="0.4"/>
+  <line x1="255" y1="230" x2="255" y2="380" stroke="#78350F" stroke-width="1" opacity="0.3"/>
+
+  <!-- Roots -->
+  <path d="M 232 390 Q 210 400 195 415" stroke="#78350F" stroke-width="6" fill="none" stroke-linecap="round"/>
+  <path d="M 268 390 Q 290 400 305 415" stroke="#78350F" stroke-width="6" fill="none" stroke-linecap="round"/>
+
+  <!-- Main canopy -->
+  <ellipse cx="180" cy="150" rx="80" ry="55" fill="url(#leaf1)"/>
+  <ellipse cx="310" cy="155" rx="75" ry="50" fill="url(#leaf1)"/>
+  <ellipse cx="250" cy="120" rx="85" ry="60" fill="url(#leaf2)"/>
+  <ellipse cx="140" cy="180" rx="60" ry="35" fill="url(#leaf2)"/>
+  <ellipse cx="340" cy="190" rx="55" ry="30" fill="url(#leaf2)"/>
+
+  <!-- Skill fruits/nodes -->
+  <!-- 数学 -->
+  <g filter="url(#dropShadow)">
+    <circle cx="130" cy="120" r="28" fill="#FFD93D" stroke="#F59E0B" stroke-width="2"/>
+    <text x="130" y="125" text-anchor="middle" font-size="14" fill="#92400E" font-weight="bold">数学</text>
+  </g>
+
+  <!-- 英语 -->
+  <g filter="url(#dropShadow)">
+    <circle cx="330" cy="110" r="28" fill="#FFD93D" stroke="#F59E0B" stroke-width="2"/>
+    <text x="330" y="115" text-anchor="middle" font-size="14" fill="#92400E" font-weight="bold">英语</text>
+  </g>
+
+  <!-- 阅读 -->
+  <g filter="url(#dropShadow)">
+    <circle cx="200" cy="80" r="28" fill="#FFD93D" stroke="#F59E0B" stroke-width="2"/>
+    <text x="200" y="85" text-anchor="middle" font-size="14" fill="#92400E" font-weight="bold">阅读</text>
+  </g>
+
+  <!-- 学习力 -->
+  <g filter="url(#dropShadow)">
+    <circle cx="250" cy="60" r="28" fill="#FFD93D" stroke="#F59E0B" stroke-width="2"/>
+    <text x="250" y="65" text-anchor="middle" font-size="13" fill="#92400E" font-weight="bold">学习力</text>
+  </g>
+
+  <!-- 物理 -->
+  <g filter="url(#dropShadow)">
+    <circle cx="370" cy="160" r="28" fill="#FFD93D" stroke="#F59E0B" stroke-width="2"/>
+    <text x="370" y="165" text-anchor="middle" font-size="14" fill="#92400E" font-weight="bold">物理</text>
+  </g>
+
+  <!-- 编程 -->
+  <g filter="url(#dropShadow)">
+    <circle cx="100" cy="180" r="28" fill="#FFD93D" stroke="#F59E0B" stroke-width="2"/>
+    <text x="100" y="185" text-anchor="middle" font-size="13" fill="#92400E" font-weight="bold">编程</text>
+  </g>
+
+  <!-- Connecting lines (branches) -->
+  <line x1="250" y1="85" x2="155" y2="115" stroke="#A16207" stroke-width="2" opacity="0.5"/>
+  <line x1="250" y1="85" x2="225" y2="90" stroke="#A16207" stroke-width="2" opacity="0.5"/>
+  <line x1="250" y1="85" x2="330" y2="115" stroke="#A16207" stroke-width="2" opacity="0.5"/>
+  <line x1="250" y1="85" x2="370" y2="155" stroke="#A16207" stroke-width="2" opacity="0.5"/>
+  <line x1="250" y1="85" x2="125" y2="170" stroke="#A16207" stroke-width="2" opacity="0.5"/>
+
+  <!-- Ladder -->
+  <line x1="220" y1="200" x2="215" y2="320" stroke="#78350F" stroke-width="3"/>
+  <line x1="280" y1="200" x2="285" y2="320" stroke="#78350F" stroke-width="3"/>
+  <line x1="215" y1="230" x2="280" y2="230" stroke="#78350F" stroke-width="2"/>
+  <line x1="216" y1="260" x2="280" y2="260" stroke="#78350F" stroke-width="2"/>
+  <line x1="216" y1="290" x2="281" y2="290" stroke="#78350F" stroke-width="2"/>
+
+  <!-- Small grass at base -->
+  <path d="M 200 405 L 205 390 L 210 405" fill="#4ADE80"/>
+  <path d="M 290 405 L 295 388 L 300 405" fill="#4ADE80"/>
+  <path d="M 240 408 L 245 395 L 250 408" fill="#34D399"/>
+
+  <!-- Sparkles -->
+  <text x="75" y="100" font-size="12" fill="#FFB347" filter="url(#softGlow)">✦</text>
+  <text x="395" y="90" font-size="10" fill="#FFB347">✦</text>
+  <text x="420" y="180" font-size="8" fill="#FFB347">✦</text>
+</svg>

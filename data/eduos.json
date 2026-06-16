@@ -1,0 +1,737 @@
+{
+  "profile": {
+    "id": "1",
+    "name": "小胖子",
+    "school": "学校名称",
+    "grade": "当前年级",
+    "targetSchool": "上海交附嘉分",
+    "currentStage": "2026 暑假基础建立期",
+    "progress": 0,
+    "quote": "围绕交附嘉分目标，把每一次学习、项目和证据沉淀成真实竞争力。"
+  },
+  "journey": {
+    "milestones": [
+      {
+        "title": "四年总目标",
+        "subtitle": "目标体系建立",
+        "status": "done"
+      },
+      {
+        "title": "2026 暑假",
+        "subtitle": "基础建立期",
+        "status": "active"
+      },
+      {
+        "title": "六年级",
+        "subtitle": "体系搭建完成",
+        "status": "next"
+      },
+      {
+        "title": "七八年级",
+        "subtitle": "能力拉开差距",
+        "status": "next"
+      },
+      {
+        "title": "九年级",
+        "subtitle": "收敛冲刺交附",
+        "status": "target"
+      }
+    ]
+  },
+  "pathwayStages": [
+    {
+      "id": "summer-2025",
+      "title": "五下暑假",
+      "period": "2025.06 - 2025.08",
+      "status": "current",
+      "summary": "基础建立期：先把语数英主线和每日执行节奏跑起来，为六年级开学做准备。",
+      "targets": [
+        {
+          "dimension": "数学",
+          "goal": "完成六上预习和知识缺口梳理，计算与应用题专项启动。",
+          "status": "进行中",
+          "linkedGoalId": "math-system"
+        },
+        {
+          "dimension": "英语",
+          "goal": "RAZ E-G 推进，PET 词汇启动，听力输入形成固定节奏。",
+          "status": "进行中",
+          "linkedGoalId": "english-system"
+        },
+        {
+          "dimension": "语文",
+          "goal": "《道德经》精读启动，晨读经典，现代文阅读和写作训练建立。",
+          "status": "进行中",
+          "linkedGoalId": "chinese-system"
+        },
+        {
+          "dimension": "项目竞赛",
+          "goal": "确定 1-2 个项目方向：软件系统、艺术表达或科创探索。",
+          "status": "待配置",
+          "linkedGoalId": "project-portfolio"
+        },
+        {
+          "dimension": "校内成绩",
+          "goal": "暂不以排名为核心，重点建立六年级开学后的稳定学习节奏。",
+          "status": "待配置"
+        }
+      ]
+    },
+    {
+      "id": "grade-six",
+      "title": "六年级",
+      "period": "2025.09 - 2026.06",
+      "status": "next",
+      "summary": "体系搭建完成：校内稳定，数学初一体系、英语 PET 基础、语文阅读体系成型。",
+      "targets": [
+        {
+          "dimension": "数学",
+          "goal": "初一体系基本完成，校内知识不拖后腿，形成错题复盘习惯。",
+          "status": "待配置",
+          "linkedGoalId": "math-system"
+        },
+        {
+          "dimension": "英语",
+          "goal": "PET 基础能力建立，Unlock 2-3 稳定推进，原版阅读进入节奏。",
+          "status": "待配置",
+          "linkedGoalId": "english-system"
+        },
+        {
+          "dimension": "语文",
+          "goal": "阅读体系建立，古文入门稳定，作文结构和表达素材开始沉淀。",
+          "status": "待配置",
+          "linkedGoalId": "chinese-system"
+        },
+        {
+          "dimension": "项目竞赛",
+          "goal": "项目方向启动，形成第一个可展示的小作品或学习成果。",
+          "status": "待配置",
+          "linkedGoalId": "project-portfolio"
+        },
+        {
+          "dimension": "校内成绩",
+          "goal": "六年级校内稳定，开始记录排名、分数和薄弱学科变化。",
+          "status": "待配置"
+        }
+      ]
+    },
+    {
+      "id": "grade-seven",
+      "title": "七年级",
+      "period": "2026.09 - 2027.06",
+      "status": "future",
+      "summary": "分化起点：学科能力开始拉开差距，英语和数学进入更高标准。",
+      "targets": [
+        {
+          "dimension": "数学",
+          "goal": "初二体系稳定，专题训练启动，压轴题思路开始成型。",
+          "status": "待配置",
+          "linkedGoalId": "math-system"
+        },
+        {
+          "dimension": "英语",
+          "goal": "2027 年 9 月前后 PET 稳定，Unlock 3 完成，开始 FCE 衔接。",
+          "status": "待配置",
+          "linkedGoalId": "english-system"
+        },
+        {
+          "dimension": "语文",
+          "goal": "古文、现代文阅读深化，写作从结构清晰走向表达稳定。",
+          "status": "待配置",
+          "linkedGoalId": "chinese-system"
+        },
+        {
+          "dimension": "项目竞赛",
+          "goal": "选择适合自招叙事的竞赛或项目路线，形成持续记录。",
+          "status": "待配置",
+          "linkedGoalId": "project-portfolio"
+        },
+        {
+          "dimension": "校内成绩",
+          "goal": "进入校内前列观察区，重点看是否能稳定接近前 10%-15%。",
+          "status": "待配置"
+        }
+      ]
+    },
+    {
+      "id": "grade-eight",
+      "title": "八年级",
+      "period": "2027.09 - 2028.06",
+      "status": "future",
+      "summary": "能力拉开：理科体系完整，自招证据开始从过程沉淀变成可展示成果。",
+      "targets": [
+        {
+          "dimension": "数学",
+          "goal": "初三到高一衔接启动，竞赛中等难度和综合题训练稳定。",
+          "status": "待配置",
+          "linkedGoalId": "math-system"
+        },
+        {
+          "dimension": "英语",
+          "goal": "FCE 强化，原版阅读稳定，听说输出能力持续提升。",
+          "status": "待配置",
+          "linkedGoalId": "english-system"
+        },
+        {
+          "dimension": "语文",
+          "goal": "高阶阅读理解和议论文表达稳定，能支撑面谈表达。",
+          "status": "待配置",
+          "linkedGoalId": "chinese-system"
+        },
+        {
+          "dimension": "项目竞赛",
+          "goal": "项目有阶段成果，竞赛和证书开始形成自招证据链。",
+          "status": "待配置",
+          "linkedGoalId": "project-portfolio"
+        },
+        {
+          "dimension": "校内成绩",
+          "goal": "校内前 10% 冲刺，薄弱项需要被及时拉回。",
+          "status": "待配置"
+        }
+      ]
+    },
+    {
+      "id": "grade-nine",
+      "title": "九年级",
+      "period": "2028.09 - 2029.06",
+      "status": "future",
+      "summary": "收敛冲刺：自招、名额到校、统招三条通道都要有清晰判断。",
+      "targets": [
+        {
+          "dimension": "数学",
+          "goal": "高中衔接和竞赛提升收敛，一模二模前明确压轴题稳定性。",
+          "status": "待配置",
+          "linkedGoalId": "math-system"
+        },
+        {
+          "dimension": "英语",
+          "goal": "原版阅读、听说输出和考试能力稳定，形成可展示优势。",
+          "status": "待配置",
+          "linkedGoalId": "english-system"
+        },
+        {
+          "dimension": "语文",
+          "goal": "阅读理解、写作表达和面谈表达能稳定支撑自招。",
+          "status": "待配置",
+          "linkedGoalId": "chinese-system"
+        },
+        {
+          "dimension": "项目竞赛",
+          "goal": "项目、证书、作品和成长记录完成整理，服务自招表达。",
+          "status": "待配置",
+          "linkedGoalId": "project-portfolio"
+        },
+        {
+          "dimension": "校内成绩",
+          "goal": "一模二模和校内排名形成判断依据，名额到校和统招底线清晰。",
+          "status": "待配置"
+        }
+      ]
+    }
+  ],
+  "events": [
+    {
+      "id": "db494982-6c71-410d-b455-c4dae60a37b9",
+      "student_id": "1",
+      "type": "goal",
+      "category": "目标",
+      "title": "2025 暑假学习任务目标",
+      "description": "2025年6月20日到8月31日，共73天，围绕数学、英语、语文三条主线推进。",
+      "date": "2025-06",
+      "year": 2025,
+      "tags": [
+        {
+          "id": "22ac6009-3a08-4339-9043-325a33c01a62",
+          "name": "短期",
+          "color": "#22c55e"
+        }
+      ],
+      "attachments": [],
+      "metadata": {
+        "goalType": "短期",
+        "goalProgress": 0
+      },
+      "is_highlight": false,
+      "is_milestone": false,
+      "source": "goals",
+      "created_at": "2026-06-15T14:16:29.564Z",
+      "updated_at": "2026-06-15T14:16:29.566Z"
+    }
+  ],
+  "goals": [
+    {
+      "id": "four-year",
+      "title": "六到九年级全学科目标体系",
+      "type": "north",
+      "period": "六年级 - 九年级",
+      "progress": 0,
+      "status": "进行中",
+      "description": "建立稳定的初中全科体系，在保证区内顶尖稳定的基础上，保留交附嘉分级别的基础，并冲刺四校/八大。",
+      "focus": [
+        "稳定进入嘉定一中级别保底",
+        "校内前10%左右进入交附嘉分达标区",
+        "保留四校/八大潜在录取能力"
+      ]
+    },
+    {
+      "id": "summer-2025",
+      "title": "2026 五下暑假学习任务",
+      "type": "phase",
+      "period": "2025.06.18 - 2025.08.31",
+      "progress": 0,
+      "status": "重点推进",
+      "description": "73 天暑假计划，围绕数学补知识缺口、英语 RAZ/PET/听说读写、语文道德经/阅读/写作三条主线推进。",
+      "parentId": "four-year",
+      "focus": [
+        "目标明确：分阶段",
+        "可量化",
+        "可执行",
+        "体系完整：语数英主线清晰",
+        "互相协同",
+        "习惯养成：每日固定节奏",
+        "长期坚持",
+        "全面发展：知识",
+        "能力",
+        "思维全面提升"
+      ]
+    },
+    {
+      "id": "grade-six",
+      "title": "六年级：基础建立",
+      "type": "phase",
+      "parentId": "four-year",
+      "period": "六年级",
+      "progress": 0,
+      "status": "规划中",
+      "description": "数学初一体系，英语 PET，语文阅读体系建立，理科启蒙阶段，学习能力完成习惯养成。",
+      "focus": [
+        "数学初一体系",
+        "英语 PET",
+        "语文阅读体系建立",
+        "学习习惯养成"
+      ]
+    },
+    {
+      "id": "grade-seven",
+      "title": "七年级：分化起点",
+      "type": "phase",
+      "parentId": "four-year",
+      "period": "七年级",
+      "progress": 0,
+      "status": "规划中",
+      "description": "数学初二体系，英语 FCE，语文古文与阅读深化，物理完整学习开始，学习能力形成独立学习。",
+      "focus": [
+        "数学初二体系",
+        "英语 FCE",
+        "语文古文与阅读深化",
+        "物理完整学习开始"
+      ]
+    },
+    {
+      "id": "grade-eight",
+      "title": "八年级：能力拉开",
+      "type": "phase",
+      "parentId": "four-year",
+      "period": "八年级",
+      "progress": 0,
+      "status": "规划中",
+      "description": "数学初三到高一衔接，英语 FCE 强化与原版阅读，物理综合能力提升，化学完整体系学习。",
+      "focus": [
+        "数学初三到高一衔接",
+        "FCE 强化与原版阅读",
+        "物理综合能力提升",
+        "化学完整体系学习"
+      ]
+    },
+    {
+      "id": "grade-nine",
+      "title": "九年级：收敛冲刺",
+      "type": "phase",
+      "parentId": "four-year",
+      "period": "九年级",
+      "progress": 0,
+      "status": "规划中",
+      "description": "高中衔接与竞赛提升，英语原版稳定与听说输出，全科查漏补缺，冲刺校级层级。",
+      "focus": [
+        "高中衔接与竞赛提升",
+        "英语原版稳定与听说输出",
+        "全科查漏补缺与冲刺收敛"
+      ]
+    },
+    {
+      "id": "math-system",
+      "title": "数学：上限决定器",
+      "type": "subject",
+      "period": "全程",
+      "progress": 0,
+      "status": "进行中",
+      "description": "完成初中全部校内体系，校内稳定 85%+；冲刺目标是高一数学提前完成、奥数达到竞赛中等难度并压轴题稳定解题。",
+      "parentId": "goal-1781577196426-5b2a48",
+      "focus": [
+        "校内稳定 85%+",
+        "校内前10%",
+        "高一数学提前完成",
+        "奥数竞赛中等难度"
+      ]
+    },
+    {
+      "id": "english-system",
+      "title": "英语：上限 + 稳定器",
+      "type": "subject",
+      "parentId": "four-year",
+      "period": "全程",
+      "progress": 0,
+      "status": "进行中",
+      "description": "保底 KET/PET 基础与阅读能力；达标 PET 优秀到 FCE；冲刺 FCE 优秀并接近 CAE，8000-12000 词汇量，形成原版书稳定阅读与听力输入体系。",
+      "focus": [
+        "KET/PET 基础",
+        "PET 优秀到 FCE",
+        "FCE 优秀接近 CAE",
+        "8000-12000 词汇量"
+      ]
+    },
+    {
+      "id": "chinese-system",
+      "title": "语文：理解与表达底座",
+      "type": "subject",
+      "parentId": "four-year",
+      "period": "全程",
+      "progress": 0,
+      "status": "进行中",
+      "description": "保底校内稳定高分与基础阅读能力；达标古文体系、年阅读体系和结构化写作；冲刺古文观止级别理解、复杂文本抽象理解和议论文结构成熟。",
+      "focus": [
+        "校内稳定高分",
+        "古文体系",
+        "年阅读体系",
+        "结构化写作与复杂文本理解"
+      ]
+    },
+    {
+      "id": "science-system",
+      "title": "理科分层：物理 / 化学",
+      "type": "subject",
+      "parentId": "four-year",
+      "period": "七年级后持续",
+      "progress": 0,
+      "status": "进行中",
+      "description": "物理建立理科分层核心，掌握完整体系、竞赛基础和复杂综合题拆解；化学作为理科稳定器，完成概念记忆、反应体系结构化和高稳定得分。",
+      "focus": [
+        "物理基础概念",
+        "完整知识体系",
+        "综合题拆解",
+        "化学反应体系结构化"
+      ]
+    },
+    {
+      "id": "learning-system",
+      "title": "学习能力：隐形核心学科",
+      "type": "habit",
+      "parentId": "four-year",
+      "period": "全程",
+      "progress": 0,
+      "status": "进行中",
+      "description": "从完成作业体系到独立预习、复盘、错题管理和学习策略，决定所有学科上限。",
+      "focus": [
+        "完成作业体系",
+        "独立预习",
+        "错题复盘",
+        "自主管理学习路径"
+      ]
+    },
+    {
+      "id": "goal-1781577196426-5b2a48",
+      "title": "专项训练",
+      "type": "subject",
+      "period": "待定",
+      "progress": 0,
+      "status": "规划中",
+      "description": "",
+      "focus": []
+    }
+  ],
+  "goalTasks": [
+    {
+      "id": "en-reading",
+      "goalId": "summer-2025",
+      "category": "英语",
+      "title": "RAZ 分级阅读 E → G",
+      "description": "RAZ 阅读提升至 G 级，建立英语语感和原版阅读入口。",
+      "target": 3,
+      "current": 0,
+      "unit": "级",
+      "dailyTarget": "每天 30 分钟",
+      "status": "normal",
+      "priority": "高",
+      "goalIds": [
+        "summer-2025",
+        "english-system",
+        "grade-six"
+      ],
+      "phaseId": ""
+    },
+    {
+      "id": "en-unlock",
+      "goalId": "summer-2025",
+      "category": "英语",
+      "title": "Unlock 2 教材学习",
+      "description": "每周 3-4 课，适应学术阅读材料，提升阅读理解和学术表达。",
+      "target": 60,
+      "current": 0,
+      "unit": "次",
+      "dailyTarget": "每周 3-4 课",
+      "status": "normal",
+      "priority": "中",
+      "goalIds": [
+        "summer-2025",
+        "english-system",
+        "grade-six"
+      ],
+      "phaseId": ""
+    },
+    {
+      "id": "en-self-reading",
+      "goalId": "summer-2025",
+      "category": "英语",
+      "title": "自主阅读",
+      "description": "每天 30-60 分钟，持续扩大英语输入量。",
+      "target": 73,
+      "current": 0,
+      "unit": "次",
+      "dailyTarget": "每天 30-60 分钟",
+      "status": "normal",
+      "priority": "高",
+      "goalIds": [
+        "summer-2025",
+        "english-system",
+        "grade-six"
+      ],
+      "phaseId": ""
+    },
+    {
+      "id": "en-listening",
+      "goalId": "summer-2025",
+      "category": "英语",
+      "title": "听力输入",
+      "description": "每天 20-30 分钟，形成听说读写全面提升。",
+      "target": 73,
+      "current": 0,
+      "unit": "次",
+      "dailyTarget": "每天 20-30 分钟",
+      "status": "normal",
+      "priority": "中",
+      "goalIds": [
+        "summer-2025",
+        "english-system",
+        "grade-six"
+      ],
+      "phaseId": ""
+    },
+    {
+      "id": "en-speaking",
+      "goalId": "summer-2025",
+      "category": "英语",
+      "title": "口袋领航口语练习",
+      "description": "每天 10-15 分钟，提升口语表达和输出稳定性。",
+      "target": 73,
+      "current": 0,
+      "unit": "次",
+      "dailyTarget": "每天 10-15 分钟",
+      "status": "normal",
+      "priority": "中",
+      "goalIds": [
+        "summer-2025",
+        "english-system",
+        "grade-six"
+      ],
+      "phaseId": ""
+    },
+    {
+      "id": "cn-daodejing",
+      "goalId": "summer-2025",
+      "category": "语文",
+      "title": "古文精读《道德经》",
+      "description": "暑假精读一遍《道德经》，每天 1 课，建立古文理解入口。",
+      "target": 81,
+      "current": 0,
+      "unit": "章",
+      "dailyTarget": "每天 1 课",
+      "status": "normal",
+      "priority": "高",
+      "goalIds": [
+        "summer-2025",
+        "chinese-system",
+        "grade-six"
+      ],
+      "phaseId": ""
+    },
+    {
+      "id": "cn-classics",
+      "goalId": "summer-2025",
+      "category": "语文",
+      "title": "晨读经典",
+      "description": "每天 30 分钟，三字经、千字文、道德经、声律启蒙、千家诗等。",
+      "target": 73,
+      "current": 0,
+      "unit": "次",
+      "dailyTarget": "每天 30 分钟",
+      "status": "normal",
+      "priority": "高",
+      "goalIds": [
+        "summer-2025",
+        "chinese-system",
+        "grade-six"
+      ],
+      "phaseId": ""
+    },
+    {
+      "id": "cn-modern-reading",
+      "goalId": "summer-2025",
+      "category": "语文",
+      "title": "现代文阅读",
+      "description": "优+阅读 6 年级与精选文章，提升阅读理解能力。",
+      "target": 73,
+      "current": 0,
+      "unit": "次",
+      "dailyTarget": "每天 30 分钟",
+      "status": "normal",
+      "priority": "高",
+      "goalIds": [
+        "summer-2025",
+        "chinese-system",
+        "grade-six"
+      ],
+      "phaseId": ""
+    },
+    {
+      "id": "cn-writing",
+      "goalId": "summer-2025",
+      "category": "语文",
+      "title": "写作训练",
+      "description": "每周 5-6 篇短文，提升写作结构与表达。",
+      "target": 60,
+      "current": 0,
+      "unit": "篇",
+      "dailyTarget": "每周 5-6 篇短文",
+      "status": "normal",
+      "priority": "高",
+      "goalIds": [
+        "summer-2025",
+        "chinese-system",
+        "grade-six"
+      ],
+      "phaseId": ""
+    },
+    {
+      "id": "cn-expression",
+      "goalId": "summer-2025",
+      "category": "语文",
+      "title": "口述讨论与思维训练",
+      "description": "每天进行表达、讨论和思维训练，提升表达稳定性。",
+      "target": 73,
+      "current": 0,
+      "unit": "次",
+      "dailyTarget": "每天 20 分钟",
+      "status": "normal",
+      "priority": "中",
+      "goalIds": [
+        "summer-2025",
+        "chinese-system",
+        "grade-six"
+      ],
+      "phaseId": ""
+    },
+    {
+      "id": "math-grade-six-down",
+      "goalId": "summer-2025",
+      "category": "数学",
+      "title": "六年级下册知识系统学习",
+      "description": "讲义梳理六下知识，重难点突破，强化理解与应用。",
+      "target": 1,
+      "current": 0,
+      "unit": "项",
+      "dailyTarget": "按阶段推进",
+      "status": "normal",
+      "priority": "高",
+      "goalIds": [
+        "summer-2025",
+        "math-system",
+        "grade-six"
+      ],
+      "phaseId": ""
+    },
+    {
+      "id": "math-one-lesson",
+      "goalId": "summer-2025",
+      "category": "数学",
+      "title": "《一课一练·基础版》六年级上下",
+      "description": "同步练习巩固基础知识，提升解题思维和速度。",
+      "target": 2,
+      "current": 0,
+      "unit": "本",
+      "dailyTarget": "按阶段推进",
+      "status": "normal",
+      "priority": "高",
+      "goalIds": [
+        "summer-2025",
+        "math-system",
+        "grade-six"
+      ],
+      "phaseId": ""
+    },
+    {
+      "id": "math-peiyou",
+      "goalId": "summer-2025",
+      "category": "数学",
+      "title": "《培优满分精练》六年级上下",
+      "description": "提升题型思维和题感，挑战压轴题，拓展解题思路。",
+      "target": 2,
+      "current": 0,
+      "unit": "本",
+      "dailyTarget": "按阶段推进",
+      "status": "normal",
+      "priority": "高",
+      "goalIds": [
+        "summer-2025",
+        "math-system",
+        "grade-six"
+      ],
+      "phaseId": ""
+    }
+  ],
+  "goalLogs": [],
+  "goalPhases": [
+    {
+      "id": "summer-phase-1",
+      "goalId": "summer-2025",
+      "title": "阶段一",
+      "period": "6.20-7.6",
+      "description": "打基础，建体系，适应节奏，习惯养成",
+      "order": 1
+    },
+    {
+      "id": "summer-phase-2",
+      "goalId": "summer-2025",
+      "title": "阶段二",
+      "period": "7.7-7.27",
+      "description": "深入学习，难点突破，专题推进",
+      "order": 2
+    },
+    {
+      "id": "summer-phase-3",
+      "goalId": "summer-2025",
+      "title": "阶段三",
+      "period": "7.28-8.17",
+      "description": "拓展拔高，阅读写作，双突破",
+      "order": 3
+    },
+    {
+      "id": "summer-phase-4",
+      "goalId": "summer-2025",
+      "title": "阶段四",
+      "period": "8.18-8.31",
+      "description": "查漏补缺，总结复盘，冲刺收官",
+      "order": 4
+    }
+  ]
+}
