@@ -41,8 +41,8 @@
   "pathwayStages": [
     {
       "id": "summer-2025",
-      "title": "五下暑假",
-      "period": "2025.06 - 2025.08",
+      "title": "五年级",
+      "period": "2026.06 - 2026.08",
       "status": "current",
       "summary": "基础建立期：先把语数英主线和每日执行节奏跑起来，为六年级开学做准备。",
       "targets": [
@@ -80,7 +80,7 @@
     {
       "id": "grade-six",
       "title": "六年级",
-      "period": "2025.09 - 2026.06",
+      "period": "2026.09 - 2027.06",
       "status": "next",
       "summary": "体系搭建完成：校内稳定，数学初一体系、英语 PET 基础、语文阅读体系成型。",
       "targets": [
@@ -118,7 +118,7 @@
     {
       "id": "grade-seven",
       "title": "七年级",
-      "period": "2026.09 - 2027.06",
+      "period": "2027.09 - 2028.06",
       "status": "future",
       "summary": "分化起点：学科能力开始拉开差距，英语和数学进入更高标准。",
       "targets": [
@@ -156,7 +156,7 @@
     {
       "id": "grade-eight",
       "title": "八年级",
-      "period": "2027.09 - 2028.06",
+      "period": "2028.09 - 2029.06",
       "status": "future",
       "summary": "能力拉开：理科体系完整，自招证据开始从过程沉淀变成可展示成果。",
       "targets": [
@@ -194,7 +194,7 @@
     {
       "id": "grade-nine",
       "title": "九年级",
-      "period": "2028.09 - 2029.06",
+      "period": "2029.09 - 2030.06",
       "status": "future",
       "summary": "收敛冲刺：自招、名额到校、统招三条通道都要有清晰判断。",
       "targets": [

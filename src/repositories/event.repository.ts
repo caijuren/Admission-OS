@@ -9,11 +9,31 @@ type EduosData = {
   events: GrowthEvent[];
 };
 
+let eventCache: { events: GrowthEvent[]; timestamp: number } | null = null;
+let eventRequest: Promise<GrowthEvent[]> | null = null;
+const eventCacheMs = 1000;
+
 async function readEvents(): Promise<GrowthEvent[]> {
-  const response = await fetch("/api/data", { cache: "no-store" });
-  if (!response.ok) return [];
-  const data = await response.json() as EduosData;
-  return data.events || [];
+  if (eventCache && Date.now() - eventCache.timestamp < eventCacheMs) {
+    return eventCache.events;
+  }
+
+  if (eventRequest) return eventRequest;
+
+  eventRequest = fetch("/api/data", { cache: "no-store" })
+    .then(async (response) => {
+      if (!response.ok) return eventCache?.events || [];
+      const data = await response.json() as EduosData;
+      const events = Array.isArray(data.events) ? data.events : [];
+      eventCache = { events, timestamp: Date.now() };
+      return events;
+    })
+    .catch(() => eventCache?.events || [])
+    .finally(() => {
+      eventRequest = null;
+    });
+
+  return eventRequest;
 }
 
 async function writeEvents(events: GrowthEvent[]) {
@@ -26,6 +46,8 @@ async function writeEvents(events: GrowthEvent[]) {
   if (!response.ok) {
     throw new Error("Failed to persist growth events");
   }
+
+  eventCache = { events, timestamp: Date.now() };
 }
 
 function applyFilters(events: GrowthEvent[], filters?: EventFilters) {

@@ -1,18 +1,10 @@
 "use client";
 
-import { FormEvent, useEffect, useMemo, useState } from "react";
-import { Archive, Database, FileText, KeyRound, Route, Save, Settings, ShieldCheck, Target, User } from "lucide-react";
+import { FormEvent, useEffect, useState } from "react";
+import { Archive, Database, FileText, KeyRound, Route, Save, ShieldCheck, Target, User } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import {
-  DEFAULT_MILESTONES,
-  DEFAULT_PROFILE,
-  getProductConfig,
-  type JourneyMilestone,
-  type PathwayStage,
-  type PathwayTarget,
-  type StudentProfile,
-} from "@/lib/product-data";
+import { DEFAULT_PROFILE, getProductConfig, type PathwayStage, type PathwayTarget, type StudentProfile } from "@/lib/product-data";
 import seedData from "../../../data/eduos.json";
 
 const pathwayDimensions = ["数学", "英语", "语文", "项目竞赛", "校内成绩"];
@@ -33,10 +25,8 @@ function defaultTargetStatus(stageStatus: PathwayStage["status"]): PathwayTarget
 
 export default function SettingsPage() {
   const [profile, setProfile] = useState<StudentProfile>({ ...DEFAULT_PROFILE, ...seedData.profile });
-  const [milestones, setMilestones] = useState<JourneyMilestone[]>(
-    seedData.journey?.milestones?.length ? seedData.journey.milestones as JourneyMilestone[] : DEFAULT_MILESTONES
-  );
   const [pathwayStages, setPathwayStages] = useState<PathwayStage[]>((seedData.pathwayStages || []) as PathwayStage[]);
+  const [activePathwayId, setActivePathwayId] = useState(((seedData.pathwayStages || []) as PathwayStage[])[0]?.id || "");
   const [systemStatus, setSystemStatus] = useState<SystemStatus>({
     version: "local",
     authMode: "local",
@@ -48,9 +38,13 @@ export default function SettingsPage() {
 
   useEffect(() => {
     getProductConfig().then((config) => {
+      const nextStages = config.pathwayStages?.length ? config.pathwayStages : (seedData.pathwayStages || []) as PathwayStage[];
       setProfile(config.profile);
-      setMilestones(config.journey.milestones);
-      setPathwayStages(config.pathwayStages?.length ? config.pathwayStages : (seedData.pathwayStages || []) as PathwayStage[]);
+      setPathwayStages(nextStages);
+      setActivePathwayId((current) => {
+        if (nextStages.some((stage) => stage.id === current)) return current;
+        return nextStages.find((stage) => stage.status === "current")?.id || nextStages[0]?.id || "";
+      });
     });
     fetch("/api/system/status", { cache: "no-store" })
       .then((response) => response.ok ? response.json() : null)
@@ -60,10 +54,8 @@ export default function SettingsPage() {
       .catch(() => undefined);
   }, []);
 
-  const currentStage = useMemo(
-    () => pathwayStages.find((stage) => stage.status === "current") || pathwayStages[0],
-    [pathwayStages]
-  );
+  const currentStage = pathwayStages.find((stage) => stage.status === "current") || pathwayStages[0];
+  const activePathwayStage = pathwayStages.find((stage) => stage.id === activePathwayId) || pathwayStages[0];
 
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -78,16 +70,13 @@ export default function SettingsPage() {
       progress: Number(form.get("progress") || 0),
       quote: String(form.get("quote") || ""),
     };
-    const nextMilestones = milestones.map((milestone, index) => ({
-      ...milestone,
-      title: String(form.get(`milestone-${index}-title`) || milestone.title),
-      subtitle: String(form.get(`milestone-${index}-subtitle`) || milestone.subtitle),
-    }));
     const nextPathwayStages = pathwayStages.map((stage) => {
-      const status = String(form.get(`${stage.id}-status`) || stage.status) as PathwayStage["status"];
+      if (stage.id !== activePathwayStage?.id) return stage;
+
+      const status = String(form.get("pathway-status") || stage.status) as PathwayStage["status"];
       const targets = pathwayDimensions.flatMap((dimension) => {
         const oldTargets = stage.targets.filter((target) => target.dimension === dimension);
-        const lines = String(form.get(`${stage.id}-${dimension}`) || "")
+        const lines = String(form.get(`pathway-${dimension}`) || "")
           .split("\n")
           .map((line) => line.trim())
           .filter(Boolean);
@@ -102,10 +91,10 @@ export default function SettingsPage() {
 
       return {
         ...stage,
-        title: String(form.get(`${stage.id}-title`) || stage.title),
-        period: String(form.get(`${stage.id}-period`) || stage.period),
+        title: String(form.get("pathway-title") || stage.title),
+        period: String(form.get("pathway-period") || stage.period),
         status,
-        summary: String(form.get(`${stage.id}-summary`) || stage.summary),
+        summary: String(form.get("pathway-summary") || stage.summary),
         targets,
       };
     });
@@ -115,13 +104,11 @@ export default function SettingsPage() {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         profile: nextProfile,
-        journey: { milestones: nextMilestones },
         pathwayStages: nextPathwayStages,
       }),
     });
 
     setProfile(nextProfile);
-    setMilestones(nextMilestones);
     setPathwayStages(nextPathwayStages);
     setSaved(true);
     window.setTimeout(() => setSaved(false), 1800);
@@ -183,13 +170,6 @@ export default function SettingsPage() {
               </div>
             </div>
           </section>
-
-          <nav className="settings-anchor-list" aria-label="设置分区">
-            <a href="#account">账户</a>
-            <a href="#profile">档案</a>
-            <a href="#route">登山路线</a>
-            <a href="#system">系统</a>
-          </nav>
         </aside>
 
         <main className="settings-form-stack">
@@ -234,44 +214,34 @@ export default function SettingsPage() {
             </div>
           </section>
 
-          <section className="data-panel">
-            <div className="data-panel-inner grid gap-4">
-              <div className="settings-section-title">
-                <Settings className="w-4 h-4 text-[#5B6BF5]" />
-                <div>
-                  <h2>阶段节奏</h2>
-                  <p>控制驾驶舱概览中的阶段短标签。</p>
-                </div>
-              </div>
-              <div className="settings-milestone-list">
-                {milestones.map((milestone, index) => (
-                  <div key={index} className="settings-milestone-row">
-                    <span>{index + 1}</span>
-                    <Input name={`milestone-${index}-title`} defaultValue={milestone.title} placeholder="阶段名称" />
-                    <Input name={`milestone-${index}-subtitle`} defaultValue={milestone.subtitle} placeholder="阶段说明" />
-                  </div>
-                ))}
-              </div>
-            </div>
-          </section>
-
           <section id="route" className="data-panel">
             <div className="data-panel-inner grid gap-4">
               <div className="settings-section-title">
                 <Route className="w-4 h-4 text-[#5B6BF5]" />
                 <div>
                   <h2>首页登山路线卡片</h2>
-                  <p>这里编辑首页五个路线卡片的标题、时间、说明和各维度目标。</p>
+                  <p>选择一个年级后编辑卡片内容，保存后同步到首页路线。</p>
                 </div>
               </div>
-              <div className="settings-pathway-list">
-                {pathwayStages.map((stage, index) => (
-                  <section key={stage.id} className="settings-pathway-stage">
+              <div className="settings-route-picker">
+                <label htmlFor="pathway-stage-select">正在编辑</label>
+                <select
+                  id="pathway-stage-select"
+                  value={activePathwayStage?.id || ""}
+                  onChange={(event) => setActivePathwayId(event.target.value)}
+                >
+                  {pathwayStages.map((stage) => (
+                    <option key={stage.id} value={stage.id}>{stage.title} · {stage.period}</option>
+                  ))}
+                </select>
+              </div>
+              {activePathwayStage && (
+                <div key={activePathwayStage.id} className="settings-pathway-list">
+                  <section className="settings-pathway-stage settings-pathway-stage-single">
                     <div className="settings-pathway-head">
-                      <span>{index + 1}</span>
-                      <Input name={`${stage.id}-title`} defaultValue={stage.title} placeholder="阶段名称" />
-                      <Input name={`${stage.id}-period`} defaultValue={stage.period} placeholder="时间范围" />
-                      <select name={`${stage.id}-status`} defaultValue={stage.status}>
+                      <Input name="pathway-title" defaultValue={activePathwayStage.title} placeholder="阶段名称" />
+                      <Input name="pathway-period" defaultValue={activePathwayStage.period} placeholder="时间范围" />
+                      <select name="pathway-status" defaultValue={activePathwayStage.status}>
                         <option value="done">已完成</option>
                         <option value="current">当前阶段</option>
                         <option value="next">下一阶段</option>
@@ -280,22 +250,22 @@ export default function SettingsPage() {
                     </div>
                     <label className="settings-wide-field">
                       <span>卡片摘要</span>
-                      <textarea name={`${stage.id}-summary`} defaultValue={stage.summary} />
+                      <textarea name="pathway-summary" defaultValue={activePathwayStage.summary} />
                     </label>
                     <div className="settings-pathway-targets">
                       {pathwayDimensions.map((dimension) => (
                         <label key={dimension}>
                           <span>{dimension}</span>
                           <textarea
-                            name={`${stage.id}-${dimension}`}
-                            defaultValue={stage.targets.filter((target) => target.dimension === dimension).map((target) => target.goal).join("\n")}
+                            name={`pathway-${dimension}`}
+                            defaultValue={activePathwayStage.targets.filter((target) => target.dimension === dimension).map((target) => target.goal).join("\n")}
                           />
                         </label>
                       ))}
                     </div>
                   </section>
-                ))}
-              </div>
+                </div>
+              )}
             </div>
           </section>
 

@@ -85,6 +85,11 @@ type PlanData = {
   goalPhases?: PlanPhase[];
 };
 
+const initialGoals = seedData.goals as PlanGoal[];
+const initialTasks = seedData.goalTasks as PlanTask[];
+const initialLogs = seedData.goalLogs as PlanLog[];
+const initialPhases = (seedData.goalPhases || []) as PlanPhase[];
+
 const goalTypeLabel: Record<GoalType, string> = {
   north: "长期",
   phase: "阶段",
@@ -128,10 +133,6 @@ function getCategoryStyle(category: string, categories: string[]) {
 }
 
 export default function GoalsPage() {
-  const initialGoals = seedData.goals as PlanGoal[];
-  const initialTasks = seedData.goalTasks as PlanTask[];
-  const initialLogs = seedData.goalLogs as PlanLog[];
-  const initialPhases = (seedData.goalPhases || []) as PlanPhase[];
   const [goals, setGoals] = useState<PlanGoal[]>(initialGoals);
   const [tasks, setTasks] = useState<PlanTask[]>(initialTasks);
   const [logs, setLogs] = useState<PlanLog[]>(initialLogs);
@@ -148,18 +149,32 @@ export default function GoalsPage() {
   const [draggingGoalId, setDraggingGoalId] = useState("");
 
   useEffect(() => {
+    let cancelled = false;
+
     async function loadPlan() {
       const response = await fetch("/api/data", { cache: "no-store" });
+      if (!response.ok || cancelled) return;
+
       const data = (await response.json()) as PlanData;
-      const nextGoals = data.goals || [];
+      if (cancelled) return;
+
+      const nextGoals = Array.isArray(data.goals) ? data.goals : initialGoals;
+      const nextTasks = Array.isArray(data.goalTasks) ? data.goalTasks : initialTasks;
+      const nextLogs = Array.isArray(data.goalLogs) ? data.goalLogs : initialLogs;
+      const nextPhases = Array.isArray(data.goalPhases) ? data.goalPhases : initialPhases;
+
       setGoals(nextGoals);
-      setTasks(data.goalTasks || []);
-      setLogs(data.goalLogs || []);
-      setPhases(data.goalPhases || []);
+      setTasks(nextTasks);
+      setLogs(nextLogs);
+      setPhases(nextPhases);
       setActiveGoalId((current) => nextGoals.some((goal) => goal.id === current) ? current : nextGoals[1]?.id || nextGoals[0]?.id || "");
     }
 
     loadPlan().catch(() => undefined);
+
+    return () => {
+      cancelled = true;
+    };
   }, []);
 
   const activeGoal = goals.find((goal) => goal.id === activeGoalId) || goals[0];

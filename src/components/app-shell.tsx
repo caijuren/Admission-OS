@@ -33,42 +33,26 @@ const navItems = [
 export function AppShell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const [profile, setProfile] = useState<StudentProfile>({ ...DEFAULT_PROFILE, ...seedData.profile });
-  const [sessionReady, setSessionReady] = useState(false);
 
   const publicShell = pathname === "/login" || pathname === "/privacy";
 
   useEffect(() => {
-    if (publicShell) {
-      setSessionReady(true);
-      return;
-    }
+    if (publicShell) return;
 
     let cancelled = false;
 
-    async function verifySession() {
-      const response = await fetch("/api/auth/session", { cache: "no-store" });
-      if (cancelled) return;
-
-      if (!response.ok) {
-        window.location.replace(`/login?next=${encodeURIComponent(pathname || "/")}`);
-        return;
-      }
-
-      setSessionReady(true);
+    async function loadProfile() {
       const config = await getProductConfig();
       if (cancelled) return;
       setProfile(config.profile);
     }
 
-    setSessionReady(false);
-    verifySession().catch(() => {
-      if (!cancelled) window.location.replace(`/login?next=${encodeURIComponent(pathname || "/")}`);
-    });
+    loadProfile().catch(() => undefined);
 
     return () => {
       cancelled = true;
     };
-  }, [pathname, publicShell]);
+  }, [publicShell]);
 
   async function handleLogout(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -78,32 +62,6 @@ export function AppShell({ children }: { children: React.ReactNode }) {
 
   if (publicShell) {
     return <>{children}</>;
-  }
-
-  if (!sessionReady) {
-    return (
-      <div className="app-frame app-frame-loading" aria-label="正在验证登录状态">
-        <aside className="design-sidebar">
-          <div className="brand-block">
-            <span><Sparkles className="h-4 w-4" /></span>
-            <div><strong>Admission OS</strong></div>
-          </div>
-          <div className="shell-loading-nav">
-            <i />
-            <i />
-            <i />
-            <i />
-          </div>
-        </aside>
-        <main className="app-main">
-          <section className="shell-loading-panel">
-            <div />
-            <span />
-            <span />
-          </section>
-        </main>
-      </div>
-    );
   }
 
   return (

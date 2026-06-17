@@ -4680,32 +4680,6 @@
   margin-top: 10px;
 }
 
-.settings-anchor-list {
-  display: grid;
-  gap: 8px;
-  border-radius: 16px;
-  border: 1px solid #e7edf6;
-  background: #ffffff;
-  padding: 10px;
-  box-shadow: 0 12px 28px rgba(30, 41, 75, 0.06);
-}
-
-.settings-anchor-list a {
-  min-height: 36px;
-  display: flex;
-  align-items: center;
-  border-radius: 11px;
-  padding: 0 11px;
-  color: #40516d;
-  font-size: 12px;
-  font-weight: 900;
-}
-
-.settings-anchor-list a:hover {
-  background: #f3f6ff;
-  color: #4f5de0;
-}
-
 .settings-section-title {
   display: flex;
   align-items: flex-start;
@@ -4775,33 +4749,26 @@
   font-weight: 950;
 }
 
-.settings-milestone-list {
-  display: grid;
-  gap: 10px;
-}
-
-.settings-milestone-row {
-  display: grid;
-  grid-template-columns: 30px minmax(0, 0.7fr) minmax(0, 1fr);
-  gap: 10px;
-  align-items: center;
-}
-
-.settings-milestone-row > span {
-  width: 30px;
-  height: 30px;
-  display: grid;
-  place-items: center;
-  border-radius: 10px;
-  background: #eef2ff;
-  color: #5b6bf5;
-  font-size: 12px;
-  font-weight: 900;
-}
-
 .settings-pathway-list {
   display: grid;
   gap: 12px;
+}
+
+.settings-route-picker {
+  display: grid;
+  grid-template-columns: 86px minmax(0, 1fr);
+  align-items: center;
+  gap: 10px;
+  border-radius: 13px;
+  border: 1px solid #e7edf6;
+  background: #f8fafc;
+  padding: 11px 12px;
+}
+
+.settings-route-picker label {
+  color: #667085;
+  font-size: 11px;
+  font-weight: 900;
 }
 
 .settings-pathway-stage {
@@ -4815,23 +4782,12 @@
 
 .settings-pathway-head {
   display: grid;
-  grid-template-columns: 34px minmax(0, 0.85fr) minmax(0, 1fr) 118px;
+  grid-template-columns: minmax(0, 0.85fr) minmax(0, 1fr) 128px;
   gap: 10px;
   align-items: center;
 }
 
-.settings-pathway-head > span {
-  width: 34px;
-  height: 34px;
-  display: grid;
-  place-items: center;
-  border-radius: 11px;
-  background: #eef2ff;
-  color: #5b6bf5;
-  font-size: 12px;
-  font-weight: 950;
-}
-
+.settings-route-picker select,
 .settings-pathway-head select,
 .settings-wide-field textarea,
 .settings-pathway-targets textarea {
@@ -4845,6 +4801,7 @@
   outline: none;
 }
 
+.settings-route-picker select,
 .settings-pathway-head select {
   height: 40px;
   padding: 0 10px;
@@ -6144,17 +6101,13 @@
 
   .settings-account-grid,
   .settings-backup-grid,
+  .settings-route-picker,
   .settings-pathway-targets {
     grid-template-columns: 1fr;
   }
 
   .settings-pathway-head {
-    grid-template-columns: 34px 1fr;
-  }
-
-  .settings-pathway-head input,
-  .settings-pathway-head select {
-    grid-column: 2;
+    grid-template-columns: 1fr;
   }
 
   .form-grid.two,
@@ -6478,14 +6431,6 @@
   .portfolio-stat-grid,
   .portfolio-material-grid {
     grid-template-columns: 1fr;
-  }
-
-  .settings-milestone-row {
-    grid-template-columns: 28px 1fr;
-  }
-
-  .settings-milestone-row input:last-child {
-    grid-column: 2;
   }
 
   .metric-card {

@@ -122,7 +122,9 @@ async function readLocalData(): Promise<EduosData> {
 
 async function writeLocalData(data: EduosData) {
   await fs.mkdir(path.dirname(localDataPath), { recursive: true });
-  await fs.writeFile(localDataPath, `${JSON.stringify(data, null, 2)}\n`, "utf8");
+  const tempPath = `${localDataPath}.${process.pid}.${Date.now()}.tmp`;
+  await fs.writeFile(tempPath, `${JSON.stringify(data, null, 2)}\n`, "utf8");
+  await fs.rename(tempPath, localDataPath);
 }
 
 function isDatabaseConfigured() {

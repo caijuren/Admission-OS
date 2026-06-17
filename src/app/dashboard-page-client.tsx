@@ -13,7 +13,6 @@ import {
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { growthService } from "@/services";
 import type { GrowthEvent } from "@/types";
 import {
   DEFAULT_PROFILE,
@@ -22,7 +21,6 @@ import {
   type StudentProfile,
   getAssetStats,
   getGradeStats,
-  getProductConfig,
   getReadingStats,
 } from "@/lib/product-data";
 import seedData from "../../data/eduos.json";
@@ -58,6 +56,15 @@ type PlanLog = {
   date: string;
 };
 
+type DashboardData = {
+  events?: GrowthEvent[];
+  profile?: Partial<StudentProfile>;
+  goals?: PlanGoal[];
+  goalTasks?: PlanTask[];
+  goalLogs?: PlanLog[];
+  pathwayStages?: PathwayStage[];
+};
+
 const pathwayDimensions = ["数学", "英语", "语文", "项目竞赛", "校内成绩"];
 const pathwayMapSize = { width: 1536, height: 548 };
 
@@ -90,6 +97,9 @@ const pathwayNodePositions = [
 ];
 
 const initialPathwayStages = (seedData.pathwayStages || []) as PathwayStage[];
+const initialGoals = seedData.goals as PlanGoal[];
+const initialTasks = seedData.goalTasks as PlanTask[];
+const initialLogs = seedData.goalLogs as PlanLog[];
 
 function defaultTargetStatus(stageStatus: PathwayStage["status"]): PathwayTarget["status"] {
   if (stageStatus === "done") return "达标";
@@ -98,9 +108,6 @@ function defaultTargetStatus(stageStatus: PathwayStage["status"]): PathwayTarget
 }
 
 export default function DashboardPage() {
-  const initialGoals = seedData.goals as PlanGoal[];
-  const initialTasks = seedData.goalTasks as PlanTask[];
-  const initialLogs = seedData.goalLogs as PlanLog[];
   const [events, setEvents] = useState<GrowthEvent[]>(seedData.events as GrowthEvent[]);
   const [profile, setProfile] = useState<StudentProfile>({ ...DEFAULT_PROFILE, ...seedData.profile });
   const [goals, setGoals] = useState<PlanGoal[]>(initialGoals);
@@ -154,20 +161,41 @@ export default function DashboardPage() {
   }, []);
 
   useEffect(() => {
-    growthService.getEvents().then(setEvents);
-    getProductConfig().then((config) => {
-      setProfile(config.profile);
-      setGoals(config.goals || []);
-      setTasks(config.goalTasks || []);
-      setLogs(config.goalLogs || []);
-      const nextPathwayStages = config.pathwayStages?.length ? config.pathwayStages : initialPathwayStages;
+    let cancelled = false;
+
+    async function loadDashboardData() {
+      const response = await fetch("/api/data", { cache: "no-store" });
+      if (!response.ok || cancelled) return;
+
+      const data = await response.json() as DashboardData;
+      if (cancelled) return;
+
+      const nextGoals = Array.isArray(data.goals) ? data.goals : initialGoals;
+      const nextTasks = Array.isArray(data.goalTasks) ? data.goalTasks : initialTasks;
+      const nextLogs = Array.isArray(data.goalLogs) ? data.goalLogs : initialLogs;
+      const nextPathwayStages = data.pathwayStages?.length ? data.pathwayStages : initialPathwayStages;
+
+      setEvents(Array.isArray(data.events) ? data.events : seedData.events as GrowthEvent[]);
+      setProfile({ ...DEFAULT_PROFILE, ...seedData.profile, ...data.profile });
+      setGoals(nextGoals);
+      setTasks(nextTasks);
+      setLogs(nextLogs);
       setPathwayStages(nextPathwayStages);
       setActivePathwayId((current) => nextPathwayStages.some((stage) => stage.id === current)
         ? current
         : nextPathwayStages.find((stage) => stage.status === "current")?.id || nextPathwayStages[0]?.id || ""
       );
-      setActivePlanId(config.goals?.find((goal) => goal.type !== "north")?.id || config.goals?.[0]?.id || "");
-    });
+      setActivePlanId((current) => nextGoals.some((goal) => goal.id === current)
+        ? current
+        : nextGoals.find((goal) => goal.type !== "north")?.id || nextGoals[0]?.id || ""
+      );
+    }
+
+    loadDashboardData().catch(() => undefined);
+
+    return () => {
+      cancelled = true;
+    };
   }, []);
 
   const readingStats = useMemo(() => getReadingStats(events), [events]);
