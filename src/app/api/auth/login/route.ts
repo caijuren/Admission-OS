@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { createSupabaseAuthClient, setAuthCookies } from "@/lib/server/auth";
+import { createSupabaseAuthClient, isLocalCredentials, setAuthCookies, setLocalAuthCookies } from "@/lib/server/auth";
 import { createSupabaseAdminClient } from "@/lib/server/supabase-admin";
 
 const usernameEmailMap: Record<string, string> = {
@@ -17,6 +17,10 @@ function resolveLoginEmail(email?: string, username?: string) {
   if (!normalizedUsername) return "";
 
   return usernameEmailMap[normalizedUsername] || normalizedUsername;
+}
+
+function isSupabaseConfigured() {
+  return Boolean(process.env.NEXT_PUBLIC_SUPABASE_URL && process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY);
 }
 
 async function ensureBuiltInUser(username?: string, password?: string) {
@@ -54,8 +58,24 @@ export async function POST(request: Request) {
     const { email, username, password } = await request.json() as { email?: string; username?: string; password?: string };
     const loginEmail = resolveLoginEmail(email, username);
 
-    if (!loginEmail || !password) {
+    if (!loginEmail || !password || !username) {
       return NextResponse.json({ error: "请输入用户名和密码。" }, { status: 400 });
+    }
+
+    if (isLocalCredentials(username, password)) {
+      const response = NextResponse.json({
+        user: {
+          id: "local-andycoy",
+          email: usernameEmailMap.andycoy,
+          username: "andycoy",
+        },
+      });
+      setLocalAuthCookies(response);
+      return response;
+    }
+
+    if (!isSupabaseConfigured()) {
+      return NextResponse.json({ error: "用户名或密码错误。" }, { status: 401 });
     }
 
     await ensureBuiltInUser(username, password);

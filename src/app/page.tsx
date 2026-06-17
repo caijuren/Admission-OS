@@ -1,6 +1,6 @@
 import { redirect } from "next/navigation";
 import { cookies } from "next/headers";
-import { authCookieNames } from "@/lib/server/auth";
+import { authCookieNames } from "@/lib/server/auth-cookies";
 import DashboardPageClient from "./dashboard-page-client";
 
 export default async function DashboardPage() {

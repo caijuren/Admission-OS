@@ -30,18 +30,30 @@ For a fresh deployment, run `supabase/schema.sql` directly.
 
 ## Environment Variables
 
-Production requires:
+For the single-server local mode used by the Tencent Cloud deployment, production requires:
 
 ```bash
 NEXT_PUBLIC_STUDENT_ID=1
 NEXT_PUBLIC_APP_ENV=production
+ADMISSION_OS_AUTH_MODE=local
+ADMISSION_OS_USERNAME=andycoy
+ADMISSION_OS_PASSWORD=andycoy
+ADMISSION_OS_AUTH_SECRET=replace-with-a-long-random-string
+ADMISSION_OS_DATA_DRIVER=file
+ADMISSION_OS_STATE_KEY=default
+NEXT_PUBLIC_SITE_URL=http://124.220.103.120:8080
+PORT=3010
+```
+
+Local mode stores mutable app data in `data/eduos.local.json` on the server. Back up this file before major releases.
+
+If you choose Supabase mode later, also configure:
+
+```bash
 NEXT_PUBLIC_SUPABASE_URL=https://your-project.supabase.co
 NEXT_PUBLIC_SUPABASE_ANON_KEY=your-anon-key
 SUPABASE_SERVICE_ROLE_KEY=your-service-role-key
 ADMISSION_OS_DATA_DRIVER=database
-ADMISSION_OS_STATE_KEY=default
-NEXT_PUBLIC_SITE_URL=https://your-domain.example
-PORT=3010
 ```
 
 Never expose `SUPABASE_SERVICE_ROLE_KEY` in browser code or public logs.

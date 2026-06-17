@@ -97,6 +97,7 @@ export type EduosData = {
 };
 
 const dataPath = path.join(process.cwd(), "data", "eduos.json");
+const localDataPath = path.join(process.cwd(), "data", "eduos.local.json");
 const appStateKey = process.env.ADMISSION_OS_STATE_KEY || "default";
 
 async function readSeedData(): Promise<EduosData> {
@@ -104,12 +105,32 @@ async function readSeedData(): Promise<EduosData> {
   return JSON.parse(raw) as EduosData;
 }
 
+async function readLocalData(): Promise<EduosData> {
+  try {
+    const raw = await fs.readFile(localDataPath, "utf8");
+    return JSON.parse(raw) as EduosData;
+  } catch (error: unknown) {
+    if ((error as NodeJS.ErrnoException).code !== "ENOENT") {
+      throw error;
+    }
+
+    const seedData = await readSeedData();
+    await writeLocalData(seedData);
+    return seedData;
+  }
+}
+
+async function writeLocalData(data: EduosData) {
+  await fs.mkdir(path.dirname(localDataPath), { recursive: true });
+  await fs.writeFile(localDataPath, `${JSON.stringify(data, null, 2)}\n`, "utf8");
+}
+
 function isDatabaseConfigured() {
   return Boolean(process.env.NEXT_PUBLIC_SUPABASE_URL && process.env.SUPABASE_SERVICE_ROLE_KEY);
 }
 
 function isDatabaseRequired() {
-  return process.env.NODE_ENV === "production" || process.env.ADMISSION_OS_DATA_DRIVER === "database";
+  return process.env.ADMISSION_OS_DATA_DRIVER === "database";
 }
 
 export async function readData(userId: string): Promise<EduosData> {
@@ -118,7 +139,7 @@ export async function readData(userId: string): Promise<EduosData> {
       throw new Error("Production data store requires NEXT_PUBLIC_SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY.");
     }
 
-    return readSeedData();
+    return readLocalData();
   }
 
   const supabase = createSupabaseAdminClient();
@@ -148,6 +169,7 @@ export async function writeData(userId: string, data: EduosData) {
       throw new Error("Production data store requires NEXT_PUBLIC_SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY.");
     }
 
+    await writeLocalData(data);
     return;
   }
 
