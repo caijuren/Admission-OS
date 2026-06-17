@@ -455,12 +455,12 @@
       "id": "en-reading",
       "goalId": "summer-2025",
       "category": "英语",
-      "title": "RAZ 分级阅读 E → G",
-      "description": "RAZ 阅读提升至 G 级，建立英语语感和原版阅读入口。",
-      "target": 3,
+      "title": "RAZ 分级阅读 E-G",
+      "description": "完成 RAZ E-G 共 265 本：E 92 本，F 88 本，G 85 本。先按阅读量推进，后续如需精细追踪可再拆级别。",
+      "target": 265,
       "current": 0,
-      "unit": "级",
-      "dailyTarget": "每天 30 分钟",
+      "unit": "本",
+      "dailyTarget": "每天 3-5 本",
       "status": "normal",
       "priority": "高",
       "goalIds": [
@@ -468,17 +468,18 @@
         "english-system",
         "grade-six"
       ],
-      "phaseId": ""
+      "phaseId": "",
+      "executionMode": "孩子自主"
     },
     {
       "id": "en-unlock",
       "goalId": "summer-2025",
       "category": "英语",
-      "title": "Unlock 2 教材学习",
-      "description": "每周 3-4 课，适应学术阅读材料，提升阅读理解和学术表达。",
-      "target": 60,
+      "title": "Unlock 2 Unit 1-3",
+      "description": "完成 Unlock 2 三个单元共 54 课：Unit 1 共 19 课，Unit 2 共 17 课，Unit 3 共 18 课。",
+      "target": 54,
       "current": 0,
-      "unit": "次",
+      "unit": "课",
       "dailyTarget": "每周 3-4 课",
       "status": "normal",
       "priority": "中",
@@ -487,14 +488,15 @@
         "english-system",
         "grade-six"
       ],
-      "phaseId": ""
+      "phaseId": "",
+      "executionMode": "家长陪练"
     },
     {
       "id": "en-self-reading",
       "goalId": "summer-2025",
       "category": "英语",
-      "title": "自主阅读",
-      "description": "每天 30-60 分钟，持续扩大英语输入量。",
+      "title": "英文自主阅读",
+      "description": "每天 30-60 分钟，持续扩大英语输入量。书单待补充，先按阅读天数记录。",
       "target": 73,
       "current": 0,
       "unit": "次",
@@ -506,7 +508,8 @@
         "english-system",
         "grade-six"
       ],
-      "phaseId": ""
+      "phaseId": "",
+      "executionMode": "孩子自主"
     },
     {
       "id": "en-listening",
@@ -525,14 +528,15 @@
         "english-system",
         "grade-six"
       ],
-      "phaseId": ""
+      "phaseId": "",
+      "executionMode": "孩子自主"
     },
     {
       "id": "en-speaking",
       "goalId": "summer-2025",
       "category": "英语",
       "title": "口袋领航口语练习",
-      "description": "每天 10-15 分钟，提升口语表达和输出稳定性。",
+      "description": "每天 10-15 分钟，提升口语表达和输出稳定性。具体课程待确认，先按练习次数记录。",
       "target": 73,
       "current": 0,
       "unit": "次",
@@ -544,18 +548,19 @@
         "english-system",
         "grade-six"
       ],
-      "phaseId": ""
+      "phaseId": "",
+      "executionMode": "家长验收"
     },
     {
       "id": "cn-daodejing",
       "goalId": "summer-2025",
       "category": "语文",
       "title": "古文精读《道德经》",
-      "description": "暑假精读一遍《道德经》，每天 1 课，建立古文理解入口。",
+      "description": "精读《道德经》，用于建立古文理解入口。和晨读经典互相补充，不追求每天新增难度。",
       "target": 81,
       "current": 0,
       "unit": "章",
-      "dailyTarget": "每天 1 课",
+      "dailyTarget": "每天 1 章",
       "status": "normal",
       "priority": "高",
       "goalIds": [
@@ -563,15 +568,16 @@
         "chinese-system",
         "grade-six"
       ],
-      "phaseId": ""
+      "phaseId": "",
+      "executionMode": "亲子共学"
     },
     {
       "id": "cn-classics",
       "goalId": "summer-2025",
       "category": "语文",
-      "title": "晨读经典",
-      "description": "每天 30 分钟，三字经、千字文、道德经、声律启蒙、千家诗等。",
-      "target": 73,
+      "title": "语文晨读经典",
+      "description": "三字经、千字文、千家诗、声律启蒙、论语、大学、中庸、道德经轮换晨读。",
+      "target": 60,
       "current": 0,
       "unit": "次",
       "dailyTarget": "每天 30 分钟",
@@ -582,18 +588,19 @@
         "chinese-system",
         "grade-six"
       ],
-      "phaseId": ""
+      "phaseId": "",
+      "executionMode": "亲子共学"
     },
     {
       "id": "cn-modern-reading",
       "goalId": "summer-2025",
       "category": "语文",
-      "title": "现代文阅读",
-      "description": "优+阅读 6 年级与精选文章，提升阅读理解能力。",
-      "target": 73,
+      "title": "现代文阅读训练",
+      "description": "现代文阅读书单和篇目待补充，先按阅读训练次数记录。",
+      "target": 30,
       "current": 0,
-      "unit": "次",
-      "dailyTarget": "每天 30 分钟",
+      "unit": "篇",
+      "dailyTarget": "每周 3-4 篇",
       "status": "normal",
       "priority": "高",
       "goalIds": [
@@ -601,7 +608,8 @@
         "chinese-system",
         "grade-six"
       ],
-      "phaseId": ""
+      "phaseId": "",
+      "executionMode": "家长陪练"
     },
     {
       "id": "cn-writing",
@@ -620,7 +628,8 @@
         "chinese-system",
         "grade-six"
       ],
-      "phaseId": ""
+      "phaseId": "",
+      "executionMode": "家长陪练"
     },
     {
       "id": "cn-expression",
@@ -639,18 +648,19 @@
         "chinese-system",
         "grade-six"
       ],
-      "phaseId": ""
+      "phaseId": "",
+      "executionMode": "亲子共学"
     },
     {
       "id": "math-grade-six-down",
       "goalId": "summer-2025",
       "category": "数学",
-      "title": "六年级下册知识系统学习",
-      "description": "讲义梳理六下知识，重难点突破，强化理解与应用。",
+      "title": "六下数学系统学习",
+      "description": "上海微课 + 培优满分精练，完成六下知识主线和对应练习，暂不拆得太细。",
       "target": 1,
       "current": 0,
-      "unit": "项",
-      "dailyTarget": "按阶段推进",
+      "unit": "轮",
+      "dailyTarget": "每周 4-5 次",
       "status": "normal",
       "priority": "高",
       "goalIds": [
@@ -658,7 +668,8 @@
         "math-system",
         "grade-six"
       ],
-      "phaseId": ""
+      "phaseId": "",
+      "executionMode": "孩子自主"
     },
     {
       "id": "math-one-lesson",
@@ -677,7 +688,8 @@
         "math-system",
         "grade-six"
       ],
-      "phaseId": ""
+      "phaseId": "",
+      "executionMode": "家长验收"
     },
     {
       "id": "math-peiyou",
@@ -696,7 +708,8 @@
         "math-system",
         "grade-six"
       ],
-      "phaseId": ""
+      "phaseId": "",
+      "executionMode": "家长验收"
     }
   ],
   "goalLogs": [],

@@ -46,6 +46,7 @@ export type PlanTask = {
   dailyTarget?: string;
   status: "ahead" | "normal" | "behind";
   priority?: "高" | "中" | "低";
+  executionMode?: "孩子自主" | "家长陪练" | "亲子共学" | "家长验收";
 };
 
 export type PlanLog = {

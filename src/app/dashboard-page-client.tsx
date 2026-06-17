@@ -48,6 +48,7 @@ type PlanTask = {
   current: number;
   unit: string;
   status: "ahead" | "normal" | "behind";
+  executionMode?: "孩子自主" | "家长陪练" | "亲子共学" | "家长验收";
 };
 
 type PlanLog = {
@@ -576,7 +577,7 @@ export default function DashboardPage() {
                 <h2>任务进度</h2>
                 <p>这里看执行：每个计划的任务数、完成度、落后项和记录天数。</p>
               </div>
-              <Link href="/goals">进入目标计划</Link>
+              <Link href="/goals">进入目标地图</Link>
             </div>
             <section className="dashboard-plan-grid">
               {planCards.map((plan) => (
@@ -591,7 +592,7 @@ export default function DashboardPage() {
                   <em>{plan.progress}% · {plan.tasks.length} 个任务 · {plan.behind} 个落后</em>
                 </button>
               ))}
-              {planCards.length === 0 && <div className="goal-empty-state">还没有可展示的计划，先到目标计划中新增目标。</div>}
+              {planCards.length === 0 && <div className="goal-empty-state">还没有可展示的目标，先到目标地图中新增目标。</div>}
             </section>
           </section>
 

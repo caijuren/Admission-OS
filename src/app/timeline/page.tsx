@@ -158,7 +158,7 @@ export default function TimelinePage() {
           <div className="empty-state-panel">
             <Search className="h-8 w-8" />
             <strong>{events.length ? "没有匹配的证据" : "还没有沉淀证据"}</strong>
-            <span>{events.length ? "换一个关键词或筛选类型。" : "从成绩、阅读、目标计划或能力资产中新增记录后，这里会形成升学证据流水。"}</span>
+            <span>{events.length ? "换一个关键词或筛选类型。" : "从成绩、阅读、目标地图或能力资产中新增记录后，这里会形成升学证据流水。"}</span>
           </div>
         )}
       </div>

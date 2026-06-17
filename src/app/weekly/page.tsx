@@ -4,10 +4,10 @@ import { ChangeEvent, useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import {
   BookOpen,
-  CalendarDays,
   CheckCircle2,
   ClipboardList,
   Flame,
+  Repeat,
   Save,
   Target,
 } from "lucide-react";
@@ -18,6 +18,7 @@ import seedData from "../../../data/eduos.json";
 
 type TaskStatus = "ahead" | "normal" | "behind";
 type TaskPriority = "高" | "中" | "低";
+type ExecutionMode = "孩子自主" | "家长陪练" | "亲子共学" | "家长验收";
 
 type PlanGoal = {
   id: string;
@@ -45,6 +46,7 @@ type PlanTask = {
   dailyTarget?: string;
   status: TaskStatus;
   priority?: TaskPriority;
+  executionMode?: ExecutionMode;
 };
 
 type PlanLog = {
@@ -66,8 +68,6 @@ type WeeklyData = {
 const initialGoals = seedData.goals as PlanGoal[];
 const initialTasks = seedData.goalTasks as PlanTask[];
 const initialLogs = (seedData.goalLogs || []) as PlanLog[];
-
-const dayNames = ["周一", "周二", "周三", "周四", "周五", "周六", "周日"];
 
 function clamp(value: number, min: number, max: number) {
   return Math.max(min, Math.min(max, value));
@@ -116,16 +116,22 @@ function getTaskStatus(task: PlanTask): TaskStatus {
   return "normal";
 }
 
-function allocateDaily(tasks: PlanTask[]) {
-  const sorted = [...tasks].sort((a, b) => {
-    const priorityScore = { "高": 0, "中": 1, "低": 2 };
-    return (priorityScore[a.priority || "中"] - priorityScore[b.priority || "中"]) || a.category.localeCompare(b.category);
-  });
+function getRhythmGroups(tasks: PlanTask[]) {
+  const daily = tasks.filter((task) => task.dailyTarget?.includes("每天"));
+  const severalTimes = tasks.filter((task) => task.dailyTarget?.includes("每周"));
+  const weekly = tasks.filter((task) => !daily.includes(task) && !severalTimes.includes(task));
+  const review = [
+    "周末核对本周完成量，少补录、多判断",
+    "看周报告：低记录学科下周优先补",
+    "只调整下周 2-3 个关键任务，不把计划排满",
+  ];
 
-  return dayNames.map((day, dayIndex) => ({
-    day,
-    tasks: sorted.filter((task, index) => index % 7 === dayIndex || task.dailyTarget?.includes("每天")).slice(0, 5),
-  }));
+  return [
+    { title: "每天保持", note: "适合阅读、听力、晨读、口语这类稳定输入", tasks: daily },
+    { title: "隔天推进", note: "适合 Unlock、写作、现代文阅读等需要间隔消化的任务", tasks: severalTimes },
+    { title: "本周推进", note: "适合练习册、项目、书单、阶段性任务", tasks: weekly },
+    { title: "周末复盘", note: "不追求每天完美，重点看一周有没有走偏", tasks: review },
+  ];
 }
 
 export default function WeeklyPage() {
@@ -162,7 +168,7 @@ export default function WeeklyPage() {
     return tasks.filter((task) => (task.goalIds || [task.goalId]).includes(summerGoal.id));
   }, [summerGoal, tasks]);
   const categories = useMemo(() => Array.from(new Set(weeklyTasks.map((task) => task.category || "未分类"))), [weeklyTasks]);
-  const dailyPlan = useMemo(() => allocateDaily(weeklyTasks), [weeklyTasks]);
+  const rhythmGroups = useMemo(() => getRhythmGroups(weeklyTasks), [weeklyTasks]);
   const suggestedTotal = useMemo(() => weeklyTasks.reduce((sum, task) => sum + getSuggestedWeeklyAmount(task), 0), [weeklyTasks]);
   const doneTotal = Object.values(weeklyDone).reduce((sum, value) => sum + Number(value || 0), 0);
   const weekProgress = suggestedTotal ? clamp(Math.round((doneTotal / suggestedTotal) * 100), 0, 100) : 0;
@@ -226,20 +232,13 @@ export default function WeeklyPage() {
       <section className="page-toolbar">
         <div>
           <h1>暑假周计划</h1>
-          <span>{week.label} · 参考拆到天，核心看本周是否完成</span>
-        </div>
-        <div className="weekly-toolbar-actions">
-          <Link className="secondary-action" href="/weekly/report">查看周报告</Link>
-          <Button type="button" onClick={saveWeeklyProgress} disabled={!doneTotal} className="bg-[#5B6BF5] hover:bg-[#4F5DE0] rounded-xl">
-            <Save className="w-4 h-4 mr-2" />
-            {saved ? "已同步" : "同步到目标计划"}
-          </Button>
+          <span>{week.label} · 本周执行清单，不新增另一套任务</span>
         </div>
       </section>
 
       {(saved || saveError) && (
         <div className={cn("weekly-save-feedback", saveError && "error")}>
-          {saveError || "本周完成量已同步到目标计划"}
+          {saveError || "本周完成量已同步到目标地图"}
         </div>
       )}
 
@@ -248,6 +247,13 @@ export default function WeeklyPage() {
           <span>当前目标</span>
           <h2>{summerGoal?.title || "暑假基础建立期"}</h2>
           <p>{summerGoal?.description || "本周计划直接来自目标任务，保存后会同步目标页进度。"}</p>
+          <div className="weekly-toolbar-actions">
+            <Link className="secondary-action" href="/weekly/report">查看周报告</Link>
+            <Button type="button" onClick={saveWeeklyProgress} disabled={!doneTotal} className="bg-[#5B6BF5] hover:bg-[#4F5DE0] rounded-xl">
+              <Save className="w-4 h-4 mr-2" />
+              {saved ? "已同步" : "同步到目标地图"}
+            </Button>
+          </div>
         </div>
         <div className="weekly-plan-score">
           <strong>{weekProgress}%</strong>
@@ -260,7 +266,7 @@ export default function WeeklyPage() {
         <article><ClipboardList className="h-5 w-5" /><span>本周任务</span><strong>{weeklyTasks.length}</strong></article>
         <article><Target className="h-5 w-5" /><span>建议总量</span><strong>{suggestedTotal}</strong></article>
         <article><CheckCircle2 className="h-5 w-5" /><span>本周已填</span><strong>{doneTotal}</strong></article>
-        <article><Flame className="h-5 w-5" /><span>同步记录</span><strong>{logs.length}</strong></article>
+        <article><Flame className="h-5 w-5" /><span>执行记录</span><strong>{logs.length}</strong></article>
       </section>
 
       {weeklyTasks.length ? (
@@ -282,7 +288,7 @@ export default function WeeklyPage() {
                         <div>
                           <strong>{task.title}</strong>
                           <span>{task.description || "未配置具体说明"}</span>
-                          <em>总进度 {task.current}/{task.target}{task.unit} · {task.dailyTarget || "节奏未配置"}</em>
+                          <em>总进度 {task.current}/{task.target}{task.unit} · {task.dailyTarget || "节奏未配置"} · {task.executionMode || "孩子自主"}</em>
                           <b>建议本周 {suggested}{task.unit}</b>
                         </div>
                         <label>
@@ -307,26 +313,29 @@ export default function WeeklyPage() {
       ) : (
         <section className="weekly-empty-state">
           <strong>还没有可生成周计划的任务</strong>
-          <span>先到目标计划里给暑假目标添加任务，周计划会自动同步过来。</span>
-          <Link className="secondary-action" href="/goals">去目标计划</Link>
+          <span>先到目标地图里给暑假目标添加任务，周计划会自动同步过来。</span>
+          <Link className="secondary-action" href="/goals">去目标地图</Link>
         </section>
       )}
 
-      <section className="weekly-daily-reference">
+      <section className="weekly-rhythm-reference">
         <div className="weekly-section-title">
-          <CalendarDays className="h-5 w-5 text-[#5B6BF5]" />
+          <Repeat className="h-5 w-5 text-[#5B6BF5]" />
           <div>
-            <h2>拆到天的参考安排</h2>
-            <p>暑假不用严格卡每天，主要用来避免一周任务堆到最后。</p>
+            <h2>本周节奏参考</h2>
+            <p>不机械排到每天，只说明不同任务应该以什么频率推进。</p>
           </div>
         </div>
-        <div className="weekly-day-grid">
-          {dailyPlan.map((day) => (
-            <article key={day.day} className="weekly-day-card">
-              <strong>{day.day}</strong>
-              {day.tasks.length ? day.tasks.map((task) => (
-                <span key={`${day.day}-${task.id}`} className={cn(task.priority === "高" && "priority")}>{task.title}</span>
-              )) : <span>机动 / 休息</span>}
+        <div className="weekly-rhythm-grid">
+          {rhythmGroups.map((group) => (
+            <article key={group.title} className="weekly-rhythm-card">
+              <strong>{group.title}</strong>
+              <em>{group.note}</em>
+              {group.tasks.length ? group.tasks.slice(0, 6).map((task) => (
+                <span key={typeof task === "string" ? task : task.id} className={cn(typeof task !== "string" && task.priority === "高" && "priority")}>
+                  {typeof task === "string" ? task : task.title}
+                </span>
+              )) : <span>本周暂无对应任务</span>}
             </article>
           ))}
         </div>

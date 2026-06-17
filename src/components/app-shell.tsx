@@ -21,12 +21,12 @@ import seedData from "../../data/eduos.json";
 
 const navItems = [
   { href: "/", label: "驾驶舱", icon: Compass },
-  { href: "/goals", label: "目标计划", icon: Flag },
+  { href: "/goals", label: "目标地图", icon: Flag },
+  { href: "/weekly", label: "周计划", icon: CalendarDays },
   { href: "/grades", label: "校内成绩", icon: BarChart3 },
   { href: "/reading", label: "阅读表达", icon: BookOpen },
   { href: "/records", label: "能力资产", icon: TreePine },
   { href: "/timeline", label: "成长档案", icon: Clock },
-  { href: "/weekly", label: "周计划", icon: CalendarDays },
   { href: "/settings", label: "设置", icon: Settings },
 ];
 

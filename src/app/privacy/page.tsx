@@ -10,7 +10,7 @@ export default function PrivacyPage() {
 
         <section>
           <h2>我们保存哪些数据</h2>
-          <p>孩子档案、目标计划、成绩记录、阅读记录、项目/荣誉证据、成长档案和复盘内容。</p>
+          <p>孩子档案、目标地图、成绩记录、阅读记录、项目/荣誉证据、成长档案和复盘内容。</p>
         </section>
 
         <section>

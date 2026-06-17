@@ -3,7 +3,6 @@
 import { FormEvent, useEffect, useMemo, useState } from "react";
 import {
   AlertTriangle,
-  ArrowRightLeft,
   BookOpen,
   CalendarCheck2,
   Compass,
@@ -13,7 +12,6 @@ import {
   PenLine,
   Plus,
   Route,
-  Shuffle,
   Sigma,
   Sparkles,
   Target,
@@ -29,6 +27,7 @@ type TaskStatus = "ahead" | "normal" | "behind";
 type GoalType = "north" | "phase" | "subject" | "project" | "habit";
 type GoalStatus = "进行中" | "规划中" | "重点推进";
 type TaskPriority = "高" | "中" | "低";
+type ExecutionMode = "孩子自主" | "家长陪练" | "亲子共学" | "家长验收";
 type ViewMode = "overview" | "board" | "logs";
 
 type PlanGoal = {
@@ -57,6 +56,7 @@ type PlanTask = {
   dailyTarget: string;
   status: TaskStatus;
   priority: TaskPriority;
+  executionMode?: ExecutionMode;
 };
 
 type PlanLog = {
@@ -104,6 +104,8 @@ const statusConfig: Record<TaskStatus, { label: string; className: string }> = {
   behind: { label: "落后", className: "bg-[#FFF4E5] text-[#E68A00]" },
 };
 
+const executionModes: ExecutionMode[] = ["孩子自主", "家长陪练", "亲子共学", "家长验收"];
+
 const categoryStyles = [
   { icon: BookOpen, tone: "text-[#5B6BF5]", soft: "bg-[#EEF2FF]", bar: "from-[#5B6BF5] to-[#8B5CF6]" },
   { icon: FileText, tone: "text-[#EF5DA8]", soft: "bg-[#FFF0F6]", bar: "from-[#EF5DA8] to-[#FFB347]" },
@@ -142,10 +144,8 @@ export default function GoalsPage() {
   const [goalOpen, setGoalOpen] = useState(false);
   const [taskOpen, setTaskOpen] = useState(false);
   const [logOpen, setLogOpen] = useState(false);
-  const [phaseOpen, setPhaseOpen] = useState(false);
   const [editingGoal, setEditingGoal] = useState<PlanGoal | null>(null);
   const [editingTask, setEditingTask] = useState<PlanTask | null>(null);
-  const [editingPhase, setEditingPhase] = useState<PlanPhase | null>(null);
   const [draggingGoalId, setDraggingGoalId] = useState("");
 
   useEffect(() => {
@@ -255,11 +255,6 @@ export default function GoalsPage() {
     await persist({ goalLogs: nextLogs });
   }
 
-  async function savePhases(nextPhases: PlanPhase[]) {
-    setPhases(nextPhases);
-    await persist({ goalPhases: nextPhases });
-  }
-
   async function handleGoalSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     const form = new FormData(event.currentTarget);
@@ -332,6 +327,7 @@ export default function GoalsPage() {
       dailyTarget: String(form.get("dailyTarget") || ""),
       status: String(form.get("status") || "normal") as TaskStatus,
       priority: String(form.get("priority") || "中") as TaskPriority,
+      executionMode: String(form.get("executionMode") || "孩子自主") as ExecutionMode,
     };
     const nextTasks = editingTask ? tasks.map((item) => (item.id === editingTask.id ? task : item)) : [...tasks, task];
     await saveTasks(nextTasks);
@@ -343,33 +339,6 @@ export default function GoalsPage() {
     const task = tasks.find((item) => item.id === taskId);
     if (!window.confirm(`确认删除任务“${task?.title || "当前任务"}”吗？`)) return;
     await saveTasks(tasks.filter((task) => task.id !== taskId));
-  }
-
-  async function handlePhaseSubmit(event: FormEvent<HTMLFormElement>) {
-    event.preventDefault();
-    if (!activeGoal) return;
-    const form = new FormData(event.currentTarget);
-    const phase: PlanPhase = {
-      id: editingPhase?.id || uid("phase"),
-      goalId: activeGoal.id,
-      title: String(form.get("title") || "新阶段"),
-      period: String(form.get("period") || ""),
-      description: String(form.get("description") || ""),
-      order: Number(form.get("order") || activePhases.length + 1),
-    };
-    const nextPhases = editingPhase ? phases.map((item) => item.id === editingPhase.id ? phase : item) : [...phases, phase];
-    await savePhases(nextPhases);
-    setEditingPhase(null);
-    setPhaseOpen(false);
-  }
-
-  async function deletePhase(phaseId: string) {
-    const phase = phases.find((item) => item.id === phaseId);
-    if (!window.confirm(`确认删除阶段“${phase?.title || "当前阶段"}”吗？关联任务会保留，但会取消阶段归属。`)) return;
-    const nextTasks = tasks.map((task) => task.phaseId === phaseId ? { ...task, phaseId: "" } : task);
-    setTasks(nextTasks);
-    setPhases(phases.filter((phase) => phase.id !== phaseId));
-    await persist({ goalTasks: nextTasks, goalPhases: phases.filter((phase) => phase.id !== phaseId) });
   }
 
   async function handleLogSubmit(event: FormEvent<HTMLFormElement>) {
@@ -394,7 +363,7 @@ export default function GoalsPage() {
       <div className="summer-goals-page">
         <section className="page-toolbar compact">
           <div>
-            <h1>目标计划</h1>
+            <h1>目标地图</h1>
             <span>当前目标数为 0</span>
           </div>
           <button className="summer-primary-button" onClick={() => { setEditingGoal(null); setGoalOpen(true); }}>
@@ -411,7 +380,7 @@ export default function GoalsPage() {
     <div className="summer-goals-page">
       <section className="page-toolbar compact">
         <div>
-          <h1>目标计划</h1>
+          <h1>目标地图</h1>
           <span>{goals.length} 个目标 · {tasks.length} 个任务 · {conflicts.length ? `${conflicts.length} 条提醒` : "运行正常"}</span>
         </div>
         <div className="goal-toolbar">
@@ -422,13 +391,12 @@ export default function GoalsPage() {
         </div>
       </section>
 
-      <section className="goal-os-grid">
-        <article className="goal-map-panel">
+      <section className="goal-map-panel">
           <div className="goal-panel-title with-action">
             <Route className="h-5 w-5 text-[#5B6BF5]" />
             <div>
               <h2>目标地图</h2>
-              <span>长期目标、阶段目标和专项目标统一管理</span>
+              <span>先选目标，再看说明和下方任务</span>
             </div>
             <button className="goal-icon-button" onClick={() => { setEditingGoal(null); setGoalOpen(true); }} aria-label="新增目标">
               <Plus className="h-4 w-4" />
@@ -459,9 +427,9 @@ export default function GoalsPage() {
               </button>
             ))}
           </div>
-        </article>
+      </section>
 
-        <article className="goal-active-panel">
+      <section className="goal-active-panel">
           <div className="goal-active-head">
             <div>
               <span>{goalTypeLabel[activeGoal.type]}目标 · 当前选中</span>
@@ -487,7 +455,6 @@ export default function GoalsPage() {
             <button className={cn(viewMode === "board" && "active")} onClick={() => setViewMode("board")}>执行看板</button>
             <button className={cn(viewMode === "logs" && "active")} onClick={() => setViewMode("logs")}>每日记录</button>
           </div>
-        </article>
       </section>
 
       {viewMode === "overview" && (
@@ -512,36 +479,6 @@ export default function GoalsPage() {
             <span>{activeGoal.period}</span>
             <em>{activeGoal.status}</em>
           </div>
-        </section>
-      )}
-
-      {viewMode === "board" && (
-        <section className="goal-phase-section">
-          <div className="summer-board-head flush">
-            <div>
-              <h2>阶段配置</h2>
-              <p>把当前目标拆成可执行的时间段，用来承接具体任务。</p>
-            </div>
-            <button className="secondary-action" onClick={() => { setEditingPhase(null); setPhaseOpen(true); }}>
-              <Plus className="h-4 w-4" />
-              新增阶段
-            </button>
-          </div>
-          {activePhases.length ? (
-            <div className="summer-phase-grid">
-              {activePhases.map((phase) => (
-                <article key={phase.id} className="summer-phase-card">
-                  <span>{phase.title}</span>
-                  <strong>{phase.period || "未设置周期"}</strong>
-                  <p>{phase.description || "未配置阶段说明"}</p>
-                  <div className="goal-action-row compact">
-                    <button onClick={() => { setEditingPhase(phase); setPhaseOpen(true); }}>编辑</button>
-                    <button className="danger" onClick={() => deletePhase(phase.id)}>删除</button>
-                  </div>
-                </article>
-              ))}
-            </div>
-          ) : <div className="goal-muted-line">当前目标没有配置阶段。</div>}
         </section>
       )}
 
@@ -620,7 +557,7 @@ export default function GoalsPage() {
                           <div className="summer-task-top">
                             <div>
                               <h4>{task.title}</h4>
-                              <span>{task.dailyTarget || "未配置执行节奏"}</span>
+                              <span>{task.dailyTarget || "未配置执行节奏"} · {task.executionMode || "孩子自主"}</span>
                             </div>
                             <em className={status.className}>{status.label}</em>
                           </div>
@@ -697,7 +634,6 @@ export default function GoalsPage() {
       <GoalDialog open={goalOpen} onOpenChange={setGoalOpen} goals={goals} goal={editingGoal} onSubmit={handleGoalSubmit} />
       <TaskDialog open={taskOpen} onOpenChange={setTaskOpen} task={editingTask} categories={categories} goals={goals} phases={activePhases} activeGoalId={activeGoal.id} onSubmit={handleTaskSubmit} />
       <LogDialog open={logOpen} onOpenChange={setLogOpen} categories={categories} onSubmit={handleLogSubmit} />
-      <PhaseDialog open={phaseOpen} onOpenChange={setPhaseOpen} phase={editingPhase} order={activePhases.length + 1} onSubmit={handlePhaseSubmit} />
     </div>
   );
 }
@@ -781,35 +717,16 @@ function TaskDialog({
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="app-dialog">
-        <DialogHeader>
+        <DialogHeader className="app-dialog-header">
           <DialogTitle>{task ? "编辑任务" : "新增任务"}</DialogTitle>
-          <DialogDescription>大类是自由输入的；输入一个新的大类名称，就会自动生成新的看板列。</DialogDescription>
+          <DialogDescription>先填核心信息就能保存，更多关联和说明可以展开高级配置。</DialogDescription>
         </DialogHeader>
-        <form onSubmit={onSubmit} className="app-form">
+        <form onSubmit={onSubmit} className="app-form app-form-scroll">
           <div className="form-grid two">
             <label className="form-field"><span>任务大类</span><Input name="category" defaultValue={task?.category || categories[0] || ""} placeholder="例如：数学 / 英语 / 考证" list="task-categories" required /><datalist id="task-categories">{categories.map((item) => <option key={item} value={item} />)}</datalist></label>
-            <label className="form-field"><span>优先级</span><select name="priority" defaultValue={task?.priority || "中"}><option>高</option><option>中</option><option>低</option></select></label>
-          </div>
-          <div className="form-grid two">
-            <label className="form-field">
-              <span>所属阶段</span>
-              <select name="phaseId" defaultValue={task?.phaseId || ""}>
-                <option value="">不关联阶段</option>
-                {phases.map((phase) => <option key={phase.id} value={phase.id}>{phase.title} · {phase.period}</option>)}
-              </select>
-            </label>
-            <label className="form-field">
-              <span>关联其他目标</span>
-              <Input name="goalIds" defaultValue={extraGoalIds.join(",")} placeholder="可填目标 ID，英文逗号分隔" list="goal-id-options" />
-              <datalist id="goal-id-options">{goals.filter((goal) => goal.id !== activeGoalId).map((goal) => <option key={goal.id} value={goal.id}>{goal.title}</option>)}</datalist>
-            </label>
+            <label className="form-field"><span>执行方式</span><select name="executionMode" defaultValue={task?.executionMode || "孩子自主"}>{executionModes.map((mode) => <option key={mode}>{mode}</option>)}</select></label>
           </div>
           <label className="form-field"><span>任务名称</span><Input name="title" defaultValue={task?.title} required /></label>
-          <label className="form-field"><span>任务说明</span><textarea name="description" defaultValue={task?.description} placeholder="这项任务具体要完成什么" /></label>
-          <div className="task-config-hint">
-            <strong>量的配置</strong>
-            <span>Unlock 可用“课/单元”，阅读书单可用“本/章”，练习册可用“页/套”。不同单元课数不一样时，先把总量写在目标量里，把单元范围写进任务说明。</span>
-          </div>
           <div className="form-grid two">
             <label className="form-field"><span>目标量</span><Input name="target" type="number" min="0" defaultValue={task?.target || 0} /></label>
             <label className="form-field"><span>已完成</span><Input name="current" type="number" min="0" defaultValue={task?.current || 0} /></label>
@@ -818,47 +735,37 @@ function TaskDialog({
             <label className="form-field"><span>单位</span><Input name="unit" defaultValue={task?.unit || "次"} /></label>
             <label className="form-field"><span>执行节奏</span><Input name="dailyTarget" defaultValue={task?.dailyTarget} placeholder="例如：每天 30 分钟" /></label>
           </div>
-          <label className="form-field"><span>状态</span><select name="status" defaultValue={task?.status || "normal"}><option value="ahead">超前</option><option value="normal">正常</option><option value="behind">落后</option></select></label>
+          <details className="task-advanced-config">
+            <summary>高级配置</summary>
+            <div className="app-form">
+              <div className="form-grid two">
+                <label className="form-field"><span>优先级</span><select name="priority" defaultValue={task?.priority || "中"}><option>高</option><option>中</option><option>低</option></select></label>
+                <label className="form-field"><span>状态</span><select name="status" defaultValue={task?.status || "normal"}><option value="ahead">超前</option><option value="normal">正常</option><option value="behind">落后</option></select></label>
+              </div>
+              <div className="form-grid two">
+                <label className="form-field">
+                  <span>所属阶段</span>
+                  <select name="phaseId" defaultValue={task?.phaseId || ""}>
+                    <option value="">不关联阶段</option>
+                    {phases.map((phase) => <option key={phase.id} value={phase.id}>{phase.title} · {phase.period}</option>)}
+                  </select>
+                </label>
+                <label className="form-field">
+                  <span>关联其他目标</span>
+                  <Input name="goalIds" defaultValue={extraGoalIds.join(",")} placeholder="可填目标 ID，英文逗号分隔" list="goal-id-options" />
+                  <datalist id="goal-id-options">{goals.filter((goal) => goal.id !== activeGoalId).map((goal) => <option key={goal.id} value={goal.id}>{goal.title}</option>)}</datalist>
+                </label>
+              </div>
+              <label className="form-field"><span>任务说明</span><textarea name="description" defaultValue={task?.description} placeholder="这项任务具体要完成什么" /></label>
+              <div className="task-config-hint">
+                <strong>量的配置</strong>
+                <span>Unlock 可用“课/单元”，阅读书单可用“本/章”，练习册可用“页/套”。不同单元课数不一样时，先把总量写在目标量里，把单元范围写进任务说明。</span>
+              </div>
+            </div>
+          </details>
           <div className="form-actions">
             <Button type="button" variant="secondary" onClick={() => onOpenChange(false)}>取消</Button>
             <Button type="submit">保存任务</Button>
-          </div>
-        </form>
-      </DialogContent>
-    </Dialog>
-  );
-}
-
-function PhaseDialog({
-  open,
-  onOpenChange,
-  phase,
-  order,
-  onSubmit,
-}: {
-  open: boolean;
-  onOpenChange: (open: boolean) => void;
-  phase: PlanPhase | null;
-  order: number;
-  onSubmit: (event: FormEvent<HTMLFormElement>) => void;
-}) {
-  return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="app-dialog">
-        <DialogHeader>
-          <DialogTitle>{phase ? "编辑阶段" : "新增阶段"}</DialogTitle>
-          <DialogDescription>阶段是当前目标自己的配置，保存后会参与任务归属和进度判断。</DialogDescription>
-        </DialogHeader>
-        <form onSubmit={onSubmit} className="app-form">
-          <div className="form-grid two">
-            <label className="form-field"><span>阶段名称</span><Input name="title" defaultValue={phase?.title || ""} placeholder="例如：阶段一" required /></label>
-            <label className="form-field"><span>排序</span><Input name="order" type="number" min="1" defaultValue={phase?.order || order} /></label>
-          </div>
-          <label className="form-field"><span>周期</span><Input name="period" defaultValue={phase?.period || ""} placeholder="例如：6.20-7.6" /></label>
-          <label className="form-field"><span>阶段说明</span><textarea name="description" defaultValue={phase?.description || ""} placeholder="这个阶段的重点是什么" /></label>
-          <div className="form-actions">
-            <Button type="button" variant="secondary" onClick={() => onOpenChange(false)}>取消</Button>
-            <Button type="submit">保存阶段</Button>
           </div>
         </form>
       </DialogContent>

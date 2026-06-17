@@ -18,6 +18,7 @@ import seedData from "../../../../data/eduos.json";
 type GoalType = "north" | "phase" | "subject" | "project" | "habit";
 type TaskStatus = "ahead" | "normal" | "behind";
 type TaskPriority = "高" | "中" | "低";
+type ExecutionMode = "孩子自主" | "家长陪练" | "亲子共学" | "家长验收";
 
 type PlanGoal = {
   id: string;
@@ -44,6 +45,7 @@ type PlanTask = {
   dailyTarget?: string;
   status: TaskStatus;
   priority?: TaskPriority;
+  executionMode?: ExecutionMode;
 };
 
 type PlanLog = {

@@ -57,6 +57,7 @@ export type ProductConfig = {
     current: number;
     unit: string;
     status: "ahead" | "normal" | "behind";
+    executionMode?: "孩子自主" | "家长陪练" | "亲子共学" | "家长验收";
   }>;
   goalLogs?: Array<{
     id: string;

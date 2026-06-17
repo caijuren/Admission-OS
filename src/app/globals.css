@@ -1260,14 +1260,26 @@
 
 .app-dialog {
   max-width: 560px;
+  max-height: min(86vh, 760px);
+  overflow: hidden;
   border-radius: 16px;
   border: 1px solid var(--line-soft);
   box-shadow: 0 28px 70px rgba(25, 35, 68, 0.16);
 }
 
+.app-dialog-header {
+  padding-right: 28px;
+}
+
 .app-form {
   display: grid;
   gap: 14px;
+}
+
+.app-form-scroll {
+  max-height: calc(86vh - 150px);
+  overflow: auto;
+  padding-right: 4px;
 }
 
 .form-grid {
@@ -1351,10 +1363,16 @@
 }
 
 .form-actions {
+  position: sticky;
+  bottom: -1px;
+  z-index: 2;
   display: flex;
   justify-content: flex-end;
   gap: 10px;
-  padding-top: 4px;
+  border-top: 1px solid #eef2f8;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.86), #ffffff 35%);
+  padding-top: 12px;
+  padding-bottom: 2px;
 }
 
 .inline-feedback {
@@ -4571,15 +4589,15 @@
 
 .settings-layout {
   display: grid;
-  grid-template-columns: 300px minmax(0, 1fr);
-  gap: 16px;
+  grid-template-columns: 280px minmax(0, 1fr);
+  gap: 12px;
 }
 
 .settings-summary-stack,
 .settings-form-stack {
   display: grid;
   align-content: start;
-  gap: 16px;
+  gap: 12px;
 }
 
 .settings-summary-stack {
@@ -4590,18 +4608,18 @@
 .settings-profile-card {
   display: flex;
   align-items: center;
-  gap: 14px;
+  gap: 12px;
 }
 
 .settings-avatar {
-  width: 58px;
-  height: 58px;
+  width: 50px;
+  height: 50px;
   display: grid;
   place-items: center;
-  border-radius: 14px;
+  border-radius: 13px;
   background: #eef2ff;
   color: #5b6bf5;
-  font-size: 24px;
+  font-size: 21px;
   font-weight: 900;
 }
 
@@ -4614,7 +4632,7 @@
 .settings-profile-card h2 {
   margin-top: 3px;
   color: #17213a;
-  font-size: 22px;
+  font-size: 19px;
   font-weight: 900;
 }
 
@@ -4629,15 +4647,15 @@
 .settings-info-row {
   display: flex;
   align-items: flex-start;
-  gap: 10px;
-  border-radius: 11px;
+  gap: 9px;
+  border-radius: 10px;
   background: #f8fafc;
   border: 1px solid #edf1f8;
-  padding: 12px;
+  padding: 10px;
 }
 
 .settings-target-box {
-  margin-top: 16px;
+  margin-top: 12px;
 }
 
 .settings-hint-box {
@@ -4677,12 +4695,12 @@
 .settings-section-title {
   display: flex;
   align-items: flex-start;
-  gap: 9px;
+  gap: 8px;
 }
 
 .settings-section-title h2 {
   color: #17213a;
-  font-size: 17px;
+  font-size: 16px;
   font-weight: 900;
 }
 
@@ -4695,7 +4713,7 @@
 .settings-field-grid {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 12px;
+  gap: 10px;
 }
 
 .settings-field-grid label,
@@ -4715,17 +4733,18 @@
 .settings-backup-grid {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 10px;
+  gap: 8px;
 }
 
 .settings-account-grid div,
 .settings-backup-grid div {
   display: grid;
   gap: 5px;
-  border-radius: 13px;
+  min-width: 0;
+  border-radius: 11px;
   border: 1px solid #e7edf6;
   background: #f8fafc;
-  padding: 12px;
+  padding: 10px;
 }
 
 .settings-account-grid span,
@@ -4737,10 +4756,12 @@
 
 .settings-account-grid strong,
 .settings-backup-grid strong {
+  min-width: 0;
   color: #17213a;
   font-size: 12px;
   line-height: 1.45;
   font-weight: 950;
+  overflow-wrap: anywhere;
 }
 
 .settings-pathway-list {
@@ -4750,13 +4771,13 @@
 
 .settings-route-picker {
   display: grid;
-  grid-template-columns: 86px minmax(0, 1fr);
+  grid-template-columns: 76px minmax(0, 1fr);
   align-items: center;
-  gap: 10px;
-  border-radius: 13px;
+  gap: 8px;
+  border-radius: 11px;
   border: 1px solid #e7edf6;
   background: #f8fafc;
-  padding: 11px 12px;
+  padding: 10px;
 }
 
 .settings-route-picker label {
@@ -4767,17 +4788,17 @@
 
 .settings-pathway-stage {
   display: grid;
-  gap: 12px;
-  border-radius: 16px;
+  gap: 10px;
+  border-radius: 13px;
   border: 1px solid #e7edf6;
   background: linear-gradient(180deg, #ffffff, #fbfcff);
-  padding: 14px;
+  padding: 12px;
 }
 
 .settings-pathway-head {
   display: grid;
-  grid-template-columns: minmax(0, 0.85fr) minmax(0, 1fr) 128px;
-  gap: 10px;
+  grid-template-columns: minmax(0, 0.8fr) minmax(0, 1fr) 120px;
+  gap: 8px;
   align-items: center;
 }
 
@@ -4797,12 +4818,12 @@
 
 .settings-route-picker select,
 .settings-pathway-head select {
-  height: 40px;
+  height: 38px;
   padding: 0 10px;
 }
 
 .settings-wide-field textarea {
-  min-height: 68px;
+  min-height: 62px;
   padding: 10px 12px;
   resize: vertical;
 }
@@ -4810,7 +4831,7 @@
 .settings-pathway-targets {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 10px;
+  gap: 8px;
 }
 
 .settings-pathway-targets label {
@@ -4825,7 +4846,7 @@
 }
 
 .settings-pathway-targets textarea {
-  min-height: 78px;
+  min-height: 70px;
   padding: 9px 10px;
   line-height: 1.45;
   resize: vertical;
@@ -4976,7 +4997,7 @@
   max-width: 1240px;
   margin: 0 auto;
   display: grid;
-  gap: 14px;
+  gap: 12px;
 }
 
 .goal-os-hero,
@@ -5095,26 +5116,25 @@
 
 .goal-os-grid {
   display: grid;
-  grid-template-columns: 0.95fr 1.05fr;
+  grid-template-columns: 1fr;
   gap: 14px;
 }
 
 .goal-map-panel,
 .goal-active-panel {
   border-radius: var(--radius-panel);
-  padding: 16px;
+  padding: 12px;
 }
 
 .goal-map-panel {
-  max-height: calc(100vh - 150px);
-  overflow: auto;
+  overflow: visible;
 }
 
 .goal-panel-title {
   display: flex;
   align-items: center;
   gap: 10px;
-  margin-bottom: 12px;
+  margin-bottom: 10px;
 }
 
 .goal-panel-title.with-action {
@@ -5160,20 +5180,22 @@
 
 .goal-tree-list {
   display: grid;
-  gap: 7px;
+  grid-template-columns: repeat(auto-fit, minmax(156px, 1fr));
+  gap: 8px;
 }
 
 .goal-node-row {
   position: relative;
-  min-height: 54px;
+  min-height: 72px;
   display: grid;
-  grid-template-columns: 18px 1fr auto;
-  align-items: center;
-  gap: 10px;
-  border-radius: 11px;
+  grid-template-columns: 12px 1fr;
+  grid-template-rows: 1fr auto;
+  align-items: start;
+  gap: 8px;
+  border-radius: 12px;
   border: 1px solid #eef2f8;
   background: #fbfcff;
-  padding: 9px 11px;
+  padding: 10px;
   text-align: left;
   transition: border-color 180ms ease, box-shadow 180ms ease, transform 180ms ease, background 180ms ease;
 }
@@ -5188,19 +5210,11 @@
 }
 
 .goal-node-row.child {
-  margin-left: 22px;
+  margin-left: 0;
 }
 
 .goal-node-row.child::before {
-  content: "";
-  position: absolute;
-  left: -13px;
-  top: -8px;
-  bottom: 50%;
-  width: 13px;
-  border-left: 2px solid #e2e8f0;
-  border-bottom: 2px solid #e2e8f0;
-  border-radius: 0 0 0 8px;
+  content: none;
 }
 
 .goal-node-row.active {
@@ -5221,8 +5235,8 @@
 }
 
 .goal-node-dot {
-  width: 10px;
-  height: 10px;
+  width: 8px;
+  height: 8px;
   border-radius: 999px;
   background: #c7d2fe;
   box-shadow: 0 0 0 4px rgba(91, 107, 245, 0.08);
@@ -5233,23 +5247,32 @@
 }
 
 .goal-node-row strong {
-  display: block;
+  display: -webkit-box;
+  overflow: hidden;
   color: #17213a;
-  font-size: 13px;
+  font-size: 12px;
+  line-height: 1.25;
   font-weight: 900;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
 }
 
 .goal-node-row span {
   display: block;
+  overflow: hidden;
   margin-top: 4px;
   color: #8b93a5;
-  font-size: 11px;
+  font-size: 10px;
   font-weight: 700;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .goal-node-row em {
+  grid-column: 1 / -1;
+  justify-self: end;
   color: #5b6bf5;
-  font-size: 13px;
+  font-size: 11px;
   font-style: normal;
   font-weight: 900;
 }
@@ -5257,7 +5280,7 @@
 .goal-active-panel {
   display: grid;
   align-content: start;
-  gap: 14px;
+  gap: 11px;
   background: var(--surface);
 }
 
@@ -5275,22 +5298,22 @@
 }
 
 .goal-active-head h2 {
-  margin-top: 6px;
-  font-size: 22px;
+  margin-top: 5px;
+  font-size: 20px;
 }
 
 .goal-active-head p {
-  max-width: 520px;
-  margin-top: 8px;
+  max-width: 760px;
+  margin-top: 6px;
   color: #667085;
-  font-size: 13px;
-  line-height: 1.75;
+  font-size: 12px;
+  line-height: 1.65;
 }
 
 .goal-active-head > strong {
   flex: 0 0 auto;
   color: #5b6bf5;
-  font-size: 38px;
+  font-size: 32px;
   line-height: 1;
   font-weight: 900;
 }
@@ -5302,7 +5325,7 @@
 }
 
 .goal-active-meta span {
-  height: 32px;
+  height: 30px;
   display: inline-flex;
   align-items: center;
   gap: 7px;
@@ -5311,7 +5334,7 @@
   background: #f8fafc;
   border: 1px solid #edf1f8;
   color: #5f6b82;
-  font-size: 12px;
+  font-size: 11px;
   font-weight: 800;
 }
 
@@ -5387,11 +5410,11 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 20px;
+  gap: 16px;
   border-radius: var(--radius-panel);
   border: 1px solid var(--line-soft);
   background: var(--surface);
-  padding: 18px;
+  padding: 14px;
   box-shadow: var(--shadow-card);
 }
 
@@ -5402,33 +5425,33 @@
 }
 
 .goal-mode-panel h2 {
-  margin-top: 6px;
+  margin-top: 5px;
   color: #17213a;
-  font-size: 22px;
+  font-size: 19px;
   font-weight: 900;
 }
 
 .goal-mode-panel p {
   max-width: 720px;
-  margin-top: 8px;
+  margin-top: 6px;
   color: #667085;
-  font-size: 13px;
-  line-height: 1.75;
+  font-size: 12px;
+  line-height: 1.65;
 }
 
 .goal-relation-grid {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 10px;
-  margin-top: 16px;
+  gap: 8px;
+  margin-top: 12px;
 }
 
 .goal-relation-card {
-  min-height: 96px;
+  min-height: 78px;
   border-radius: 14px;
   border: 1px solid #edf1f8;
   background: rgba(255, 255, 255, 0.78);
-  padding: 12px;
+  padding: 10px;
 }
 
 .goal-relation-card strong {
@@ -5452,9 +5475,9 @@
   gap: 12px;
   border-radius: var(--radius-panel);
   border: 1px solid var(--line-soft);
-  background: var(--surface);
-  box-shadow: var(--shadow-card);
-  padding: 16px;
+  background: #fbfcff;
+  box-shadow: none;
+  padding: 14px;
 }
 
 .goal-focus-list {
@@ -5636,7 +5659,7 @@
 .summer-stats-row {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
-  gap: 12px;
+  gap: 10px;
 }
 
 .summer-phase-grid {
@@ -5646,14 +5669,14 @@
 }
 
 .summer-phase-card {
-  min-height: 88px;
+  min-height: 76px;
   display: grid;
   align-content: center;
   gap: 5px;
   border-radius: 12px;
   border: 1px solid #edf1f8;
-  background: #fbfcff;
-  padding: 13px;
+  background: #ffffff;
+  padding: 12px;
   box-shadow: none;
 }
 
@@ -5677,12 +5700,12 @@
 }
 
 .summer-stat-card {
-  min-height: 96px;
+  min-height: 78px;
   border-radius: var(--radius-panel);
   display: grid;
   align-content: center;
-  gap: 7px;
-  padding: 15px;
+  gap: 5px;
+  padding: 12px;
 }
 
 .summer-stat-card span {
@@ -5693,7 +5716,7 @@
 
 .summer-stat-card strong {
   color: #17213a;
-  font-size: 23px;
+  font-size: 21px;
   line-height: 1;
   font-weight: 900;
 }
@@ -5739,34 +5762,35 @@
 
 .summer-subject-grid {
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 12px;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 10px;
 }
 
 .summer-subject-column {
+  min-width: 0;
   border-radius: var(--radius-panel);
-  padding: 15px;
+  padding: 12px;
 }
 
 .summer-subject-head {
   display: grid;
-  grid-template-columns: 42px 1fr auto;
+  grid-template-columns: 34px 1fr auto;
   align-items: center;
-  gap: 10px;
-  margin-bottom: 12px;
+  gap: 8px;
+  margin-bottom: 10px;
 }
 
 .summer-subject-icon {
-  width: 42px;
-  height: 42px;
-  border-radius: 13px;
+  width: 34px;
+  height: 34px;
+  border-radius: 11px;
   display: grid;
   place-items: center;
 }
 
 .summer-subject-head h3 {
   color: #17213a;
-  font-size: 17px;
+  font-size: 15px;
   font-weight: 900;
 }
 
@@ -5780,21 +5804,26 @@
 
 .summer-subject-head strong {
   color: #17213a;
-  font-size: 20px;
+  font-size: 18px;
   font-weight: 900;
 }
 
 .summer-task-list {
   display: grid;
-  gap: 9px;
-  margin-top: 12px;
+  grid-auto-rows: 1fr;
+  gap: 8px;
+  margin-top: 10px;
 }
 
 .summer-task-card {
+  min-width: 0;
+  min-height: 150px;
+  display: grid;
+  align-content: start;
   border-radius: 12px;
   border: 1px solid #eef2f8;
   background: #fbfcff;
-  padding: 11px;
+  padding: 10px;
 }
 
 .summer-task-top,
@@ -5806,17 +5835,24 @@
 }
 
 .summer-task-top h4 {
+  display: -webkit-box;
+  overflow: hidden;
   color: #1f2a44;
   font-size: 13px;
   font-weight: 900;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
 }
 
 .summer-task-top span {
   display: block;
+  overflow: hidden;
   margin-top: 4px;
   color: #8b93a5;
   font-size: 10.5px;
   font-weight: 800;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .summer-task-top em {
@@ -5829,11 +5865,15 @@
 }
 
 .summer-task-card p {
-  min-height: 38px;
+  min-height: 34px;
+  display: -webkit-box;
+  overflow: hidden;
   margin-top: 9px;
   color: #5f6b82;
   font-size: 11px;
-  line-height: 1.65;
+  line-height: 1.55;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
 }
 
 .summer-task-progress {
@@ -5997,6 +6037,42 @@
   font-weight: 760;
 }
 
+.task-advanced-config {
+  border-radius: 14px;
+  border: 1px solid #e7edf6;
+  background: #fbfcff;
+  padding: 0;
+  overflow: hidden;
+}
+
+.task-advanced-config summary {
+  cursor: pointer;
+  color: #4f5de0;
+  font-size: 12px;
+  font-weight: 950;
+  padding: 12px;
+  list-style: none;
+}
+
+.task-advanced-config summary::-webkit-details-marker {
+  display: none;
+}
+
+.task-advanced-config summary::after {
+  content: "+";
+  float: right;
+  color: #8b93a5;
+}
+
+.task-advanced-config[open] summary::after {
+  content: "-";
+}
+
+.task-advanced-config > .app-form {
+  border-top: 1px solid #eef2f8;
+  padding: 12px;
+}
+
 .weekly-draft-editor {
   min-height: 280px;
   width: 100%;
@@ -6025,6 +6101,7 @@
   display: flex;
   align-items: center;
   gap: 10px;
+  margin-top: 16px;
 }
 
 .weekly-save-feedback {
@@ -6221,8 +6298,9 @@
 
 .weekly-workload-grid {
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
   gap: 14px;
+  align-items: stretch;
 }
 
 .weekly-report-grid {
@@ -6325,13 +6403,19 @@
 }
 
 .weekly-workload-column,
-.weekly-daily-reference,
+.weekly-rhythm-reference,
 .weekly-empty-state {
   border-radius: 18px;
   border: 1px solid #e7edf6;
   background: #ffffff;
   padding: 16px;
   box-shadow: 0 12px 28px rgba(31, 42, 71, 0.05);
+}
+
+.weekly-workload-column {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
 }
 
 .weekly-empty-state {
@@ -6376,11 +6460,16 @@
 
 .weekly-task-stack {
   display: grid;
+  grid-auto-rows: 1fr;
   gap: 10px;
   margin-top: 14px;
+  flex: 1;
 }
 
 .weekly-task-row {
+  min-width: 0;
+  min-height: 156px;
+  height: 100%;
   display: grid;
   grid-template-columns: minmax(0, 1fr) 104px;
   gap: 12px;
@@ -6390,8 +6479,12 @@
   padding: 12px;
 }
 
+.weekly-task-row > div {
+  min-width: 0;
+}
+
 .weekly-task-row strong,
-.weekly-day-card strong {
+.weekly-rhythm-card strong {
   display: block;
   color: #17213a;
   font-size: 13px;
@@ -6400,17 +6493,21 @@
 
 .weekly-task-row span,
 .weekly-task-row em {
-  display: block;
+  display: -webkit-box;
+  overflow: hidden;
   margin-top: 5px;
   color: #667085;
   font-size: 11px;
   line-height: 1.5;
   font-style: normal;
   font-weight: 720;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
 }
 
 .weekly-task-row em {
   color: #8b93a5;
+  -webkit-line-clamp: 1;
 }
 
 .weekly-task-row b {
@@ -6458,15 +6555,15 @@
   font-weight: 720;
 }
 
-.weekly-day-grid {
+.weekly-rhythm-grid {
   display: grid;
-  grid-template-columns: repeat(7, minmax(0, 1fr));
+  grid-template-columns: repeat(4, minmax(0, 1fr));
   gap: 10px;
   margin-top: 14px;
 }
 
-.weekly-day-card {
-  min-height: 142px;
+.weekly-rhythm-card {
+  min-height: 188px;
   display: grid;
   align-content: start;
   gap: 8px;
@@ -6476,7 +6573,15 @@
   padding: 12px;
 }
 
-.weekly-day-card span {
+.weekly-rhythm-card em {
+  color: #8b93a5;
+  font-size: 11px;
+  line-height: 1.5;
+  font-style: normal;
+  font-weight: 760;
+}
+
+.weekly-rhythm-card span {
   display: block;
   border-radius: 10px;
   background: #f3f6ff;
@@ -6487,7 +6592,7 @@
   font-weight: 800;
 }
 
-.weekly-day-card span.priority {
+.weekly-rhythm-card span.priority {
   background: #fff4e5;
   color: #9a5a00;
 }
@@ -6585,7 +6690,7 @@
   }
 
   .weekly-workload-grid,
-  .weekly-day-grid {
+  .weekly-rhythm-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
@@ -6655,6 +6760,10 @@
 
   .summer-phase-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .goal-tree-list {
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
   }
 
   .journey-hero {
@@ -6865,7 +6974,11 @@
   .weekly-stat-grid,
   .weekly-report-kpis,
   .weekly-workload-grid,
-  .weekly-day-grid {
+  .weekly-rhythm-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .goal-tree-list {
     grid-template-columns: 1fr;
   }
 
