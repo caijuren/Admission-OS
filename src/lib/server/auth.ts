@@ -7,7 +7,9 @@ import { authCookieNames } from "./auth-cookies";
 const cookieOptions = {
   httpOnly: true,
   sameSite: "lax" as const,
-  secure: process.env.NODE_ENV === "production",
+  secure: process.env.ADMISSION_OS_COOKIE_SECURE
+    ? process.env.ADMISSION_OS_COOKIE_SECURE === "true"
+    : process.env.NODE_ENV === "production",
   path: "/",
 };
 
