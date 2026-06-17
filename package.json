@@ -1,12 +1,12 @@
 {
   "name": "edu-os",
-  "version": "1.1.0",
+  "version": "1.1.1",
   "private": true,
   "scripts": {
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint src middleware.ts --ext .ts,.tsx"
+    "lint": "eslint src src/middleware.ts --ext .ts,.tsx"
   },
   "dependencies": {
     "@radix-ui/react-dialog": "^1.1.4",

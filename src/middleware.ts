@@ -1,5 +1,5 @@
 import { NextResponse, type NextRequest } from "next/server";
-import { authCookieNames } from "@/lib/server/auth";
+import { authCookieNames } from "@/lib/server/auth-cookies";
 
 const publicPaths = new Set(["/login", "/privacy"]);
 
@@ -22,6 +22,12 @@ export function middleware(request: NextRequest) {
     return NextResponse.next();
   }
 
+  if (pathname === "/" && !hasSession) {
+    const loginUrl = new URL("/login", request.url);
+    loginUrl.searchParams.set("next", "/");
+    return NextResponse.redirect(loginUrl);
+  }
+
   if (!hasSession) {
     const loginUrl = new URL("/login", request.url);
     loginUrl.searchParams.set("next", pathname);
@@ -32,5 +38,5 @@ export function middleware(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ["/((?!.*\\..*).*)", "/api/:path*"],
+  matcher: ["/", "/((?!_next|.*\\..*).*)", "/api/:path*"],
 };

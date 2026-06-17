@@ -2060,20 +2060,101 @@
   pointer-events: none;
 }
 
-.pathway-route-image {
+.pathway-route-svg {
   position: absolute;
   inset: 0;
   width: 100%;
   height: 100%;
-  object-fit: cover;
-  object-position: center;
   z-index: 2;
   pointer-events: none;
+  overflow: visible;
+}
+
+.pathway-route-shadow,
+.pathway-route-base,
+.pathway-route-progress,
+.pathway-route-spark {
+  fill: none;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.pathway-route-shadow {
+  stroke: rgba(49, 37, 21, 0.28);
+  stroke-width: 20;
+  transform: translateY(7px);
+  filter: blur(2px);
+}
+
+.pathway-route-base {
+  stroke: rgba(255, 236, 180, 0.72);
+  stroke-width: 13;
+  filter: url("#pathway-route-glow");
+}
+
+.pathway-route-progress {
+  stroke: url("#pathway-route-gold");
+  stroke-width: 7;
+  stroke-dasharray: 1000;
+  stroke-dashoffset: 1000;
+  animation: pathway-draw 2.7s cubic-bezier(0.65, 0, 0.35, 1) 260ms forwards;
+}
+
+.pathway-route-spark {
+  stroke: rgba(255, 255, 255, 0.95);
+  stroke-width: 3;
+  stroke-dasharray: 60 940;
+  stroke-dashoffset: 1000;
+  filter: drop-shadow(0 0 10px rgba(255, 219, 102, 0.9));
+  animation: pathway-spark 3.4s ease-in-out 3s infinite;
+}
+
+.pathway-summit-flag line {
+  stroke: #28385b;
+  stroke-width: 5;
+  stroke-linecap: round;
+  filter: drop-shadow(0 5px 8px rgba(20, 35, 70, 0.2));
+}
+
+.pathway-summit-flag path {
+  fill: #244f95;
+  stroke: rgba(255, 255, 255, 0.72);
+  stroke-width: 2;
+  filter: drop-shadow(0 8px 10px rgba(20, 35, 70, 0.24));
+}
+
+@keyframes pathway-flow {
+  to {
+    stroke-dashoffset: -41;
+  }
+}
+
+@keyframes pathway-draw {
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+
+@keyframes pathway-spark {
+  0% {
+    stroke-dashoffset: 1000;
+    opacity: 0;
+  }
+
+  14%,
+  70% {
+    opacity: 1;
+  }
+
+  100% {
+    stroke-dashoffset: 0;
+    opacity: 0;
+  }
 }
 
 .pathway-map-header {
   position: relative;
-  z-index: 3;
+  z-index: 4;
   display: flex;
   align-items: flex-start;
   justify-content: space-between;
@@ -2125,25 +2206,32 @@
 .pathway-node-layer {
   position: absolute;
   inset: 0;
-  z-index: 3;
+  z-index: 5;
 }
 
 .pathway-stage-anchor {
   position: absolute;
   transform: translate(-50%, -50%);
+  z-index: 1;
+}
+
+.pathway-stage-anchor.active,
+.pathway-stage-anchor:has(.pathway-stage-node:hover),
+.pathway-stage-anchor:has(.pathway-stage-dot:hover) {
+  z-index: 4;
 }
 
 .pathway-stage-dot {
-  width: 30px;
-  height: 30px;
+  width: 25px;
+  height: 25px;
   position: absolute;
   left: 0;
   top: 0;
   transform: translate(-50%, -50%);
   border-radius: 999px;
-  border: 6px solid #ffffff;
+  border: 5px solid #ffffff;
   background: #52617b;
-  box-shadow: 0 0 0 4px rgba(82, 97, 123, 0.16), 0 0 24px rgba(255, 214, 129, 0.46);
+  box-shadow: 0 0 0 4px rgba(82, 97, 123, 0.16), 0 0 24px rgba(255, 214, 129, 0.56);
   transition: transform 180ms ease, box-shadow 180ms ease, background 180ms ease;
   z-index: 2;
 }
@@ -2151,7 +2239,7 @@
 .pathway-stage-dot.current,
 .pathway-stage-dot.active {
   background: #22b973;
-  box-shadow: 0 0 0 7px rgba(34, 185, 115, 0.2), 0 0 30px rgba(34, 185, 115, 0.56);
+  box-shadow: 0 0 0 7px rgba(34, 185, 115, 0.22), 0 0 30px rgba(34, 185, 115, 0.58);
 }
 
 .pathway-stage-dot:hover,
@@ -2160,30 +2248,31 @@
 }
 
 .pathway-stage-node {
-  width: 148px;
-  min-height: 108px;
+  width: 150px;
+  min-height: 96px;
   position: absolute;
   left: 0;
   top: 0;
   display: grid;
   align-content: start;
   gap: 5px;
-  border-radius: 18px;
+  border-radius: 14px;
   border: 1px solid rgba(216, 228, 244, 0.95);
-  background: rgba(255, 255, 255, 0.74);
-  backdrop-filter: blur(15px);
+  background: rgba(255, 255, 255, 0.66);
+  backdrop-filter: blur(12px);
   box-shadow:
     0 18px 34px rgba(30, 41, 75, 0.13),
     inset 0 1px 0 rgba(255, 255, 255, 0.82);
-  padding: 11px 12px;
+  padding: 10px 11px;
   text-align: left;
   transition: transform 180ms ease, box-shadow 180ms ease, border-color 180ms ease, background 180ms ease;
+  z-index: 1;
 }
 
 .pathway-stage-node:hover,
 .pathway-stage-node.active {
   border-color: rgba(79, 93, 224, 0.34);
-  background: rgba(255, 255, 255, 0.86);
+  background: rgba(255, 255, 255, 0.82);
   box-shadow: 0 24px 46px rgba(30, 41, 75, 0.18);
 }
 
@@ -2207,7 +2296,7 @@
 
 .pathway-stage-node strong {
   color: #17213a;
-  font-size: 16px;
+  font-size: 15px;
   line-height: 1.16;
   font-weight: 950;
 }

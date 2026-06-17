@@ -2,11 +2,9 @@
 
 import { FormEvent, Suspense, useState } from "react";
 import { useSearchParams } from "next/navigation";
-import { LockKeyhole, LogIn, Sparkles, UserPlus } from "lucide-react";
+import { LockKeyhole, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-
-type AuthMode = "login" | "signup";
 
 export default function LoginPage() {
   return (
@@ -18,24 +16,20 @@ export default function LoginPage() {
 
 function LoginForm() {
   const searchParams = useSearchParams();
-  const [mode, setMode] = useState<AuthMode>("login");
   const [error, setError] = useState("");
-  const [message, setMessage] = useState("");
   const [loading, setLoading] = useState(false);
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     setError("");
-    setMessage("");
     setLoading(true);
 
     const form = new FormData(event.currentTarget);
-    const endpoint = mode === "login" ? "/api/auth/login" : "/api/auth/signup";
-    const response = await fetch(endpoint, {
+    const response = await fetch("/api/auth/login", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
-        email: String(form.get("email") || ""),
+        username: String(form.get("username") || ""),
         password: String(form.get("password") || ""),
       }),
     });
@@ -44,11 +38,6 @@ function LoginForm() {
 
     if (!response.ok) {
       setError(payload.error || "操作失败，请稍后重试。");
-      return;
-    }
-
-    if (payload.message) {
-      setMessage(payload.message);
       return;
     }
 
@@ -66,33 +55,21 @@ function LoginForm() {
           </div>
         </div>
 
-        <div className="auth-tabs" role="tablist" aria-label="登录方式">
-          <button type="button" className={mode === "login" ? "active" : ""} onClick={() => setMode("login")}>
-            <LogIn className="h-4 w-4" />
-            登录
-          </button>
-          <button type="button" className={mode === "signup" ? "active" : ""} onClick={() => setMode("signup")}>
-            <UserPlus className="h-4 w-4" />
-            注册
-          </button>
-        </div>
-
         <form onSubmit={handleSubmit} className="auth-form">
           <label>
-            <span>邮箱</span>
-            <Input name="email" type="email" autoComplete="email" required placeholder="you@example.com" />
+            <span>用户名</span>
+            <Input name="username" type="text" autoComplete="username" required placeholder="andycoy" />
           </label>
           <label>
             <span>密码</span>
-            <Input name="password" type="password" autoComplete={mode === "login" ? "current-password" : "new-password"} required minLength={6} placeholder="至少 6 位" />
+            <Input name="password" type="password" autoComplete="current-password" required minLength={6} placeholder="请输入密码" />
           </label>
 
           {error && <p className="auth-error">{error}</p>}
-          {message && <p className="auth-message">{message}</p>}
 
           <Button type="submit" disabled={loading} className="w-full">
             <LockKeyhole className="mr-2 h-4 w-4" />
-            {loading ? "处理中..." : mode === "login" ? "登录" : "创建账号"}
+            {loading ? "登录中..." : "登录"}
           </Button>
         </form>
       </section>

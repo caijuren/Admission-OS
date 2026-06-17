@@ -33,13 +33,42 @@ const navItems = [
 export function AppShell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const [profile, setProfile] = useState<StudentProfile>({ ...DEFAULT_PROFILE, ...seedData.profile });
+  const [sessionReady, setSessionReady] = useState(false);
 
   const publicShell = pathname === "/login" || pathname === "/privacy";
 
   useEffect(() => {
-    if (publicShell) return;
-    getProductConfig().then((config) => setProfile(config.profile));
-  }, [publicShell]);
+    if (publicShell) {
+      setSessionReady(true);
+      return;
+    }
+
+    let cancelled = false;
+
+    async function verifySession() {
+      const response = await fetch("/api/auth/session", { cache: "no-store" });
+      if (cancelled) return;
+
+      if (!response.ok) {
+        window.location.replace(`/login?next=${encodeURIComponent(pathname || "/")}`);
+        return;
+      }
+
+      const config = await getProductConfig();
+      if (cancelled) return;
+      setProfile(config.profile);
+      setSessionReady(true);
+    }
+
+    setSessionReady(false);
+    verifySession().catch(() => {
+      if (!cancelled) window.location.replace(`/login?next=${encodeURIComponent(pathname || "/")}`);
+    });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [pathname, publicShell]);
 
   async function handleLogout(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -49,6 +78,10 @@ export function AppShell({ children }: { children: React.ReactNode }) {
 
   if (publicShell) {
     return <>{children}</>;
+  }
+
+  if (!sessionReady) {
+    return <main className="auth-page" aria-label="正在验证登录状态" />;
   }
 
   return (

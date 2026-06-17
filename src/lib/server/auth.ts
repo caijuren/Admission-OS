@@ -1,10 +1,7 @@
 import { createClient, type Session, type User } from "@supabase/supabase-js";
 import { NextResponse, type NextRequest } from "next/server";
-
-export const authCookieNames = {
-  accessToken: "admission_os_access_token",
-  refreshToken: "admission_os_refresh_token",
-};
+export { authCookieNames } from "./auth-cookies";
+import { authCookieNames } from "./auth-cookies";
 
 const cookieOptions = {
   httpOnly: true,
