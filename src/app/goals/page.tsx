@@ -806,6 +806,10 @@ function TaskDialog({
           </div>
           <label className="form-field"><span>任务名称</span><Input name="title" defaultValue={task?.title} required /></label>
           <label className="form-field"><span>任务说明</span><textarea name="description" defaultValue={task?.description} placeholder="这项任务具体要完成什么" /></label>
+          <div className="task-config-hint">
+            <strong>量的配置</strong>
+            <span>Unlock 可用“课/单元”，阅读书单可用“本/章”，练习册可用“页/套”。不同单元课数不一样时，先把总量写在目标量里，把单元范围写进任务说明。</span>
+          </div>
           <div className="form-grid two">
             <label className="form-field"><span>目标量</span><Input name="target" type="number" min="0" defaultValue={task?.target || 0} /></label>
             <label className="form-field"><span>已完成</span><Input name="current" type="number" min="0" defaultValue={task?.current || 0} /></label>

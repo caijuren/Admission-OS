@@ -26,7 +26,7 @@ const navItems = [
   { href: "/reading", label: "阅读表达", icon: BookOpen },
   { href: "/records", label: "能力资产", icon: TreePine },
   { href: "/timeline", label: "成长档案", icon: Clock },
-  { href: "/weekly", label: "阶段复盘", icon: CalendarDays },
+  { href: "/weekly", label: "周计划", icon: CalendarDays },
   { href: "/settings", label: "设置", icon: Settings },
 ];
 
