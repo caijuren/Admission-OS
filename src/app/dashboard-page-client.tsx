@@ -82,11 +82,11 @@ const pathwayRoutePath = [
 ].join(" ");
 
 const pathwayNodePositions = [
-  { left: 26.2, top: 84.6, cardX: -224, cardY: -142 },
-  { left: 38.6, top: 76, cardX: -218, cardY: -138 },
-  { left: 51.2, top: 68.1, cardX: 74, cardY: -128 },
-  { left: 63.6, top: 47.6, cardX: 82, cardY: -82 },
-  { left: 73.9, top: 19.8, cardX: 80, cardY: 30 },
+  { left: 26.2, top: 84.3, cardX: -71, cardY: -176 },
+  { left: 39.4, top: 75.4, cardX: -71, cardY: -176 },
+  { left: 51.3, top: 67.9, cardX: -71, cardY: -176 },
+  { left: 65.6, top: 52.7, cardX: -71, cardY: 42 },
+  { left: 74.4, top: 18.6, cardX: 18, cardY: 44 },
 ];
 
 const initialPathwayStages = (seedData.pathwayStages || []) as PathwayStage[];
@@ -440,11 +440,6 @@ export default function DashboardPage() {
                 <path className="pathway-route-shadow" d={pathwayRoutePath} />
                 <path className="pathway-route-base" d={pathwayRoutePath} pathLength="1000" />
                 <path className="pathway-route-progress" d={pathwayRoutePath} pathLength="1000" />
-                <path className="pathway-route-spark" d={pathwayRoutePath} pathLength="1000" />
-                <g className="pathway-summit-flag">
-                  <line x1="1143" y1="102" x2="1143" y2="52" />
-                  <path d="M 1143 54 C 1166 48 1177 58 1197 52 L 1197 78 C 1175 84 1165 72 1143 78 Z" />
-                </g>
               </svg>
               <div className="pathway-node-layer">
                 {pathwayStages.map((stage, index) => {
@@ -485,14 +480,12 @@ export default function DashboardPage() {
               <div>
                 <h2>交附嘉分登山路线</h2>
               </div>
-              <button className="pathway-edit-button" onClick={() => setPathwayOpen(true)}>编辑路径</button>
             </div>
 
             {pathwayStages.length === 0 && (
               <div className="pathway-map-empty">
                 <strong>还没有路径全景</strong>
-                <span>点击编辑路径，先配置从当前暑假到九年级冲刺的阶段目标。</span>
-                <button className="empty-action-button" onClick={() => setPathwayOpen(true)}>配置路径</button>
+                <span>路径数据加载后会显示从五年级到九年级的登山路线。</span>
               </div>
             )}
           </div>

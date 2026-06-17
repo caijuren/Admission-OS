@@ -2,7 +2,7 @@
 
 import { FormEvent, Suspense, useState } from "react";
 import { useSearchParams } from "next/navigation";
-import { LockKeyhole, Sparkles } from "lucide-react";
+import { LockKeyhole, Mountain } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 
@@ -48,17 +48,17 @@ function LoginForm() {
     <main className="auth-page">
       <section className="auth-panel">
         <div className="auth-brand">
-          <span><Sparkles className="h-5 w-5" /></span>
+          <span><Mountain className="h-5 w-5" /></span>
           <div>
             <strong>Admission OS</strong>
-            <p>登录后进入你的升学规划系统</p>
+            <p>升学规划系统</p>
           </div>
         </div>
 
         <form onSubmit={handleSubmit} className="auth-form">
           <label>
             <span>用户名</span>
-            <Input name="username" type="text" autoComplete="username" required placeholder="andycoy" />
+            <Input name="username" type="text" autoComplete="username" required placeholder="请输入用户名" />
           </label>
           <label>
             <span>密码</span>

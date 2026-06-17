@@ -35,3 +35,4 @@ pnpm-debug.log*
 
 # deployment/runtime
 pm2.log
+data/eduos.local.json

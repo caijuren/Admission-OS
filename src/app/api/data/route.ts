@@ -45,6 +45,7 @@ export async function PATCH(request: NextRequest) {
         ...data.journey,
         milestones: patch.journey?.milestones || data.journey.milestones,
       },
+      pathwayStages: patch.pathwayStages || data.pathwayStages,
     };
 
     await writeData(auth.user.id, nextData);

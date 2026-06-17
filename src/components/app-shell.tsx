@@ -54,10 +54,10 @@ export function AppShell({ children }: { children: React.ReactNode }) {
         return;
       }
 
+      setSessionReady(true);
       const config = await getProductConfig();
       if (cancelled) return;
       setProfile(config.profile);
-      setSessionReady(true);
     }
 
     setSessionReady(false);
@@ -81,7 +81,29 @@ export function AppShell({ children }: { children: React.ReactNode }) {
   }
 
   if (!sessionReady) {
-    return <main className="auth-page" aria-label="正在验证登录状态" />;
+    return (
+      <div className="app-frame app-frame-loading" aria-label="正在验证登录状态">
+        <aside className="design-sidebar">
+          <div className="brand-block">
+            <span><Sparkles className="h-4 w-4" /></span>
+            <div><strong>Admission OS</strong></div>
+          </div>
+          <div className="shell-loading-nav">
+            <i />
+            <i />
+            <i />
+            <i />
+          </div>
+        </aside>
+        <main className="app-main">
+          <section className="shell-loading-panel">
+            <div />
+            <span />
+            <span />
+          </section>
+        </main>
+      </div>
+    );
   }
 
   return (
