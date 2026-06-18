@@ -201,7 +201,7 @@ export default function WeeklyReportPage() {
 
       <section className="weekly-report-grid">
         <article className="weekly-report-panel">
-          <div className="weekly-report-title"><TrendingUp className="h-5 w-5 text-[#5B6BF5]" /><h2>对标近期任务</h2></div>
+          <div className="weekly-report-title"><TrendingUp className="h-5 w-5 text-[#23B87A]" /><h2>对标近期任务</h2></div>
           <div className="weekly-category-list">
             {categoryStats.map((item) => (
               <div key={item.category} className="weekly-category-row">

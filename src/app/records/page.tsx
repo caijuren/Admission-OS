@@ -36,9 +36,9 @@ const skillCategories = [
     name: "数学",
     icon: Calculator,
     color: "primary" as const,
-    xpColor: "bg-[#5B6BF5]",
-    xpBg: "bg-[#EEF2FF]",
-    xpText: "text-[#5B6BF5]",
+    xpColor: "bg-[#2F7DD3]",
+    xpBg: "bg-[#EEF7FF]",
+    xpText: "text-[#2F7DD3]",
     subSkills: ["代数", "几何", "概率统计", "函数"],
   },
   {
@@ -46,9 +46,9 @@ const skillCategories = [
     name: "英语",
     icon: BookOpen,
     color: "green" as const,
-    xpColor: "bg-[#4CD7A4]",
+    xpColor: "bg-[#23B87A]",
     xpBg: "bg-[#ECFDF5]",
-    xpText: "text-[#4CD7A4]",
+    xpText: "text-[#23B87A]",
     subSkills: ["阅读", "听力", "写作", "口语"],
   },
   {
@@ -66,9 +66,9 @@ const skillCategories = [
     name: "学习力",
     icon: Brain,
     color: "purple" as const,
-    xpColor: "bg-[#8B5CF6]",
-    xpBg: "bg-[#F5F3FF]",
-    xpText: "text-[#8B5CF6]",
+    xpColor: "bg-[#8FDDBE]",
+    xpBg: "bg-[#EAFBF4]",
+    xpText: "text-[#16724D]",
     subSkills: ["专注力", "记忆力", "逻辑思维", "时间管理"],
   },
   {
@@ -76,7 +76,7 @@ const skillCategories = [
     name: "物理",
     icon: Atom,
     color: "slate" as const,
-    xpColor: "bg-[#64748B]",
+    xpColor: "bg-[#94A3B8]",
     xpBg: "bg-[#F8FAFC]",
     xpText: "text-[#64748B]",
     subSkills: ["力学", "电学", "光学", "实验"],
@@ -189,7 +189,7 @@ export default function SkillTreePage() {
                 className={cn(
                   "px-4 py-2 text-xs font-medium rounded-lg transition-all",
                   activeTab === tab.id
-                    ? "bg-[#5B6BF5] text-white shadow-sm"
+                    ? "bg-[#23B87A] text-white shadow-sm"
                     : "text-[#6B7280] hover:bg-slate-50"
                 )}
               >
@@ -203,9 +203,9 @@ export default function SkillTreePage() {
       <section className="metric-grid">
         {[
           ["荣誉资产", assetStats.honors, "text-[#FFB347]"],
-          ["项目成果", assetStats.projects, "text-[#8B5CF6]"],
-          ["目标节点", assetStats.goals, "text-[#5B6BF5]"],
-          ["升学证据", assetStats.highlights, "text-[#4CD7A4]"],
+          ["项目成果", assetStats.projects, "text-[#2F7DD3]"],
+          ["目标节点", assetStats.goals, "text-[#23B87A]"],
+          ["升学证据", assetStats.highlights, "text-[#23B87A]"],
         ].map(([label, value, color]) => (
           <article key={label as string} className="metric-card">
             <div className="metric-head"><Sparkles className={cn("h-4 w-4", color as string)} /><span>{label as string}</span></div>
@@ -280,7 +280,7 @@ export default function SkillTreePage() {
               key={skill.id}
               className={cn(
                 "card-glow overflow-hidden cursor-pointer transition-all duration-300",
-                isExpanded && "ring-2 ring-[#5B6BF5]/20"
+                isExpanded && "ring-2 ring-[#23B87A]/20"
               )}
               onClick={() => setExpandedSkill(isExpanded ? null : skill.id)}
             >
@@ -355,7 +355,7 @@ export default function SkillTreePage() {
         <CardContent className="p-5">
           <div className="flex items-center gap-2 mb-4">
             <div className="w-7 h-7 rounded-lg bg-[#ECFDF5] flex items-center justify-center">
-              <TrendingUp className="w-3.5 h-3.5 text-[#4CD7A4]" />
+              <TrendingUp className="w-3.5 h-3.5 text-[#23B87A]" />
             </div>
             <h2 className="text-[15px] font-semibold text-slate-800">能力发展趋势</h2>
           </div>
@@ -377,10 +377,10 @@ export default function SkillTreePage() {
               {growthTrend.map((data, idx) => (
                 <div key={idx} className="flex-1 flex flex-col items-center gap-1">
                   <div className="w-full flex items-end gap-0.5 h-40">
-                    <div className="flex-1 bg-[#5B6BF5] rounded-t-sm" style={{ height: `${data.math}%` }} />
-                    <div className="flex-1 bg-[#4CD7A4] rounded-t-sm" style={{ height: `${data.english}%` }} />
+                    <div className="flex-1 bg-[#2F7DD3] rounded-t-sm" style={{ height: `${data.math}%` }} />
+                    <div className="flex-1 bg-[#23B87A] rounded-t-sm" style={{ height: `${data.english}%` }} />
                     <div className="flex-1 bg-[#FFB347] rounded-t-sm" style={{ height: `${data.reading}%` }} />
-                    <div className="flex-1 bg-[#8B5CF6] rounded-t-sm" style={{ height: `${data.learning}%` }} />
+                    <div className="flex-1 bg-[#8FDDBE] rounded-t-sm" style={{ height: `${data.learning}%` }} />
                   </div>
                   <span className="text-[10px] text-[#94A3B8]">{data.month}</span>
                 </div>
@@ -394,10 +394,10 @@ export default function SkillTreePage() {
           {/* Legend */}
           {growthTrend.length > 0 && <div className="flex items-center gap-4 mt-4 pt-4 border-t border-[#F1F5F9]">
             {[
-              { color: "bg-[#5B6BF5]", label: "数学" },
-              { color: "bg-[#4CD7A4]", label: "英语" },
+              { color: "bg-[#2F7DD3]", label: "数学" },
+              { color: "bg-[#23B87A]", label: "英语" },
               { color: "bg-[#FFB347]", label: "阅读" },
-              { color: "bg-[#8B5CF6]", label: "学习力" },
+              { color: "bg-[#8FDDBE]", label: "学习力" },
             ].map((leg) => (
               <div key={leg.label} className="flex items-center gap-1.5">
                 <div className={cn("w-3 h-3 rounded", leg.color)} />

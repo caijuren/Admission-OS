@@ -28,7 +28,7 @@ type GoalType = "north" | "phase" | "subject" | "project" | "habit";
 type GoalStatus = "进行中" | "规划中" | "重点推进";
 type TaskPriority = "高" | "中" | "低";
 type ExecutionMode = "孩子自主" | "家长陪练" | "亲子共学" | "家长验收";
-type ViewMode = "overview" | "board" | "logs";
+type ViewMode = "overview" | "board";
 
 type PlanGoal = {
   id: string;
@@ -100,17 +100,17 @@ const goalTypeLabel: Record<GoalType, string> = {
 
 const statusConfig: Record<TaskStatus, { label: string; className: string }> = {
   ahead: { label: "超前", className: "bg-[#EAFBF4] text-[#23B87A]" },
-  normal: { label: "正常", className: "bg-[#EEF2FF] text-[#5B6BF5]" },
+  normal: { label: "正常", className: "bg-[#EEF7FF] text-[#2F7DD3]" },
   behind: { label: "落后", className: "bg-[#FFF4E5] text-[#E68A00]" },
 };
 
 const executionModes: ExecutionMode[] = ["孩子自主", "家长陪练", "亲子共学", "家长验收"];
 
 const categoryStyles = [
-  { icon: BookOpen, tone: "text-[#5B6BF5]", soft: "bg-[#EEF2FF]", bar: "from-[#5B6BF5] to-[#8B5CF6]" },
-  { icon: FileText, tone: "text-[#EF5DA8]", soft: "bg-[#FFF0F6]", bar: "from-[#EF5DA8] to-[#FFB347]" },
-  { icon: Sigma, tone: "text-[#23B87A]", soft: "bg-[#EAFBF4]", bar: "from-[#23B87A] to-[#5B6BF5]" },
-  { icon: Target, tone: "text-[#E68A00]", soft: "bg-[#FFF4E5]", bar: "from-[#E68A00] to-[#EF5DA8]" },
+  { icon: BookOpen, tone: "text-[#2F7DD3]", soft: "bg-[#EEF7FF]", bar: "from-[#2F7DD3] to-[#23B87A]" },
+  { icon: FileText, tone: "text-[#23B87A]", soft: "bg-[#EAFBF4]", bar: "from-[#23B87A] to-[#8FDDBE]" },
+  { icon: Sigma, tone: "text-[#E68A00]", soft: "bg-[#FFF4E5]", bar: "from-[#FFB347] to-[#23B87A]" },
+  { icon: Target, tone: "text-[#C56A00]", soft: "bg-[#FFF7ED]", bar: "from-[#E68A00] to-[#FFB347]" },
 ];
 
 function uid(prefix: string) {
@@ -143,7 +143,6 @@ export default function GoalsPage() {
   const [viewMode, setViewMode] = useState<ViewMode>("board");
   const [goalOpen, setGoalOpen] = useState(false);
   const [taskOpen, setTaskOpen] = useState(false);
-  const [logOpen, setLogOpen] = useState(false);
   const [editingGoal, setEditingGoal] = useState<PlanGoal | null>(null);
   const [editingTask, setEditingTask] = useState<PlanTask | null>(null);
   const [draggingGoalId, setDraggingGoalId] = useState("");
@@ -250,11 +249,6 @@ export default function GoalsPage() {
     await persist({ goalTasks: nextTasks });
   }
 
-  async function saveLogs(nextLogs: PlanLog[]) {
-    setLogs(nextLogs);
-    await persist({ goalLogs: nextLogs });
-  }
-
   async function handleGoalSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     const form = new FormData(event.currentTarget);
@@ -285,7 +279,7 @@ export default function GoalsPage() {
     if (!confirmed) return;
     const nextGoals = goals.filter((goal) => goal.id !== goalId && goal.parentId !== goalId);
     const removedIds = new Set(goals.filter((goal) => goal.id === goalId || goal.parentId === goalId).map((goal) => goal.id));
-    const nextTasks = tasks.filter((task) => !removedIds.has(task.goalId));
+    const nextTasks = tasks.filter((task) => !(task.goalIds || [task.goalId]).some((goalId) => removedIds.has(goalId)));
     const nextLogs = logs.filter((log) => !removedIds.has(log.goalId));
     setGoals(nextGoals);
     setTasks(nextTasks);
@@ -341,23 +335,6 @@ export default function GoalsPage() {
     await saveTasks(tasks.filter((task) => task.id !== taskId));
   }
 
-  async function handleLogSubmit(event: FormEvent<HTMLFormElement>) {
-    event.preventDefault();
-    if (!activeGoal) return;
-    const form = new FormData(event.currentTarget);
-    const log: PlanLog = {
-      id: uid("log"),
-      goalId: activeGoal.id,
-      date: String(form.get("date") || new Date().toISOString().slice(0, 10)),
-      category: String(form.get("category") || categories[0] || "未分类"),
-      summary: String(form.get("summary") || "今日学习记录"),
-      amount: String(form.get("amount") || ""),
-      note: String(form.get("note") || ""),
-    };
-    await saveLogs([log, ...logs]);
-    setLogOpen(false);
-  }
-
   if (!activeGoal) {
     return (
       <div className="summer-goals-page">
@@ -393,7 +370,7 @@ export default function GoalsPage() {
 
       <section className="goal-map-panel">
           <div className="goal-panel-title with-action">
-            <Route className="h-5 w-5 text-[#5B6BF5]" />
+            <Route className="h-5 w-5 text-[#23B87A]" />
             <div>
               <h2>目标地图</h2>
               <span>先选目标，再看说明和下方任务</span>
@@ -453,7 +430,6 @@ export default function GoalsPage() {
           <div className="goal-scope-row">
             <button className={cn(viewMode === "overview" && "active")} onClick={() => setViewMode("overview")}>目标说明</button>
             <button className={cn(viewMode === "board" && "active")} onClick={() => setViewMode("board")}>执行看板</button>
-            <button className={cn(viewMode === "logs" && "active")} onClick={() => setViewMode("logs")}>每日记录</button>
           </div>
       </section>
 
@@ -486,10 +462,10 @@ export default function GoalsPage() {
         <>
           <section className="summer-stats-row">
             {[
-              [Target, "分项任务", `${summary.total} 个`, "text-[#5B6BF5]"],
+              [Target, "分项任务", `${summary.total} 个`, "text-[#2F7DD3]"],
               [TrendingUp, "总体完成", `${summary.progress}%`, "text-[#23B87A]"],
               [AlertTriangle, "落后任务", `${summary.behind.length} 个`, "text-[#E68A00]"],
-              [Flame, "记录天数", `${summary.logDays} 天`, "text-[#8B5CF6]"],
+              [Flame, "记录天数", `${summary.logDays} 天`, "text-[#FFB347]"],
             ].map(([Icon, label, value, color]) => {
               const TypedIcon = Icon as typeof Target;
               return (
@@ -504,8 +480,8 @@ export default function GoalsPage() {
 
           <section className="summer-board-head" id="daily-logs">
             <div>
-              <h2>{viewMode === "logs" ? "每日执行记录" : "当前目标的任务看板"}</h2>
-              <p>{viewMode === "logs" ? "只显示当前目标的执行记录。" : "任务按大类汇总，便于查看当前目标的执行结构。"}</p>
+              <h2>当前目标的任务看板</h2>
+              <p>任务按大类汇总，便于查看当前目标的执行结构。每日完成记录统一在周计划里填写。</p>
             </div>
             <div className="goal-toolbar">
               {viewMode === "board" && (
@@ -514,10 +490,6 @@ export default function GoalsPage() {
                   新增任务
                 </button>
               )}
-              <button className="summer-primary-button" onClick={() => setLogOpen(true)}>
-                <Plus className="h-4 w-4" />
-                每日记录
-              </button>
             </div>
           </section>
         </>
@@ -588,7 +560,7 @@ export default function GoalsPage() {
         )
       )}
 
-      <section className={cn("summer-bottom-grid", viewMode === "logs" && "logs-only")}>
+      <section className="summer-bottom-grid">
         {viewMode === "board" && (
           <article className="summer-insight-card">
             <div className="summer-section-title">
@@ -607,10 +579,10 @@ export default function GoalsPage() {
           </article>
         )}
 
-        {(viewMode === "board" || viewMode === "logs") && (
+        {viewMode === "board" && (
           <article className="summer-insight-card">
             <div className="summer-section-title">
-              <ListChecks className="h-5 w-5 text-[#5B6BF5]" />
+              <ListChecks className="h-5 w-5 text-[#2F7DD3]" />
               <h2>最近记录</h2>
             </div>
             <div className="summer-log-list">
@@ -633,7 +605,6 @@ export default function GoalsPage() {
 
       <GoalDialog open={goalOpen} onOpenChange={setGoalOpen} goals={goals} goal={editingGoal} onSubmit={handleGoalSubmit} />
       <TaskDialog open={taskOpen} onOpenChange={setTaskOpen} task={editingTask} categories={categories} goals={goals} phases={activePhases} activeGoalId={activeGoal.id} onSubmit={handleTaskSubmit} />
-      <LogDialog open={logOpen} onOpenChange={setLogOpen} categories={categories} onSubmit={handleLogSubmit} />
     </div>
   );
 }
@@ -716,7 +687,7 @@ function TaskDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="app-dialog">
+      <DialogContent className="app-dialog task-dialog">
         <DialogHeader className="app-dialog-header">
           <DialogTitle>{task ? "编辑任务" : "新增任务"}</DialogTitle>
           <DialogDescription>先填核心信息就能保存，更多关联和说明可以展开高级配置。</DialogDescription>
@@ -766,42 +737,6 @@ function TaskDialog({
           <div className="form-actions">
             <Button type="button" variant="secondary" onClick={() => onOpenChange(false)}>取消</Button>
             <Button type="submit">保存任务</Button>
-          </div>
-        </form>
-      </DialogContent>
-    </Dialog>
-  );
-}
-
-function LogDialog({
-  open,
-  onOpenChange,
-  categories,
-  onSubmit,
-}: {
-  open: boolean;
-  onOpenChange: (open: boolean) => void;
-  categories: string[];
-  onSubmit: (event: FormEvent<HTMLFormElement>) => void;
-}) {
-  return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="app-dialog">
-        <DialogHeader>
-          <DialogTitle>新增每日记录</DialogTitle>
-          <DialogDescription>记录当天执行情况，用来判断当前目标是否按节奏推进。</DialogDescription>
-        </DialogHeader>
-        <form onSubmit={onSubmit} className="app-form">
-          <div className="form-grid two">
-            <label className="form-field"><span>日期</span><Input name="date" type="date" defaultValue={new Date().toISOString().slice(0, 10)} /></label>
-            <label className="form-field"><span>大类</span><Input name="category" placeholder="英语/语文/数学" defaultValue={categories[0] || ""} list="log-categories" /><datalist id="log-categories">{categories.map((item) => <option key={item} value={item} />)}</datalist></label>
-          </div>
-          <label className="form-field"><span>完成内容</span><Input name="summary" placeholder="例如：RAZ 30 分钟，计算训练" required /></label>
-          <label className="form-field"><span>完成量</span><Input name="amount" placeholder="例如：55 分钟 / 1 套" /></label>
-          <label className="form-field"><span>备注</span><Input name="note" placeholder="困难、错因、明日调整" /></label>
-          <div className="form-actions">
-            <Button type="button" variant="secondary" onClick={() => onOpenChange(false)}>取消</Button>
-            <Button type="submit">保存记录</Button>
           </div>
         </form>
       </DialogContent>

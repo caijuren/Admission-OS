@@ -45,6 +45,10 @@ export async function PATCH(request: NextRequest) {
         ...data.journey,
         milestones: patch.journey?.milestones || data.journey.milestones,
       },
+      integrations: {
+        ...data.integrations,
+        ...patch.integrations,
+      },
       pathwayStages: patch.pathwayStages || data.pathwayStages,
     };
 
@@ -72,6 +76,7 @@ export async function POST(request: NextRequest) {
       goalTasks?: EduosData["goalTasks"];
       goalLogs?: EduosData["goalLogs"];
       goalPhases?: EduosData["goalPhases"];
+      integrations?: EduosData["integrations"];
     };
     const data = await readData(auth.user.id);
 
@@ -101,6 +106,13 @@ export async function POST(request: NextRequest) {
 
     if (body.goalPhases) {
       data.goalPhases = body.goalPhases;
+    }
+
+    if (body.integrations) {
+      data.integrations = {
+        ...data.integrations,
+        ...body.integrations,
+      };
     }
 
     await writeData(auth.user.id, data);

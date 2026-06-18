@@ -108,10 +108,10 @@ export default function PortfolioPage() {
 
         <section className="portfolio-stat-grid">
           {[
-            [GraduationCap, "最高成绩", gradeStats.bestScore || 0, "分", "text-[#5B6BF5]"],
+            [GraduationCap, "最高成绩", gradeStats.bestScore || 0, "分", "text-[#2F7DD3]"],
             [BookOpen, "阅读素材", readingStats.totalBooks || 0, "条", "text-[#23B87A]"],
             [Trophy, "荣誉证书", assetStats.honors || 0, "项", "text-[#FFB347]"],
-            [Lightbulb, "项目证据", assetStats.projects || 0, "个", "text-[#8B5CF6]"],
+            [Lightbulb, "项目证据", assetStats.projects || 0, "个", "text-[#E68A00]"],
           ].map(([Icon, label, value, unit, color]) => {
             const TypedIcon = Icon as typeof BookOpen;
             return (
@@ -188,7 +188,7 @@ export default function PortfolioPage() {
             <div className="portfolio-asset-list">
               {assets.map((item) => (
                 <div key={item.id} className="portfolio-asset-row">
-                  {item.type === "project" ? <FileText className="h-4 w-4 text-[#8B5CF6]" /> : <Award className="h-4 w-4 text-[#FFB347]" />}
+                  {item.type === "project" ? <FileText className="h-4 w-4 text-[#2F7DD3]" /> : <Award className="h-4 w-4 text-[#FFB347]" />}
                   <div>
                     <strong>{item.title}</strong>
                     <span>{formatMonth(item.date)} · {item.category}</span>
@@ -209,7 +209,7 @@ export default function PortfolioPage() {
               </div>
             </div>
             <div className="portfolio-statement-box">
-              <User className="h-4 w-4 text-[#5B6BF5]" />
+              <User className="h-4 w-4 text-[#23B87A]" />
               <p>{profile.quote || "补充目标寄语后，这里会形成申请材料中的目标陈述素材。"}</p>
             </div>
           </div>

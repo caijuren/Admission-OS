@@ -18,10 +18,10 @@ import type { GrowthEvent } from "@/types";
 import { STUDENT_ID, formatMonth, getGradeStats } from "@/lib/product-data";
 
 const subjectColors: Record<string, string> = {
-  数学: "bg-[#5B6BF5]",
-  英语: "bg-[#4CD7A4]",
+  数学: "bg-[#2F7DD3]",
+  英语: "bg-[#23B87A]",
   语文: "bg-[#FFB347]",
-  物理: "bg-[#8B5CF6]",
+  物理: "bg-[#8FDDBE]",
   综合: "bg-[#64748B]",
 };
 
@@ -92,7 +92,7 @@ export default function GradesPage() {
               </label>
               <div className="form-actions">
                 <Button type="button" variant="secondary" onClick={() => setOpen(false)}>取消</Button>
-                <Button type="submit" className="bg-[#5B6BF5] hover:bg-[#4F5DE0]">保存到成长档案</Button>
+                <Button type="submit" className="bg-[#23B87A] hover:bg-[#1FA36C]">保存到成长档案</Button>
               </div>
             </form>
           </DialogContent>
@@ -101,10 +101,10 @@ export default function GradesPage() {
 
       <section className="metric-grid">
         {[
-          [GraduationCap, "最新分数", `${stats.latestScore}`, "分", "text-[#5B6BF5]"],
-          [TrendingUp, "平均分", `${stats.averageScore}`, "分", "text-[#4CD7A4]"],
+          [GraduationCap, "最新分数", `${stats.latestScore}`, "分", "text-[#2F7DD3]"],
+          [TrendingUp, "平均分", `${stats.averageScore}`, "分", "text-[#23B87A]"],
           [Trophy, "最高", `${stats.bestScore}`, "分", "text-[#FFB347]"],
-          [BarChart3, "最佳排名", stats.bestRanking ? `${stats.bestRanking}` : "-", "/年级", "text-[#8B5CF6]"],
+          [BarChart3, "最佳排名", stats.bestRanking ? `${stats.bestRanking}` : "-", "/年级", "text-[#E68A00]"],
         ].map(([Icon, label, value, unit, color]) => {
           const TypedIcon = Icon as typeof GraduationCap;
           return (
@@ -151,7 +151,7 @@ export default function GradesPage() {
                       </td>
                       <td className="py-4 px-5 text-[13px] font-bold text-slate-700">{event.metadata.score || 0}</td>
                       <td className="py-4 px-5">
-                        <span className="text-[11px] font-bold px-2 py-0.5 rounded-full bg-[#EEF2FF] text-[#5B6BF5]">
+                        <span className="text-[11px] font-bold px-2 py-0.5 rounded-full bg-[#EAFBF4] text-[#16724D]">
                           {event.metadata.examType || "考试"}
                         </span>
                       </td>

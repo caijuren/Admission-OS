@@ -89,6 +89,9 @@ export type EduosData = {
   journey: {
     milestones: JourneyMilestone[];
   };
+  integrations?: {
+    dingtalkWebhookUrl?: string;
+  };
   events: GrowthEvent[];
   pathwayStages?: PathwayStage[];
   goals?: PlanGoal[];

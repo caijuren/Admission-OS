@@ -57,6 +57,18 @@ type PlanLog = {
   date: string;
 };
 
+type AdmissionModule = {
+  id: string;
+  title: string;
+  icon: typeof GraduationCap;
+  tone: string;
+  score: number;
+  status: string;
+  href: string;
+  action: string;
+  details: string[];
+};
+
 type DashboardData = {
   events?: GrowthEvent[];
   profile?: Partial<StudentProfile>;
@@ -97,6 +109,15 @@ const pathwayNodePositions = [
   { left: 74.4, top: 18.6, cardX: 18, cardY: 44 },
 ];
 
+const admissionTreeNodePositions: Record<string, { left: number; top: number; size: number }> = {
+  grades: { left: 30, top: 28, size: 76 },
+  subjects: { left: 70, top: 28, size: 74 },
+  reading: { left: 84, top: 43, size: 70 },
+  competition: { left: 17, top: 48, size: 70 },
+  projects: { left: 73, top: 61, size: 68 },
+  risks: { left: 50, top: 73, size: 70 },
+};
+
 const initialPathwayStages = (seedData.pathwayStages || []) as PathwayStage[];
 const initialGoals = seedData.goals as PlanGoal[];
 const initialTasks = seedData.goalTasks as PlanTask[];
@@ -108,7 +129,13 @@ function defaultTargetStatus(stageStatus: PathwayStage["status"]): PathwayTarget
   return "待配置";
 }
 
-export default function DashboardPage() {
+type DashboardView = "panorama" | "admission" | "admissionTree" | "tasks";
+
+type DashboardPageProps = {
+  initialView?: DashboardView;
+};
+
+export default function DashboardPage({ initialView = "panorama" }: DashboardPageProps) {
   const [events, setEvents] = useState<GrowthEvent[]>(seedData.events as GrowthEvent[]);
   const [profile, setProfile] = useState<StudentProfile>({ ...DEFAULT_PROFILE, ...seedData.profile });
   const [goals, setGoals] = useState<PlanGoal[]>(initialGoals);
@@ -117,13 +144,15 @@ export default function DashboardPage() {
   const [pathwayStages, setPathwayStages] = useState<PathwayStage[]>(initialPathwayStages);
   const [pathwayOpen, setPathwayOpen] = useState(false);
   const [pathwayDetailOpen, setPathwayDetailOpen] = useState(false);
+  const [admissionTreeDetailOpen, setAdmissionTreeDetailOpen] = useState(false);
   const pathwayMapRef = useRef<HTMLDivElement>(null);
   const [pathwayCanvasRect, setPathwayCanvasRect] = useState({ left: 0, top: 0, width: 0, height: 0 });
   const [activePathwayId, setActivePathwayId] = useState(
     initialPathwayStages.find((stage) => stage.status === "current")?.id || initialPathwayStages[0]?.id || ""
   );
   const [activePlanId, setActivePlanId] = useState(initialGoals.find((goal) => goal.type !== "north")?.id || initialGoals[0]?.id || "");
-  const [dashboardView, setDashboardView] = useState<"panorama" | "admission" | "tasks">("panorama");
+  const [dashboardView, setDashboardView] = useState<DashboardView>(initialView);
+  const [activeAdmissionModuleId, setActiveAdmissionModuleId] = useState("grades");
 
   useLayoutEffect(() => {
     const updateCanvas = () => {
@@ -365,6 +394,7 @@ export default function DashboardPage() {
   );
   const admissionStatus = admissionReadiness >= 70 ? "进入强化区" : admissionReadiness >= 35 ? "证据建设期" : "基础补齐期";
   const riskCount = admissionRiskItems.length;
+  const activeAdmissionModule = admissionModules.find((module) => module.id === activeAdmissionModuleId) || admissionModules[0];
   const currentPathwayStage = pathwayStages.find((stage) => stage.status === "current") || pathwayStages[0];
   const selectedPathwayStage = pathwayStages.find((stage) => stage.id === activePathwayId) || currentPathwayStage;
 
@@ -418,12 +448,13 @@ export default function DashboardPage() {
           {[
             { id: "panorama", title: "路径全景" },
             { id: "admission", title: "自招看板" },
+            { id: "admissionTree", title: "自招看板1" },
             { id: "tasks", title: "任务进度" },
           ].map((item) => (
             <button
               key={item.id}
               className={cn(dashboardView === item.id && "active")}
-              onClick={() => setDashboardView(item.id as "panorama" | "admission" | "tasks")}
+              onClick={() => setDashboardView(item.id as DashboardView)}
             >
               <span>{item.title}</span>
             </button>
@@ -569,6 +600,150 @@ export default function DashboardPage() {
         </section>
       )}
 
+      {dashboardView === "admissionTree" && (
+        <section className="admission-tree-board-v1" aria-label="自招看板1">
+          <div className="admission-tree-stars" />
+          <div className="admission-tree-status">
+            <span>数据更新时间：2025.06.01</span>
+          </div>
+
+          <aside className="admission-tree-left-panel">
+            <div className="admission-tree-title">
+              <h2>自主招生作战看板</h2>
+              <label>
+                <span>目标学校</span>
+                <select defaultValue="交附嘉分" aria-label="目标学校">
+                  <option>交附嘉分</option>
+                  <option>上中东校</option>
+                  <option>华二宝山</option>
+                </select>
+              </label>
+            </div>
+
+            <section className="admission-tree-card">
+              <span>当前阶段</span>
+              <strong>{profile.currentStage}</strong>
+              <div className="admission-tree-meter"><i style={{ width: `${admissionReadiness}%` }} /></div>
+              <em>阶段进度 {Math.max(12, Math.round(admissionReadiness / 6))}%</em>
+            </section>
+
+            <section className="admission-tree-card compact">
+              <span>录取准备度评级</span>
+              <strong>{admissionReadiness >= 70 ? "A-" : admissionReadiness >= 45 ? "B+" : "B"}</strong>
+            </section>
+
+            <section className="admission-tree-card">
+              <span>关键数据</span>
+              <div className="admission-tree-stat-list">
+                <b>总证据项 <em>{gradeStats.examCount + assetStats.honors + assetStats.projects + readingStats.totalBooks} 项</em></b>
+                <b>已完成 <em>{Math.max(0, Math.round((gradeStats.examCount + assetStats.honors) * 1.6))} 项</em></b>
+                <b>进行中 <em>{subjectTasks.length} 项</em></b>
+                <b>待完成 <em>{riskCount + 8} 项</em></b>
+              </div>
+            </section>
+
+            <section className="admission-tree-card task-list">
+              <div className="admission-tree-card-head">
+                <span>近期重要任务</span>
+                <Link href="/goals">查看全部</Link>
+              </div>
+              {tasks.slice(0, 4).map((task, index) => (
+                <button
+                  key={task.id}
+                  className="admission-tree-task"
+                  onClick={() => setDashboardView("tasks")}
+                >
+                  <i>P{index}</i>
+                  <span>{task.title}</span>
+                  <em>{Math.min(100, Math.round((task.current / Math.max(task.target, 1)) * 100))}%</em>
+                </button>
+              ))}
+            </section>
+          </aside>
+
+          <div className="admission-tree-stage" aria-hidden="false">
+            <Image
+              className="admission-tree-asset"
+              src="/assets/design/admission-tree-original-v1.png"
+              alt=""
+              width={1365}
+              height={1152}
+              priority
+              unoptimized
+              sizes="520px"
+            />
+            <button
+              className="admission-tree-core"
+              onClick={() => {
+                setActiveAdmissionModuleId("grades");
+                setAdmissionTreeDetailOpen(true);
+              }}
+              aria-label="交附嘉分录取准备度"
+            >
+              <span>交附嘉分</span>
+              <strong>录取准备度</strong>
+              <b>{admissionReadiness}%</b>
+              <em>较上次 +8%</em>
+            </button>
+            {admissionModules.map((module, index) => {
+              const position = admissionTreeNodePositions[module.id];
+              if (!position) return null;
+              return (
+                <button
+                  key={module.id}
+                  className={cn("admission-tree-fruit", `tone-${module.tone}`)}
+                  style={{
+                    left: `${position.left}%`,
+                    top: `${position.top}%`,
+                    width: `${position.size}px`,
+                    height: `${position.size}px`,
+                    animationDelay: `${index * 120}ms`,
+                  }}
+                  onClick={() => {
+                    setActiveAdmissionModuleId(module.id);
+                    setAdmissionTreeDetailOpen(true);
+                  }}
+                  aria-label={`${module.title}详情`}
+                >
+                  <span>{module.title}</span>
+                  <strong>{module.score}%</strong>
+                  <em>{module.status}</em>
+                </button>
+              );
+            })}
+          </div>
+
+          <aside className="admission-tree-right-panel">
+            <section className="admission-tree-target-card">
+              <span>距离目标还有</span>
+              <strong>{Math.max(0, 100 - admissionReadiness)}项</strong>
+              <em>关键证据待补充</em>
+            </section>
+
+            <section className="admission-tree-alert-card">
+              <div className="admission-tree-card-head">
+                <span>风险预警</span>
+                <Link href="/goals">查看全部</Link>
+              </div>
+              {(admissionRiskItems.length ? admissionRiskItems : ["当前暂无明显风险", "继续保持每周复盘"]).slice(0, 4).map((item, index) => (
+                <button
+                  key={`${item}-${index}`}
+                  className="admission-tree-alert"
+                  onClick={() => {
+                    setActiveAdmissionModuleId("risks");
+                    setAdmissionTreeDetailOpen(true);
+                  }}
+                >
+                  <AlertTriangle className="h-4 w-4" />
+                  <span>{item}</span>
+                  <em>P{index}</em>
+                </button>
+              ))}
+            </section>
+          </aside>
+        </section>
+      )}
+
       {dashboardView === "tasks" && (
         <>
           <section className="dashboard-section">
@@ -642,6 +817,11 @@ export default function DashboardPage() {
         stage={selectedPathwayStage}
         onOpenChange={setPathwayDetailOpen}
       />
+      <AdmissionTreeDetailDialog
+        module={activeAdmissionModule}
+        open={admissionTreeDetailOpen}
+        onOpenChange={setAdmissionTreeDetailOpen}
+      />
     </div>
   );
 }
@@ -682,6 +862,43 @@ function PathwayDetailDialog({
               );
             })}
           </div>
+        </div>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
+function AdmissionTreeDetailDialog({
+  module,
+  open,
+  onOpenChange,
+}: {
+  module?: AdmissionModule;
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+}) {
+  if (!module) return null;
+  const Icon = module.icon;
+
+  return (
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent className="app-dialog admission-tree-detail-dialog">
+        <DialogHeader>
+          <DialogTitle>{module.title}详情</DialogTitle>
+          <DialogDescription>{module.status} · 当前完成度 {module.score}%</DialogDescription>
+        </DialogHeader>
+        <div className="admission-tree-detail-body">
+          <div className={cn("admission-tree-detail-score", `tone-${module.tone}`)}>
+            <Icon className="h-5 w-5" />
+            <strong>{module.score}%</strong>
+            <span>{module.action}</span>
+          </div>
+          <div className="admission-tree-detail-list">
+            {module.details.map((detail) => (
+              <span key={detail}>{detail}</span>
+            ))}
+          </div>
+          <Link className="primary-action" href={module.href}>进入处理</Link>
         </div>
       </DialogContent>
     </Dialog>

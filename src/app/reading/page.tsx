@@ -18,7 +18,7 @@ import { growthService } from "@/services";
 import type { GrowthEvent } from "@/types";
 import { STUDENT_ID, formatMonth, getReadingStats } from "@/lib/product-data";
 
-const covers = ["bg-[#FFB347]", "bg-[#5B6BF5]", "bg-[#4CD7A4]", "bg-[#8B5CF6]", "bg-[#64748B]"];
+const covers = ["bg-[#23B87A]", "bg-[#2F7DD3]", "bg-[#FFB347]", "bg-[#8FDDBE]", "bg-[#94A3B8]"];
 
 export default function ReadingPage() {
   const [events, setEvents] = useState<GrowthEvent[]>([]);
@@ -87,7 +87,7 @@ export default function ReadingPage() {
               </label>
               <div className="form-actions">
                 <Button type="button" variant="secondary" onClick={() => setOpen(false)}>取消</Button>
-                <Button type="submit" className="bg-[#5B6BF5] hover:bg-[#4F5DE0]">保存到成长档案</Button>
+                <Button type="submit" className="bg-[#23B87A] hover:bg-[#1FA36C]">保存到成长档案</Button>
               </div>
             </form>
           </DialogContent>
@@ -96,10 +96,10 @@ export default function ReadingPage() {
 
       <section className="metric-grid">
         {[
-          [BookMarked, "已读总数", `${stats.totalBooks}`, "本", "text-[#5B6BF5]"],
-          [Clock, "已完成", `${stats.completedBooks}`, "本", "text-[#4CD7A4]"],
+          [BookMarked, "已读总数", `${stats.totalBooks}`, "本", "text-[#2F7DD3]"],
+          [Clock, "已完成", `${stats.completedBooks}`, "本", "text-[#23B87A]"],
           [TrendingUp, "本月阅读", `${stats.monthlyBooks}`, "本", "text-[#FFB347]"],
-          [Star, "平均评分", stats.avgRating ? stats.avgRating.toFixed(1) : "0", "/5", "text-[#8B5CF6]"],
+          [Star, "平均评分", stats.avgRating ? stats.avgRating.toFixed(1) : "0", "/5", "text-[#E68A00]"],
         ].map(([Icon, label, value, unit, color]) => {
           const TypedIcon = Icon as typeof BookOpen;
           return (
@@ -133,7 +133,7 @@ export default function ReadingPage() {
                 <div className="flex-1 min-w-0 flex items-center justify-between gap-4">
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2">
-                      <h3 className="text-[14px] font-semibold text-slate-800 group-hover:text-[#5B6BF5] transition-colors truncate">
+                      <h3 className="text-[14px] font-semibold text-slate-800 group-hover:text-[#23B87A] transition-colors truncate">
                         《{event.metadata.bookTitle || event.title.replace("完成《", "").replace("》", "")}》
                       </h3>
                       <span className="text-[10px] px-1.5 py-0.5 rounded bg-[#F1F5F9] text-[#6B7280]">

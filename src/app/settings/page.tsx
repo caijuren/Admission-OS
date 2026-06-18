@@ -17,6 +17,12 @@ type SystemStatus = {
   cookieSecure: string;
 };
 
+type SettingsData = {
+  integrations?: {
+    dingtalkWebhookUrl?: string;
+  };
+};
+
 function defaultTargetStatus(stageStatus: PathwayStage["status"]): PathwayTarget["status"] {
   if (stageStatus === "done") return "达标";
   if (stageStatus === "current") return "进行中";
@@ -34,6 +40,7 @@ export default function SettingsPage() {
     dataFile: "data/eduos.local.json",
     cookieSecure: "auto",
   });
+  const [dingtalkWebhookUrl, setDingtalkWebhookUrl] = useState("");
   const [saved, setSaved] = useState(false);
 
   useEffect(() => {
@@ -46,6 +53,12 @@ export default function SettingsPage() {
         return nextStages.find((stage) => stage.status === "current")?.id || nextStages[0]?.id || "";
       });
     });
+    fetch("/api/data", { cache: "no-store" })
+      .then((response) => response.ok ? response.json() : null)
+      .then((data: SettingsData | null) => {
+        setDingtalkWebhookUrl(data?.integrations?.dingtalkWebhookUrl || "");
+      })
+      .catch(() => undefined);
     fetch("/api/system/status", { cache: "no-store" })
       .then((response) => response.ok ? response.json() : null)
       .then((status: SystemStatus | null) => {
@@ -105,11 +118,15 @@ export default function SettingsPage() {
       body: JSON.stringify({
         profile: nextProfile,
         pathwayStages: nextPathwayStages,
+        integrations: {
+          dingtalkWebhookUrl: String(form.get("dingtalkWebhookUrl") || ""),
+        },
       }),
     });
 
     setProfile(nextProfile);
     setPathwayStages(nextPathwayStages);
+    setDingtalkWebhookUrl(String(form.get("dingtalkWebhookUrl") || ""));
     setSaved(true);
     window.setTimeout(() => setSaved(false), 1800);
   };
@@ -136,7 +153,7 @@ export default function SettingsPage() {
                 </div>
               </div>
               <div className="settings-target-box">
-                <Target className="h-4 w-4 text-[#5B6BF5]" />
+                <Target className="h-4 w-4 text-[#23B87A]" />
                 <div>
                   <strong>{profile.targetSchool}</strong>
                   <span>{currentStage?.title || profile.currentStage} · 准备度 {profile.progress}%</span>
@@ -155,7 +172,7 @@ export default function SettingsPage() {
                 </div>
               </div>
               <div className="settings-info-row">
-                <Database className="h-4 w-4 text-[#5B6BF5]" />
+                <Database className="h-4 w-4 text-[#2F7DD3]" />
                 <div>
                   <strong>数据存储</strong>
                   <span>服务器文件：{systemStatus.dataFile}</span>
@@ -176,7 +193,7 @@ export default function SettingsPage() {
           <section id="account" className="data-panel">
             <div className="data-panel-inner grid gap-4">
               <div className="settings-section-title">
-                <KeyRound className="w-4 h-4 text-[#5B6BF5]" />
+                <KeyRound className="w-4 h-4 text-[#2F7DD3]" />
                 <div>
                   <h2>账户与登录</h2>
                   <p>当前使用本地账号密码。用户名和密码在服务器 .env.production 中配置。</p>
@@ -193,7 +210,7 @@ export default function SettingsPage() {
           <section id="profile" className="data-panel">
             <div className="data-panel-inner grid gap-4">
               <div className="settings-section-title">
-                <User className="w-4 h-4 text-[#5B6BF5]" />
+                <User className="w-4 h-4 text-[#23B87A]" />
                 <div>
                   <h2>孩子与升学目标档案</h2>
                   <p>这些信息会出现在驾驶舱、左下角头像和阶段复盘中。</p>
@@ -214,10 +231,30 @@ export default function SettingsPage() {
             </div>
           </section>
 
+          <section id="integrations" className="data-panel">
+            <div className="data-panel-inner grid gap-4">
+              <div className="settings-section-title">
+                <FileText className="w-4 h-4 text-[#2F7DD3]" />
+                <div>
+                  <h2>钉钉推送</h2>
+                  <p>填写钉钉自定义机器人 Webhook 后，周计划可推送今日安排、整体进度和周报。</p>
+                </div>
+              </div>
+              <label className="settings-wide-field">
+                <span>机器人 Webhook</span>
+                <Input
+                  name="dingtalkWebhookUrl"
+                  defaultValue={dingtalkWebhookUrl}
+                  placeholder="https://oapi.dingtalk.com/robot/send?access_token=..."
+                />
+              </label>
+            </div>
+          </section>
+
           <section id="route" className="data-panel">
             <div className="data-panel-inner grid gap-4">
               <div className="settings-section-title">
-                <Route className="w-4 h-4 text-[#5B6BF5]" />
+                <Route className="w-4 h-4 text-[#23B87A]" />
                 <div>
                   <h2>首页登山路线卡片</h2>
                   <p>选择一个年级后编辑卡片内容，保存后同步到首页路线。</p>
@@ -272,7 +309,7 @@ export default function SettingsPage() {
           <section id="system" className="data-panel">
             <div className="data-panel-inner grid gap-4">
               <div className="settings-section-title">
-                <FileText className="w-4 h-4 text-[#5B6BF5]" />
+                <FileText className="w-4 h-4 text-[#2F7DD3]" />
                 <div>
                   <h2>数据与备份</h2>
                   <p>当前业务数据落在服务器本地文件。发布新版前建议先复制一份备份。</p>
@@ -287,11 +324,11 @@ export default function SettingsPage() {
           </section>
 
           <div className="settings-submit-row">
-            <Button type="submit" className="bg-[#5B6BF5] hover:bg-[#4F5DE0] rounded-xl">
+            <Button type="submit" className="bg-[#23B87A] hover:bg-[#1FA36C] rounded-xl">
               <Save className="w-4 h-4 mr-2" />
               保存设置
             </Button>
-            {saved && <p className="text-sm text-[#4CD7A4]">已保存到服务器本地文件</p>}
+            {saved && <p className="text-sm text-[#23B87A]">已保存到服务器本地文件</p>}
           </div>
         </main>
       </form>
