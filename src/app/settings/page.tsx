@@ -18,9 +18,8 @@ type SystemStatus = {
 };
 
 type SettingsData = {
-  integrations?: {
-    dingtalkWebhookUrl?: string;
-  };
+  configured?: boolean;
+  webhookUrl?: string;
 };
 
 function defaultTargetStatus(stageStatus: PathwayStage["status"]): PathwayTarget["status"] {
@@ -41,6 +40,9 @@ export default function SettingsPage() {
     cookieSecure: "auto",
   });
   const [dingtalkWebhookUrl, setDingtalkWebhookUrl] = useState("");
+  const [dingtalkMaskedUrl, setDingtalkMaskedUrl] = useState("");
+  const [dingtalkConfigured, setDingtalkConfigured] = useState(false);
+  const [saveError, setSaveError] = useState("");
   const [saved, setSaved] = useState(false);
 
   useEffect(() => {
@@ -53,10 +55,11 @@ export default function SettingsPage() {
         return nextStages.find((stage) => stage.status === "current")?.id || nextStages[0]?.id || "";
       });
     });
-    fetch("/api/data", { cache: "no-store" })
+    fetch("/api/integrations/dingtalk", { cache: "no-store" })
       .then((response) => response.ok ? response.json() : null)
       .then((data: SettingsData | null) => {
-        setDingtalkWebhookUrl(data?.integrations?.dingtalkWebhookUrl || "");
+        setDingtalkConfigured(Boolean(data?.configured));
+        setDingtalkMaskedUrl(data?.webhookUrl || "");
       })
       .catch(() => undefined);
     fetch("/api/system/status", { cache: "no-store" })
@@ -112,21 +115,42 @@ export default function SettingsPage() {
       };
     });
 
-    await fetch("/api/data", {
+    const profileResponse = await fetch("/api/data", {
       method: "PATCH",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         profile: nextProfile,
         pathwayStages: nextPathwayStages,
-        integrations: {
-          dingtalkWebhookUrl: String(form.get("dingtalkWebhookUrl") || ""),
-        },
       }),
     });
 
+    if (!profileResponse.ok) {
+      setSaveError("基础设置保存失败，请稍后重试。");
+      return;
+    }
+
+    const nextWebhookUrl = String(form.get("dingtalkWebhookUrl") || "").trim();
+    if (nextWebhookUrl || dingtalkConfigured) {
+      const integrationResponse = await fetch("/api/integrations/dingtalk", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ webhookUrl: nextWebhookUrl }),
+      });
+
+      const integrationData = await integrationResponse.json().catch(() => null) as SettingsData & { error?: string } | null;
+      if (!integrationResponse.ok) {
+        setSaveError(integrationData?.error || "钉钉配置保存失败，请检查 Webhook。");
+        return;
+      }
+
+      setDingtalkConfigured(Boolean(integrationData?.configured));
+      setDingtalkMaskedUrl(integrationData?.webhookUrl || "");
+    }
+
     setProfile(nextProfile);
     setPathwayStages(nextPathwayStages);
-    setDingtalkWebhookUrl(String(form.get("dingtalkWebhookUrl") || ""));
+    setDingtalkWebhookUrl("");
+    setSaveError("");
     setSaved(true);
     window.setTimeout(() => setSaved(false), 1800);
   };
@@ -241,13 +265,18 @@ export default function SettingsPage() {
                 </div>
               </div>
               <label className="settings-wide-field">
-                <span>机器人 Webhook</span>
+                <span>机器人 Webhook{dingtalkConfigured ? ` · 已配置 ${dingtalkMaskedUrl}` : ""}</span>
                 <Input
                   name="dingtalkWebhookUrl"
-                  defaultValue={dingtalkWebhookUrl}
+                  value={dingtalkWebhookUrl}
+                  onChange={(event) => setDingtalkWebhookUrl(event.target.value)}
                   placeholder="https://oapi.dingtalk.com/robot/send?access_token=..."
                 />
               </label>
+              <div className="settings-hint-box">
+                <strong>{dingtalkConfigured ? "钉钉推送已启用" : "钉钉推送未启用"}</strong>
+                <span>为保护 access_token，保存后这里只显示脱敏地址。留空保存可清除当前 Webhook。</span>
+              </div>
             </div>
           </section>
 
@@ -328,6 +357,7 @@ export default function SettingsPage() {
               <Save className="w-4 h-4 mr-2" />
               保存设置
             </Button>
+            {saveError && <p className="text-sm text-[#EF4444]">{saveError}</p>}
             {saved && <p className="text-sm text-[#23B87A]">已保存到服务器本地文件</p>}
           </div>
         </main>
