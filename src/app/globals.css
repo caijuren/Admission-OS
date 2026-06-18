@@ -7278,9 +7278,198 @@
   color: #d92d20;
 }
 
+.advisor-memory-panel {
+  display: grid;
+  gap: 10px;
+  padding-top: 10px;
+  border-top: 1px solid #e7edf6;
+}
+
+.advisor-memory-form {
+  display: grid;
+  gap: 8px;
+}
+
+.advisor-memory-form select,
+.advisor-memory-form input,
+.advisor-memory-form textarea {
+  width: 100%;
+  border-radius: 12px;
+  border: 1px solid #dbe3ef;
+  background: #ffffff;
+  color: #17213a;
+  font-size: 12px;
+  font-weight: 760;
+  outline: none;
+}
+
+.advisor-memory-form select,
+.advisor-memory-form input {
+  height: 38px;
+  padding: 0 10px;
+}
+
+.advisor-memory-form textarea {
+  min-height: 70px;
+  resize: vertical;
+  padding: 10px;
+  line-height: 1.55;
+}
+
+.advisor-memory-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.advisor-memory-actions .btn,
+.advisor-memory-actions button[type="submit"] {
+  min-height: 36px;
+  gap: 6px;
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: 900;
+}
+
+.advisor-memory-actions > button:not([type="submit"]) {
+  height: 36px;
+  border-radius: 12px;
+  border: 1px solid #dbe3ef;
+  background: #ffffff;
+  color: #667085;
+  padding: 0 12px;
+  font-size: 12px;
+  font-weight: 900;
+}
+
+.advisor-memory-list {
+  display: grid;
+  gap: 8px;
+}
+
+.advisor-memory-card {
+  display: grid;
+  gap: 7px;
+  border-radius: 12px;
+  border: 1px solid #dbe3ef;
+  background: #ffffff;
+  padding: 10px;
+}
+
+.advisor-memory-card.disabled {
+  opacity: 0.62;
+}
+
+.advisor-memory-card > div:first-child {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+}
+
+.advisor-memory-card > div:first-child span {
+  flex: 0 0 auto;
+  border-radius: 999px;
+  background: #eef7ff;
+  color: #2f7dd3;
+  padding: 3px 7px;
+  font-size: 11px;
+  font-weight: 900;
+}
+
+.advisor-memory-card strong {
+  min-width: 0;
+  overflow: hidden;
+  color: #17213a;
+  font-size: 12px;
+  font-weight: 950;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.advisor-memory-card p {
+  color: #667085;
+  font-size: 12px;
+  font-weight: 740;
+  line-height: 1.55;
+}
+
+.advisor-memory-card-actions {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.advisor-memory-card-actions button {
+  height: 30px;
+  display: grid;
+  place-items: center;
+  border-radius: 10px;
+  border: 1px solid #e7edf6;
+  background: #ffffff;
+  color: #667085;
+  padding: 0 9px;
+  font-size: 11px;
+  font-weight: 900;
+}
+
+.advisor-memory-card-actions button:first-child {
+  min-width: 58px;
+  color: #176a4b;
+}
+
+.advisor-memory-card.disabled .advisor-memory-card-actions button:first-child {
+  color: #8a94a6;
+}
+
+.advisor-memory-card-actions button:hover {
+  border-color: #23b87a;
+  color: #176a4b;
+}
+
+.advisor-log-panel {
+  display: grid;
+  gap: 10px;
+  padding-top: 10px;
+  border-top: 1px solid #e7edf6;
+}
+
+.advisor-log-list {
+  display: grid;
+  gap: 8px;
+}
+
+.advisor-log-card {
+  display: grid;
+  gap: 4px;
+  border-radius: 12px;
+  border: 1px solid #e7edf6;
+  background: #ffffff;
+  padding: 9px 10px;
+}
+
+.advisor-log-card strong {
+  color: #17213a;
+  font-size: 12px;
+  font-weight: 950;
+}
+
+.advisor-log-card p {
+  color: #667085;
+  font-size: 12px;
+  font-weight: 740;
+  line-height: 1.45;
+}
+
+.advisor-log-card span {
+  color: #8a94a6;
+  font-size: 11px;
+  font-weight: 760;
+}
+
 .advisor-chat-panel {
   display: grid;
-  grid-template-rows: auto minmax(360px, 1fr) auto auto;
+  grid-template-rows: auto auto auto auto auto minmax(300px, 1fr) auto auto;
   gap: 12px;
   padding: 16px;
 }
@@ -7304,6 +7493,506 @@
   color: #667085;
   font-size: 12px;
   font-weight: 760;
+}
+
+.advisor-suggestion-panel {
+  display: grid;
+  gap: 9px;
+  border-radius: 14px;
+  border: 1px solid #cdeedd;
+  background: #f4fbf7;
+  padding: 12px;
+}
+
+.advisor-suggestion-panel > div:first-child {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+}
+
+.advisor-suggestion-panel span {
+  flex: 0 0 auto;
+  border-radius: 999px;
+  background: #eafbf4;
+  color: #176a4b;
+  padding: 4px 8px;
+  font-size: 11px;
+  font-weight: 950;
+}
+
+.advisor-suggestion-panel strong {
+  min-width: 0;
+  overflow: hidden;
+  color: #17213a;
+  font-size: 13px;
+  font-weight: 950;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.advisor-suggestion-panel p {
+  color: #42526b;
+  font-size: 12px;
+  font-weight: 780;
+  line-height: 1.55;
+}
+
+.advisor-suggestion-panel > div:last-child {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.advisor-suggestion-panel button {
+  min-height: 34px;
+  border-radius: 10px;
+  font-size: 12px;
+  font-weight: 900;
+}
+
+.advisor-suggestion-panel .btn,
+.advisor-suggestion-panel button[type="button"]:first-child {
+  gap: 6px;
+}
+
+.advisor-suggestion-panel > div:last-child > button:not(.btn) {
+  border: 1px solid #dbe3ef;
+  background: #ffffff;
+  color: #667085;
+  padding: 0 12px;
+}
+
+.advisor-draft-panel,
+.advisor-progress-panel,
+.advisor-diagnosis-panel {
+  display: grid;
+  gap: 12px;
+  border-radius: 16px;
+  border: 1px solid #e7edf6;
+  background: #ffffff;
+  padding: 14px;
+}
+
+.advisor-draft-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.advisor-draft-head h3 {
+  color: #17213a;
+  font-size: 15px;
+  font-weight: 950;
+}
+
+.advisor-draft-head span {
+  color: #667085;
+  font-size: 12px;
+  font-weight: 760;
+}
+
+.advisor-draft-head button {
+  flex: 0 0 auto;
+  gap: 7px;
+  border-radius: 12px;
+  background: #23b87a;
+  font-size: 12px;
+  font-weight: 900;
+}
+
+.advisor-draft-input {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 116px;
+  gap: 10px;
+  align-items: stretch;
+}
+
+.advisor-draft-input textarea,
+.advisor-draft-card textarea {
+  width: 100%;
+  resize: vertical;
+  border-radius: 12px;
+  border: 1px solid #dbe3ef;
+  background: #ffffff;
+  color: #17213a;
+  padding: 10px 12px;
+  font-size: 12px;
+  line-height: 1.55;
+  font-weight: 740;
+  outline: none;
+}
+
+.advisor-draft-input textarea {
+  min-height: 58px;
+}
+
+.advisor-draft-input button {
+  min-height: 44px;
+  gap: 7px;
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: 900;
+}
+
+.advisor-draft-list {
+  display: grid;
+  gap: 10px;
+}
+
+.advisor-draft-card {
+  display: grid;
+  gap: 8px;
+  border-radius: 14px;
+  border: 1px solid #e7edf6;
+  background: #f8fbff;
+  padding: 10px;
+}
+
+.advisor-draft-card-head {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 34px;
+  gap: 8px;
+}
+
+.advisor-draft-card-head input,
+.advisor-draft-fields input,
+.advisor-draft-fields select {
+  height: 36px;
+  border-radius: 10px;
+  border: 1px solid #dbe3ef;
+  background: #ffffff;
+  color: #17213a;
+  padding: 0 9px;
+  font-size: 12px;
+  font-weight: 760;
+  outline: none;
+}
+
+.advisor-draft-card-head button {
+  display: grid;
+  place-items: center;
+  border-radius: 10px;
+  border: 1px solid #e7edf6;
+  background: #ffffff;
+  color: #8a94a6;
+}
+
+.advisor-draft-card-head button:hover {
+  background: #fff1f0;
+  color: #d92d20;
+}
+
+.advisor-draft-card textarea {
+  min-height: 54px;
+}
+
+.advisor-draft-fields {
+  display: grid;
+  grid-template-columns: minmax(100px, 1fr) 72px 72px minmax(116px, 1fr) 72px minmax(116px, 1fr);
+  gap: 8px;
+}
+
+.advisor-progress-panel {
+  background: #fbfdfc;
+}
+
+.advisor-diagnosis-panel {
+  background: #fffdf9;
+}
+
+.advisor-diagnosis-list {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.advisor-diagnosis-empty {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 48px;
+  color: #667085;
+  font-size: 12px;
+  font-weight: 820;
+}
+
+.advisor-diagnosis-card {
+  display: grid;
+  gap: 8px;
+  border-radius: 14px;
+  border: 1px solid #e7edf6;
+  background: #ffffff;
+  padding: 12px;
+}
+
+.advisor-diagnosis-card.warn {
+  border-color: #ffe2a8;
+  background: #fffaf0;
+}
+
+.advisor-diagnosis-card.danger {
+  border-color: #ffc9c5;
+  background: #fff7f6;
+}
+
+.advisor-diagnosis-card > div {
+  display: grid;
+  gap: 6px;
+}
+
+.advisor-diagnosis-card span {
+  width: fit-content;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  border-radius: 999px;
+  background: #eef7ff;
+  color: #2f7dd3;
+  padding: 4px 8px;
+  font-size: 11px;
+  font-weight: 950;
+}
+
+.advisor-diagnosis-card.warn span {
+  background: #fff4e5;
+  color: #c56a00;
+}
+
+.advisor-diagnosis-card.danger span {
+  background: #fff1f0;
+  color: #d92d20;
+}
+
+.advisor-diagnosis-card strong {
+  color: #17213a;
+  font-size: 13px;
+  font-weight: 950;
+  line-height: 1.35;
+}
+
+.advisor-diagnosis-card p,
+.advisor-diagnosis-card em {
+  color: #667085;
+  font-size: 12px;
+  font-style: normal;
+  font-weight: 740;
+  line-height: 1.55;
+}
+
+.advisor-diagnosis-card em {
+  color: #176a4b;
+  font-weight: 850;
+}
+
+.advisor-diagnosis-card > button {
+  width: fit-content;
+  min-height: 32px;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  border-radius: 10px;
+  border: 1px solid #dbe3ef;
+  background: #ffffff;
+  color: #17213a;
+  padding: 0 10px;
+  font-size: 12px;
+  font-weight: 900;
+}
+
+.advisor-diagnosis-card > button:hover {
+  border-color: #23b87a;
+  color: #176a4b;
+}
+
+.advisor-action-panel {
+  display: grid;
+  gap: 10px;
+  border-radius: 14px;
+  border: 1px solid #dbe3ef;
+  background: #ffffff;
+  padding: 12px;
+}
+
+.advisor-action-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.advisor-action-head > div {
+  display: grid;
+  gap: 2px;
+}
+
+.advisor-action-head strong {
+  color: #17213a;
+  font-size: 13px;
+  font-weight: 950;
+}
+
+.advisor-action-head span {
+  color: #667085;
+  font-size: 12px;
+  font-weight: 760;
+}
+
+.advisor-action-head button {
+  flex: 0 0 auto;
+  gap: 7px;
+  border-radius: 12px;
+  background: #23b87a;
+  font-size: 12px;
+  font-weight: 900;
+}
+
+.advisor-action-list {
+  display: grid;
+  gap: 8px;
+}
+
+.advisor-action-card {
+  display: grid;
+  gap: 7px;
+  border-radius: 12px;
+  border: 1px solid #e7edf6;
+  background: #f8fbff;
+  padding: 10px;
+}
+
+.advisor-action-card > div {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) 32px;
+  gap: 8px;
+  align-items: center;
+}
+
+.advisor-action-card span {
+  border-radius: 999px;
+  background: #eafbf4;
+  color: #176a4b;
+  padding: 4px 8px;
+  font-size: 11px;
+  font-weight: 950;
+}
+
+.advisor-action-card strong {
+  min-width: 0;
+  overflow: hidden;
+  color: #17213a;
+  font-size: 12px;
+  font-weight: 950;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.advisor-action-card button {
+  width: 32px;
+  height: 32px;
+  display: grid;
+  place-items: center;
+  border-radius: 10px;
+  border: 1px solid #e7edf6;
+  background: #ffffff;
+  color: #8a94a6;
+}
+
+.advisor-action-card button:hover {
+  background: #fff1f0;
+  color: #d92d20;
+}
+
+.advisor-action-card p,
+.advisor-action-card em {
+  color: #667085;
+  font-size: 12px;
+  font-style: normal;
+  font-weight: 740;
+  line-height: 1.55;
+}
+
+.advisor-action-card em {
+  color: #2f7dd3;
+  font-weight: 850;
+}
+
+.advisor-progress-list {
+  display: grid;
+  gap: 10px;
+}
+
+.advisor-progress-card {
+  display: grid;
+  gap: 8px;
+  border-radius: 14px;
+  border: 1px solid #e0f0e9;
+  background: #ffffff;
+  padding: 10px;
+}
+
+.advisor-progress-card-head {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 34px;
+  gap: 8px;
+  align-items: center;
+}
+
+.advisor-progress-card-head strong {
+  min-width: 0;
+  overflow: hidden;
+  color: #17213a;
+  font-size: 13px;
+  font-weight: 950;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.advisor-progress-card-head button {
+  width: 34px;
+  height: 34px;
+  display: grid;
+  place-items: center;
+  border-radius: 10px;
+  border: 1px solid #e7edf6;
+  background: #ffffff;
+  color: #8a94a6;
+}
+
+.advisor-progress-card-head button:hover {
+  background: #fff1f0;
+  color: #d92d20;
+}
+
+.advisor-progress-fields {
+  display: grid;
+  grid-template-columns: minmax(120px, 1fr) 90px 90px;
+  gap: 8px;
+}
+
+.advisor-progress-fields input,
+.advisor-progress-card textarea {
+  border-radius: 10px;
+  border: 1px solid #dbe3ef;
+  background: #ffffff;
+  color: #17213a;
+  font-size: 12px;
+  font-weight: 760;
+  outline: none;
+}
+
+.advisor-progress-fields input {
+  height: 36px;
+  padding: 0 9px;
+}
+
+.advisor-progress-card textarea {
+  min-height: 48px;
+  width: 100%;
+  resize: vertical;
+  padding: 9px 10px;
+  line-height: 1.5;
 }
 
 .advisor-message-list {
@@ -7853,7 +8542,11 @@
   }
 
   .advisor-chat-panel {
-    grid-template-rows: auto minmax(300px, 1fr) auto auto;
+    grid-template-rows: auto auto auto auto auto minmax(300px, 1fr) auto auto;
+  }
+
+  .advisor-diagnosis-list {
+    grid-template-columns: 1fr;
   }
 }
 
@@ -7864,6 +8557,14 @@
   }
 
   .advisor-input-row {
+    grid-template-columns: 1fr;
+  }
+
+  .advisor-draft-input,
+  .advisor-draft-card-head,
+  .advisor-draft-fields,
+  .advisor-progress-fields,
+  .advisor-progress-card-head {
     grid-template-columns: 1fr;
   }
 

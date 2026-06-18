@@ -71,6 +71,28 @@ export type AiConversation = {
   updatedAt: string;
 };
 
+export type AiMemoryType = "preference" | "student" | "goal" | "principle" | "decision";
+
+export type AiMemory = {
+  id: string;
+  type: AiMemoryType;
+  title: string;
+  content: string;
+  enabled: boolean;
+  sourceConversationId?: string;
+  createdAt: string;
+  updatedAt: string;
+};
+
+export type AiActionLog = {
+  id: string;
+  type: "task_draft_apply" | "progress_apply" | "diagnosis_action_apply" | "memory_save";
+  title: string;
+  summary: string;
+  details?: Record<string, unknown>;
+  createdAt: string;
+};
+
 export type PlanLog = {
   id: string;
   goalId: string;
@@ -122,6 +144,8 @@ export type EduosData = {
   goalLogs?: PlanLog[];
   goalPhases?: PlanPhase[];
   aiConversations?: AiConversation[];
+  aiMemories?: AiMemory[];
+  aiActionLogs?: AiActionLog[];
 };
 
 const dataPath = path.join(process.cwd(), "data", "eduos.json");

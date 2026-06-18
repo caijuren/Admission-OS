@@ -8,6 +8,12 @@ type ChatMessage = {
   content: string;
 };
 
+type MemorySuggestion = {
+  type: "preference" | "student" | "goal" | "principle" | "decision";
+  title: string;
+  content: string;
+};
+
 function uid(prefix: string) {
   return `${prefix}-${Date.now()}-${Math.random().toString(16).slice(2, 8)}`;
 }
@@ -40,6 +46,69 @@ function buildContext(data: EduosData) {
     "近期记录：",
     logs || "暂无记录",
   ].join("\n");
+}
+
+function buildMemoryContext(data: EduosData) {
+  const typeLabels = {
+    preference: "用户偏好",
+    student: "学生节奏",
+    goal: "申请目标",
+    principle: "规划原则",
+    decision: "已确认决策",
+  };
+  const memories = (data.aiMemories || [])
+    .filter((memory) => memory.enabled)
+    .slice(0, 12)
+    .map((memory) => `${typeLabels[memory.type]}｜${memory.title}：${memory.content}`)
+    .join("\n");
+
+  return memories || "暂无长期记忆";
+}
+
+function extractMemorySuggestion(data: EduosData, message: string): MemorySuggestion | null {
+  const text = message.replace(/\s+/g, " ").trim();
+  if (text.length < 8) return null;
+
+  const existing = (data.aiMemories || []).map((memory) => `${memory.title}${memory.content}`).join("\n");
+  const isDuplicate = existing.includes(text.slice(0, Math.min(12, text.length)));
+  if (isDuplicate) return null;
+
+  const includesAny = (patterns: string[]) => patterns.some((pattern) => text.includes(pattern));
+  const cleanContent = text.length > 80 ? `${text.slice(0, 80)}...` : text;
+
+  if (includesAny(["不要", "不想", "希望", "尽量", "偏好", "喜欢", "不喜欢"])) {
+    return {
+      type: "preference",
+      title: "用户规划偏好",
+      content: cleanContent,
+    };
+  }
+
+  if (includesAny(["决定", "确认", "暂时", "暂停", "改成", "调整为"])) {
+    return {
+      type: "decision",
+      title: "已确认的计划决策",
+      content: cleanContent,
+    };
+  }
+
+  if (includesAny(["周中", "周末", "每天", "每周", "时间", "节奏", "太满", "太累"])) {
+    return {
+      type: "student",
+      title: "学生执行节奏",
+      content: cleanContent,
+    };
+  }
+
+  if (includesAny(["目标", "申请", "学校", "deadline", "截止", "文书"])) {
+    return {
+      type: "goal",
+      title: "申请规划目标",
+      content: cleanContent,
+    };
+  }
+
+  return null;
 }
 
 function buildConversationTitle(message: string) {
@@ -106,6 +175,7 @@ export async function POST(request: NextRequest) {
     const requestMessages = [...baseConversation.messages, userMessage]
       .slice(-10)
       .map((item) => ({ role: item.role, content: item.content }));
+    const memorySuggestion = extractMemorySuggestion(data, message);
     const saveReply = async (reply: string, provider: string, model?: string) => {
       const replyNow = new Date().toISOString();
       const conversation: AiConversation = {
@@ -128,7 +198,7 @@ export async function POST(request: NextRequest) {
         ...conversations.filter((item) => item.id !== conversation.id),
       ];
       await writeData(userId, data);
-      const response = NextResponse.json({ reply, provider, model, conversation });
+      const response = NextResponse.json({ reply, provider, model, conversation, memorySuggestion });
       if (auth.session) setAuthCookies(response, auth.session);
       return response;
     };
@@ -157,6 +227,8 @@ export async function POST(request: NextRequest) {
               "输出中文，优先给 3 条以内的行动建议。",
               "当前 EduOS 数据：",
               buildContext(data),
+              "已确认的长期记忆：",
+              buildMemoryContext(data),
             ].join("\n"),
           },
           ...requestMessages,
