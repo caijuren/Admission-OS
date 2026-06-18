@@ -10,6 +10,7 @@ import {
   Clock,
   Compass,
   Flag,
+  MessageCircle,
   Settings,
   Sparkles,
   TreePine,
@@ -27,6 +28,7 @@ const navItems = [
   { href: "/reading", label: "阅读表达", icon: BookOpen },
   { href: "/records", label: "能力资产", icon: TreePine },
   { href: "/timeline", label: "成长档案", icon: Clock },
+  { href: "/advisor", label: "AI 顾问", icon: MessageCircle },
   { href: "/settings", label: "设置", icon: Settings },
 ];
 

@@ -16,7 +16,7 @@ export async function GET() {
     version: await getVersion(),
     authMode: process.env.ADMISSION_OS_AUTH_MODE || "local",
     dataDriver: process.env.ADMISSION_OS_DATA_DRIVER || "file",
-    dataFile: "data/eduos.local.json",
+    dataFile: process.env.ADMISSION_OS_DATA_DRIVER === "structured" ? "Supabase structured tables + app_state backup" : "data/eduos.local.json",
     cookieSecure: process.env.ADMISSION_OS_COOKIE_SECURE || "auto",
   });
 }

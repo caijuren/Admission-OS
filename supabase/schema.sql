@@ -162,8 +162,17 @@ create table if not exists public.goal_logs (
 create table if not exists public.growth_events (
   id text not null,
   user_id uuid not null references auth.users(id) on delete cascade,
+  student_id text,
   type text not null,
+  category text,
   title text not null,
+  description text,
+  date date,
+  year integer,
+  tags jsonb not null default '[]'::jsonb,
+  attachments jsonb not null default '[]'::jsonb,
+  metadata jsonb not null default '{}'::jsonb,
+  source text,
   happened_at date,
   payload jsonb not null default '{}'::jsonb,
   is_milestone boolean not null default false,
@@ -173,6 +182,16 @@ create table if not exists public.growth_events (
   updated_at timestamptz not null default now(),
   primary key (user_id, id)
 );
+
+alter table public.growth_events add column if not exists student_id text;
+alter table public.growth_events add column if not exists category text;
+alter table public.growth_events add column if not exists description text;
+alter table public.growth_events add column if not exists date date;
+alter table public.growth_events add column if not exists year integer;
+alter table public.growth_events add column if not exists tags jsonb not null default '[]'::jsonb;
+alter table public.growth_events add column if not exists attachments jsonb not null default '[]'::jsonb;
+alter table public.growth_events add column if not exists metadata jsonb not null default '{}'::jsonb;
+alter table public.growth_events add column if not exists source text;
 
 create table if not exists public.pathway_stages (
   id text not null,

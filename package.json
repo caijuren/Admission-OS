@@ -6,7 +6,8 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint src src/middleware.ts --ext .ts,.tsx"
+    "lint": "eslint src src/middleware.ts --ext .ts,.tsx",
+    "migrate:structured": "node scripts/migrate-structured-data.mjs"
   },
   "dependencies": {
     "@radix-ui/react-dialog": "^1.1.4",

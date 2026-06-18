@@ -6,6 +6,14 @@ import { AppShell } from "@/components/app-shell";
 export const metadata: Metadata = {
   title: "Admission OS",
   description: "围绕上海交附嘉分自招与名额到校目标的升学规划系统",
+  icons: {
+    icon: [
+      { url: "/icon.svg", type: "image/svg+xml" },
+    ],
+    apple: [
+      { url: "/icon.svg", type: "image/svg+xml" },
+    ],
+  },
 };
 
 export default function RootLayout({

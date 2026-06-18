@@ -1,7 +1,7 @@
 "use client";
 
 import { FormEvent, useEffect, useState } from "react";
-import { Archive, Database, FileText, KeyRound, Route, Save, ShieldCheck, Target, User } from "lucide-react";
+import { Archive, Bot, Database, FileText, KeyRound, Route, Save, ShieldCheck, Target, User } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { DEFAULT_PROFILE, getProductConfig, type PathwayStage, type PathwayTarget, type StudentProfile } from "@/lib/product-data";
@@ -20,6 +20,14 @@ type SystemStatus = {
 type SettingsData = {
   configured?: boolean;
   webhookUrl?: string;
+};
+
+type AiSettingsData = {
+  configured?: boolean;
+  provider?: "openai" | "deepseek" | "custom";
+  baseUrl?: string;
+  model?: string;
+  maskedApiKey?: string;
 };
 
 function defaultTargetStatus(stageStatus: PathwayStage["status"]): PathwayTarget["status"] {
@@ -42,6 +50,12 @@ export default function SettingsPage() {
   const [dingtalkWebhookUrl, setDingtalkWebhookUrl] = useState("");
   const [dingtalkMaskedUrl, setDingtalkMaskedUrl] = useState("");
   const [dingtalkConfigured, setDingtalkConfigured] = useState(false);
+  const [aiProvider, setAiProvider] = useState<AiSettingsData["provider"]>("openai");
+  const [aiApiKey, setAiApiKey] = useState("");
+  const [aiBaseUrl, setAiBaseUrl] = useState("");
+  const [aiModel, setAiModel] = useState("");
+  const [aiMaskedApiKey, setAiMaskedApiKey] = useState("");
+  const [aiConfigured, setAiConfigured] = useState(false);
   const [saveError, setSaveError] = useState("");
   const [saved, setSaved] = useState(false);
 
@@ -60,6 +74,16 @@ export default function SettingsPage() {
       .then((data: SettingsData | null) => {
         setDingtalkConfigured(Boolean(data?.configured));
         setDingtalkMaskedUrl(data?.webhookUrl || "");
+      })
+      .catch(() => undefined);
+    fetch("/api/integrations/ai", { cache: "no-store" })
+      .then((response) => response.ok ? response.json() : null)
+      .then((data: AiSettingsData | null) => {
+        setAiConfigured(Boolean(data?.configured));
+        setAiProvider(data?.provider || "openai");
+        setAiBaseUrl(data?.baseUrl || "");
+        setAiModel(data?.model || "");
+        setAiMaskedApiKey(data?.maskedApiKey || "");
       })
       .catch(() => undefined);
     fetch("/api/system/status", { cache: "no-store" })
@@ -147,6 +171,32 @@ export default function SettingsPage() {
       setDingtalkMaskedUrl(integrationData?.webhookUrl || "");
     }
 
+    const nextAiPayload = {
+      provider: aiProvider,
+      apiKey: aiApiKey.trim(),
+      baseUrl: aiBaseUrl.trim(),
+      model: aiModel.trim(),
+    };
+    if (nextAiPayload.apiKey || aiConfigured || nextAiPayload.baseUrl || nextAiPayload.model || nextAiPayload.provider !== "openai") {
+      const aiResponse = await fetch("/api/integrations/ai", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(nextAiPayload),
+      });
+      const aiData = await aiResponse.json().catch(() => null) as AiSettingsData & { error?: string } | null;
+      if (!aiResponse.ok) {
+        setSaveError(aiData?.error || "AI 配置保存失败，请检查服务地址和 Key。");
+        return;
+      }
+
+      setAiConfigured(Boolean(aiData?.configured));
+      setAiProvider(aiData?.provider || "openai");
+      setAiBaseUrl(aiData?.baseUrl || "");
+      setAiModel(aiData?.model || "");
+      setAiMaskedApiKey(aiData?.maskedApiKey || "");
+      setAiApiKey("");
+    }
+
     setProfile(nextProfile);
     setPathwayStages(nextPathwayStages);
     setDingtalkWebhookUrl("");
@@ -160,7 +210,7 @@ export default function SettingsPage() {
       <section className="page-toolbar">
         <div>
           <h1>设置中心</h1>
-          <span>{profile.name} · {profile.targetSchool} · 本地文件模式</span>
+          <span>{profile.name} · {profile.targetSchool} · {systemStatus.dataDriver} 模式</span>
         </div>
       </section>
 
@@ -199,14 +249,14 @@ export default function SettingsPage() {
                 <Database className="h-4 w-4 text-[#2F7DD3]" />
                 <div>
                   <strong>数据存储</strong>
-                  <span>服务器文件：{systemStatus.dataFile}</span>
+                  <span>{systemStatus.dataFile}</span>
                 </div>
               </div>
               <div className="settings-info-row">
                 <Archive className="h-4 w-4 text-[#FFB347]" />
                 <div>
                   <strong>备份建议</strong>
-                  <span>发布前备份 data/eduos.local.json</span>
+                  <span>发布前备份 app_state 或 data/eduos.local.json</span>
                 </div>
               </div>
             </div>
@@ -280,6 +330,44 @@ export default function SettingsPage() {
             </div>
           </section>
 
+          <section id="ai" className="data-panel">
+            <div className="data-panel-inner grid gap-4">
+              <div className="settings-section-title">
+                <Bot className="w-4 h-4 text-[#23B87A]" />
+                <div>
+                  <h2>AI 顾问</h2>
+                  <p>配置 OpenAI-compatible 服务后，AI 顾问台会结合目标、任务和记录做计划建议。</p>
+                </div>
+              </div>
+              <div className="settings-field-grid">
+                <label>
+                  <span>服务商</span>
+                  <select value={aiProvider} onChange={(event) => setAiProvider(event.target.value as AiSettingsData["provider"])}>
+                    <option value="openai">OpenAI</option>
+                    <option value="deepseek">DeepSeek</option>
+                    <option value="custom">自定义兼容服务</option>
+                  </select>
+                </label>
+                <label>
+                  <span>模型</span>
+                  <Input value={aiModel} onChange={(event) => setAiModel(event.target.value)} placeholder={aiProvider === "deepseek" ? "deepseek-chat" : "gpt-4o-mini"} />
+                </label>
+                <label>
+                  <span>Base URL</span>
+                  <Input value={aiBaseUrl} onChange={(event) => setAiBaseUrl(event.target.value)} placeholder={aiProvider === "deepseek" ? "https://api.deepseek.com" : "https://api.openai.com/v1"} />
+                </label>
+                <label>
+                  <span>API Key{aiConfigured ? ` · 已配置 ${aiMaskedApiKey}` : ""}</span>
+                  <Input value={aiApiKey} onChange={(event) => setAiApiKey(event.target.value)} placeholder="sk-..." />
+                </label>
+              </div>
+              <div className="settings-hint-box">
+                <strong>{aiConfigured ? "AI 顾问已启用" : "未配置真实 AI Key"}</strong>
+                <span>API Key 留空保存会保留当前密钥；未配置时，顾问台会使用本地规则给出基础建议。</span>
+              </div>
+            </div>
+          </section>
+
           <section id="route" className="data-panel">
             <div className="data-panel-inner grid gap-4">
               <div className="settings-section-title">
@@ -341,7 +429,7 @@ export default function SettingsPage() {
                 <FileText className="w-4 h-4 text-[#2F7DD3]" />
                 <div>
                   <h2>数据与备份</h2>
-                  <p>当前业务数据落在服务器本地文件。发布新版前建议先复制一份备份。</p>
+                  <p>结构化模式会读写 Supabase 业务表，并保留 app_state JSON 快照作为迁移备份。</p>
                 </div>
               </div>
               <div className="settings-backup-grid">

@@ -16,7 +16,6 @@ import {
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import seedData from "../../../data/eduos.json";
 
 type TaskStatus = "ahead" | "normal" | "behind";
 type TaskPriority = "高" | "中" | "低";
@@ -78,9 +77,6 @@ type ParsedLogItem = {
   line: string;
 };
 
-const initialGoals = seedData.goals as PlanGoal[];
-const initialTasks = seedData.goalTasks as PlanTask[];
-const initialLogs = (seedData.goalLogs || []) as PlanLog[];
 const weekDays = ["周一", "周二", "周三", "周四", "周五", "周六", "周日"];
 
 function clamp(value: number, min: number, max: number) {
@@ -249,9 +245,10 @@ function buildDingTalkMessage(type: string, options: {
 }
 
 export default function WeeklyPage() {
-  const [goals, setGoals] = useState<PlanGoal[]>(initialGoals);
-  const [tasks, setTasks] = useState<PlanTask[]>(initialTasks);
-  const [logs, setLogs] = useState<PlanLog[]>(initialLogs);
+  const [goals, setGoals] = useState<PlanGoal[]>([]);
+  const [tasks, setTasks] = useState<PlanTask[]>([]);
+  const [logs, setLogs] = useState<PlanLog[]>([]);
+  const [loaded, setLoaded] = useState(false);
   const [weeklyDone, setWeeklyDone] = useState<Record<string, number>>({});
   const [naturalLog, setNaturalLog] = useState("");
   const [saved, setSaved] = useState(false);
@@ -266,9 +263,10 @@ export default function WeeklyPage() {
       if (!response.ok || cancelled) return;
       const data = await response.json() as WeeklyData;
       if (cancelled) return;
-      setGoals(Array.isArray(data.goals) ? data.goals : initialGoals);
-      setTasks(Array.isArray(data.goalTasks) ? data.goalTasks : initialTasks);
-      setLogs(Array.isArray(data.goalLogs) ? data.goalLogs : initialLogs);
+      setGoals(Array.isArray(data.goals) ? data.goals : []);
+      setTasks(Array.isArray(data.goalTasks) ? data.goalTasks : []);
+      setLogs(Array.isArray(data.goalLogs) ? data.goalLogs : []);
+      setLoaded(true);
     }
 
     function handleVisibilityChange() {
@@ -288,9 +286,14 @@ export default function WeeklyPage() {
   const week = useMemo(getWeekRange, []);
   const summerGoal = goals.find((goal) => goal.id === "summer-2025") || goals.find((goal) => goal.title.includes("暑假")) || goals[0];
   const weeklyTasks = useMemo(() => {
-    if (!summerGoal) return tasks;
-    return tasks.filter((task) => (task.goalIds || [task.goalId]).includes(summerGoal.id));
-  }, [summerGoal, tasks]);
+    const liveGoalIds = new Set(goals.map((goal) => goal.id));
+    const liveTasks = tasks.filter((task) => {
+      const ids = (task.goalIds?.length ? task.goalIds : [task.goalId]).filter(Boolean);
+      return ids.some((goalId) => liveGoalIds.has(goalId));
+    });
+    if (!summerGoal) return liveTasks;
+    return liveTasks.filter((task) => (task.goalIds?.length ? task.goalIds : [task.goalId]).includes(summerGoal.id));
+  }, [goals, summerGoal, tasks]);
   const categories = useMemo(() => Array.from(new Set(weeklyTasks.map((task) => task.category || "未分类"))), [weeklyTasks]);
   const rhythmGroups = useMemo(() => getRhythmGroups(weeklyTasks), [weeklyTasks]);
   const dailyPlan = useMemo(() => buildDailyPlan(weeklyTasks), [weeklyTasks]);
@@ -298,6 +301,11 @@ export default function WeeklyPage() {
   const suggestedTotal = useMemo(() => weeklyTasks.reduce((sum, task) => sum + getSuggestedWeeklyAmount(task), 0), [weeklyTasks]);
   const doneTotal = Object.values(weeklyDone).reduce((sum, value) => sum + Number(value || 0), 0);
   const weekProgress = suggestedTotal ? clamp(Math.round((doneTotal / suggestedTotal) * 100), 0, 100) : 0;
+
+  useEffect(() => {
+    const liveTaskIds = new Set(weeklyTasks.map((task) => task.id));
+    setWeeklyDone((current) => Object.fromEntries(Object.entries(current).filter(([taskId]) => liveTaskIds.has(taskId))));
+  }, [weeklyTasks]);
 
   function updateDone(taskId: string, event: ChangeEvent<HTMLInputElement>) {
     setSaved(false);
@@ -439,6 +447,13 @@ export default function WeeklyPage() {
         <div className={cn("weekly-save-feedback", pushFeedback.includes("失败") || pushFeedback.includes("检查") ? "error" : "")}>
           {pushFeedback}
         </div>
+      )}
+
+      {!loaded && (
+        <section className="weekly-empty-state">
+          <strong>正在同步目标地图</strong>
+          <span>周计划只读取目标地图里的当前任务，不维护另一套任务库。</span>
+        </section>
       )}
 
       <section className="weekly-plan-hero">
