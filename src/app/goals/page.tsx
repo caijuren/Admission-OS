@@ -186,6 +186,10 @@ export default function GoalsPage() {
     () => phases.filter((phase) => phase.goalId === activeGoal?.id).sort((a, b) => a.order - b.order),
     [activeGoal?.id, phases]
   );
+  const parentGoal = useMemo(
+    () => activeGoal?.parentId ? goals.find((goal) => goal.id === activeGoal.parentId) : undefined,
+    [activeGoal?.parentId, goals]
+  );
   const categories = useMemo(() => Array.from(new Set(activeTasks.map((task) => task.category || "未分类"))), [activeTasks]);
   const childGoals = useMemo(() => goals.filter((goal) => goal.parentId === activeGoal?.id), [activeGoal?.id, goals]);
   const linkedGoals = useMemo(() => {
@@ -423,8 +427,14 @@ export default function GoalsPage() {
             <span><Compass className="h-4 w-4" /> {childGoals.length} 个子目标</span>
             <span><Sparkles className="h-4 w-4" /> {activeGoal.status}</span>
           </div>
+          <div className="goal-path-strip">
+            <span>路径</span>
+            <strong>{parentGoal ? `${parentGoal.title} / ${activeGoal.title}` : activeGoal.title}</strong>
+            <em>{linkedGoals.length ? `关联 ${linkedGoals.length} 个目标` : "单目标推进"}</em>
+          </div>
           <div className="goal-action-row">
             <button onClick={() => { setEditingGoal(activeGoal); setGoalOpen(true); }}>编辑目标</button>
+            <button onClick={() => { setEditingTask(null); setTaskOpen(true); }}>新增任务</button>
             <button className="danger" onClick={() => deleteGoal(activeGoal.id)}>删除目标</button>
           </div>
           <div className="goal-scope-row">
@@ -531,7 +541,10 @@ export default function GoalsPage() {
                               <h4>{task.title}</h4>
                               <span>{task.dailyTarget || "未配置执行节奏"} · {task.executionMode || "孩子自主"}</span>
                             </div>
-                            <em className={status.className}>{status.label}</em>
+                            <div className="summer-task-badges">
+                              <em className={status.className}>{status.label}</em>
+                              <em className={cn("priority", task.priority === "高" && "high", task.priority === "低" && "low")}>{task.priority}</em>
+                            </div>
                           </div>
                           <p>{task.description || "还没有配置任务说明。"}</p>
                           <div className="summer-task-progress">

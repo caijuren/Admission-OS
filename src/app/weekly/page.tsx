@@ -297,6 +297,9 @@ export default function WeeklyPage() {
   const categories = useMemo(() => Array.from(new Set(weeklyTasks.map((task) => task.category || "未分类"))), [weeklyTasks]);
   const rhythmGroups = useMemo(() => getRhythmGroups(weeklyTasks), [weeklyTasks]);
   const dailyPlan = useMemo(() => buildDailyPlan(weeklyTasks), [weeklyTasks]);
+  const todayIndex = Math.max(0, (new Date().getDay() || 7) - 1);
+  const todayItems = dailyPlan[todayIndex] || [];
+  const todayTotal = todayItems.reduce((sum, item) => sum + item.amount, 0);
   const parsedLogs = useMemo(() => parseNaturalLog(naturalLog, weeklyTasks), [naturalLog, weeklyTasks]);
   const suggestedTotal = useMemo(() => weeklyTasks.reduce((sum, task) => sum + getSuggestedWeeklyAmount(task), 0), [weeklyTasks]);
   const doneTotal = Object.values(weeklyDone).reduce((sum, value) => sum + Number(value || 0), 0);
@@ -491,6 +494,29 @@ export default function WeeklyPage() {
         <article><Target className="h-5 w-5" /><span>建议总量</span><strong>{suggestedTotal}</strong></article>
         <article><CalendarDays className="h-5 w-5" /><span>每日安排</span><strong>{dailyPlan.filter((items) => items.length).length}</strong></article>
         <article><CheckCircle2 className="h-5 w-5" /><span>本周已填</span><strong>{doneTotal}</strong></article>
+      </section>
+
+      <section className="weekly-today-panel">
+        <div className="weekly-section-title">
+          <CalendarDays className="h-5 w-5 text-[#2F7DD3]" />
+          <div>
+            <h2>今日焦点</h2>
+            <p>{weekDays[todayIndex]} · {todayItems.length ? `${todayItems.length} 项任务 · 建议总量 ${todayTotal}` : "今天没有自动拆解任务"}</p>
+          </div>
+        </div>
+        <div className="weekly-today-list">
+          {todayItems.length ? todayItems.map(({ task, amount }) => (
+            <article key={`today-${task.id}`}>
+              <div>
+                <strong>{task.title}</strong>
+                <span>{task.category} · {task.executionMode || "孩子自主"} · {task.dailyTarget || "节奏未配置"}</span>
+              </div>
+              <em>{amount}{task.unit}</em>
+            </article>
+          )) : (
+            <div className="weekly-today-empty">今天可以用于复盘、补录或机动调整。</div>
+          )}
+        </div>
       </section>
 
       <section className="weekly-recommendation-panel">

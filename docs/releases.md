@@ -1,5 +1,36 @@
 # EduOS Release Notes
 
+## v1.9.0 - Workspace UI Upgrade
+
+Release type: product UI upgrade + workflow refinement.
+
+### Highlights
+
+- Upgraded the application shell with grouped navigation, module-aware accent colors, and a visible account/logout area.
+- Added a compact context bar on non-home pages showing the current module, student, target school, and stage.
+- Refined non-home page surfaces with unified panel radius, softer shadows, consistent action buttons, and denser workbench spacing.
+- Improved Goals as a planning workbench with a sticky goal map, active goal path summary, direct task creation, and task priority badges.
+- Improved Weekly Plan with a Today Focus panel that surfaces the current day's suggested tasks before the full weekly breakdown.
+- Tuned Timeline, Advisor, Settings, Portfolio, Reading, Grades, and shared empty states to align with the new workspace visual system.
+
+### Design System
+
+- Added route-aware section themes: planning green, evidence blue, advisor purple, and system gray.
+- Standardized page width, panel radius, control radius, and resting/raised shadows through shared CSS variables.
+- Kept the home cockpit visually distinct while bringing secondary pages into one operating-system style.
+
+### Engineering
+
+- App version bumped to `1.9.0`.
+- The UI upgrade is mostly CSS- and shell-driven, with scoped JSX changes in Goals and Weekly Plan.
+- Cleared stale Next.js cache during validation to resolve dev-server manifest mismatch after repeated builds.
+
+### Known Beta Areas
+
+- The upgraded UI should be reviewed visually in the browser across the main authenticated pages.
+- Mobile layouts use responsive fallbacks, but Goals and Advisor still deserve a dedicated mobile pass.
+- Local disk space can affect Next.js cache writes; keep enough free space before running repeated builds.
+
 ## v1.5.0 - UI Polish Sprint
 
 Release type: product polish + workflow beta.
