@@ -233,6 +233,14 @@ export default function SettingsPage() {
                   <span>{currentStage?.title || profile.currentStage} · 准备度 {profile.progress}%</span>
                 </div>
               </div>
+              <nav className="settings-anchor-nav" aria-label="设置分区">
+                <a href="#account">账户与登录</a>
+                <a href="#profile">孩子档案</a>
+                <a href="#integrations">钉钉推送</a>
+                <a href="#ai">AI 顾问</a>
+                <a href="#route">首页路线</a>
+                <a href="#system">数据备份</a>
+              </nav>
             </div>
           </section>
 

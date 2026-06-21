@@ -6,9 +6,11 @@ import {
   BookOpen,
   CalendarCheck2,
   Compass,
+  Edit3,
   FileText,
   Flame,
   ListChecks,
+  MoreHorizontal,
   PenLine,
   Plus,
   Route,
@@ -433,9 +435,18 @@ export default function GoalsPage() {
             <em>{linkedGoals.length ? `关联 ${linkedGoals.length} 个目标` : "单目标推进"}</em>
           </div>
           <div className="goal-action-row">
-            <button onClick={() => { setEditingGoal(activeGoal); setGoalOpen(true); }}>编辑目标</button>
-            <button onClick={() => { setEditingTask(null); setTaskOpen(true); }}>新增任务</button>
-            <button className="danger" onClick={() => deleteGoal(activeGoal.id)}>删除目标</button>
+            <button className="primary" onClick={() => { setEditingTask(null); setTaskOpen(true); }}>
+              <Plus className="h-4 w-4" />
+              新增任务
+            </button>
+            <button onClick={() => { setEditingGoal(activeGoal); setGoalOpen(true); }}>
+              <Edit3 className="h-4 w-4" />
+              编辑目标
+            </button>
+            <button className="danger quiet" onClick={() => deleteGoal(activeGoal.id)}>
+              <MoreHorizontal className="h-4 w-4" />
+              删除目标
+            </button>
           </div>
           <div className="goal-scope-row">
             <button className={cn(viewMode === "overview" && "active")} onClick={() => setViewMode("overview")}>目标说明</button>
@@ -555,8 +566,14 @@ export default function GoalsPage() {
                             <i className={cn("bg-gradient-to-r", config.bar)} style={{ width: `${taskProgress}%` }} />
                           </div>
                           <div className="goal-action-row compact">
-                            <button onClick={() => { setEditingTask(task); setTaskOpen(true); }}>编辑</button>
-                            <button className="danger" onClick={() => deleteTask(task.id)}>删除</button>
+                            <button onClick={() => { setEditingTask(task); setTaskOpen(true); }}>
+                              <Edit3 className="h-4 w-4" />
+                              编辑
+                            </button>
+                            <button className="danger quiet" onClick={() => deleteTask(task.id)}>
+                              <MoreHorizontal className="h-4 w-4" />
+                              删除
+                            </button>
                           </div>
                         </div>
                       );

@@ -218,8 +218,20 @@ export default function SkillTreePage() {
       <>
       {events.length === 0 && (
         <section className="action-empty-panel">
-          <strong>能力资产还没有证据</strong>
-          <span>先补一条成绩、阅读、项目或荣誉记录，系统才会开始判断学科能力、项目成果和自招差距。</span>
+          <div>
+            <strong>能力资产还没有证据</strong>
+            <span>先补一条项目或荣誉，系统才会开始判断项目成果、自招差距和申请材料厚度。</span>
+          </div>
+          <div className="empty-action-row">
+            <button onClick={() => { setAssetType("honor"); setAssetOpen(true); }}>
+              <Award className="h-4 w-4" />
+              新增荣誉
+            </button>
+            <button onClick={() => { setAssetType("project"); setAssetOpen(true); }}>
+              <Lightbulb className="h-4 w-4" />
+              新增项目
+            </button>
+          </div>
         </section>
       )}
 

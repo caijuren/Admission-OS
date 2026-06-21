@@ -51,6 +51,8 @@ export default function TimelinePage() {
       return acc;
     }, {});
   }, [filteredEvents]);
+  const highlightCount = events.filter((event) => event.is_highlight).length;
+  const milestoneCount = events.filter((event) => event.is_milestone).length;
 
   return (
     <div className="design-page-shell">
@@ -73,6 +75,20 @@ export default function TimelinePage() {
             </div>
           )}
         </div>
+      </section>
+
+      <section className="timeline-proof-strip">
+        {[
+          ["全部证据", events.length],
+          ["申请亮点", highlightCount],
+          ["关键里程碑", milestoneCount],
+          ["当前筛选", filteredEvents.length],
+        ].map(([label, value]) => (
+          <article key={label as string}>
+            <span>{label as string}</span>
+            <strong>{String(value)}</strong>
+          </article>
+        ))}
       </section>
 
       <div className="timeline-toolbar">

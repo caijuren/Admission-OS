@@ -162,7 +162,10 @@ export default function ReadingPage() {
                 <BookOpen className="h-8 w-8" />
                 <strong>还没有阅读表达素材</strong>
                 <span>先记录一本暑假阅读书目，补充一句可复用观点，后续可转化为作文和面谈表达。</span>
-                <button className="empty-action-button" onClick={() => setOpen(true)}>添加第一条阅读素材</button>
+                <button className="empty-action-button" onClick={() => setOpen(true)}>
+                  <Plus className="h-4 w-4" />
+                  添加第一条阅读素材
+                </button>
               </div>
             )}
           </div>

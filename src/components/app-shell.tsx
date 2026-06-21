@@ -67,7 +67,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
   const [profile, setProfile] = useState<StudentProfile>({ ...DEFAULT_PROFILE, ...seedData.profile });
 
   const publicShell = pathname === "/login" || pathname === "/privacy";
-  const showContextBar = pathname !== "/";
+  const showContextBar = pathname !== "/" && !pathname.startsWith("/weekly");
   const activeNavItem = flatNavItems
     .filter((item) => item.href === "/" ? pathname === "/" : pathname.startsWith(item.href))
     .sort((a, b) => b.href.length - a.href.length)[0];

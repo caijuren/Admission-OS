@@ -446,10 +446,10 @@ export default function DashboardPage({ initialView = "panorama" }: DashboardPag
         </div>
         <div className="dashboard-toolbar-switch" aria-label="驾驶舱视图">
           {[
-            { id: "panorama", title: "路径全景" },
-            { id: "admission", title: "自招看板" },
-            { id: "admissionTree", title: "自招看板1" },
-            { id: "tasks", title: "任务进度" },
+            { id: "panorama", title: "升学路径" },
+            { id: "admission", title: "自招准备" },
+            { id: "admissionTree", title: "能力树" },
+            { id: "tasks", title: "执行进度" },
           ].map((item) => (
             <button
               key={item.id}
@@ -539,6 +539,7 @@ export default function DashboardPage({ initialView = "panorama" }: DashboardPag
             <div className="pathway-map-header">
               <div>
                 <h2>交附嘉分登山路线</h2>
+                <p>先看当前阶段，再看下一段要补齐的学科、项目和证据。</p>
               </div>
             </div>
 
@@ -558,7 +559,7 @@ export default function DashboardPage({ initialView = "panorama" }: DashboardPag
             <div>
               <span className="admission-kicker">自招准备度</span>
               <h2>{admissionStatus}</h2>
-              <p>这里先只回答一个问题：为了自招，当前证据够不够、进度到哪了、短板在哪里。</p>
+              <p>先判断当前证据是否够厚，再把成绩、竞赛、项目、阅读和风险拆开看。</p>
               <div className="admission-summary-meta">
                 <em>成绩 {gradeStats.examCount} 次</em>
                 <em>竞赛 {assetStats.honors} 项</em>
@@ -601,8 +602,9 @@ export default function DashboardPage({ initialView = "panorama" }: DashboardPag
       )}
 
       {dashboardView === "admissionTree" && (
-        <section className="admission-tree-board-v1" aria-label="自招看板1">
+        <section className="admission-tree-board-v1" aria-label="能力树">
           <div className="admission-tree-stars" />
+          <div className="admission-tree-gridlines" />
           <div className="admission-tree-status">
             <span>数据更新时间：2025.06.01</span>
           </div>
@@ -647,7 +649,7 @@ export default function DashboardPage({ initialView = "panorama" }: DashboardPag
                 <span>近期重要任务</span>
                 <Link href="/goals">查看全部</Link>
               </div>
-              {tasks.slice(0, 4).map((task, index) => (
+              {tasks.slice(0, 3).map((task, index) => (
                 <button
                   key={task.id}
                   className="admission-tree-task"
@@ -662,6 +664,9 @@ export default function DashboardPage({ initialView = "panorama" }: DashboardPag
           </aside>
 
           <div className="admission-tree-stage" aria-hidden="false">
+            <div className="admission-tree-halo" />
+            <div className="admission-tree-orbit orbit-one" />
+            <div className="admission-tree-orbit orbit-two" />
             <Image
               className="admission-tree-asset"
               src="/assets/design/admission-tree-original-v1.png"
@@ -711,6 +716,10 @@ export default function DashboardPage({ initialView = "panorama" }: DashboardPag
                 </button>
               );
             })}
+          </div>
+
+          <div className="admission-tree-footnote">
+            <span>点击树上的指标，查看各维度详细证据与提升建议</span>
           </div>
 
           <aside className="admission-tree-right-panel">

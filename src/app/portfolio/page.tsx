@@ -66,6 +66,12 @@ export default function PortfolioPage() {
       + Number(assetStats.honors + assetStats.projects > 0)
       + Number(timeline.length > 0)) * 20
   );
+  const missingMaterials = [
+    gradeStats.examCount > 0 ? "" : "校内成绩",
+    readingStats.totalBooks > 0 ? "" : "阅读表达",
+    assetStats.honors + assetStats.projects > 0 ? "" : "项目/荣誉",
+    timeline.length > 0 ? "" : "关键证据",
+  ].filter(Boolean);
 
   function handlePrint() {
     setExportState("已打开打印面板，可选择“保存为 PDF”。");
@@ -89,6 +95,23 @@ export default function PortfolioPage() {
       </section>
 
       {exportState && <div className="inline-feedback no-print">{exportState}</div>}
+
+      <section className="portfolio-release-strip no-print">
+        <div className="portfolio-readiness-meter">
+          <strong>{readiness}%</strong>
+          <span>材料完成度</span>
+          <div className="line-meter"><i style={{ width: `${readiness}%` }} /></div>
+        </div>
+        <div>
+          <h2>{missingMaterials.length ? "发版前仍需补齐材料" : "材料结构已完整"}</h2>
+          <p>{missingMaterials.length ? `建议优先补：${missingMaterials.join("、")}。` : "可以导出 PDF 做人工校对，重点检查文字表达和证据顺序。"}</p>
+        </div>
+        <div className="portfolio-release-tags">
+          {materialSections.map((item) => (
+            <span key={item.key} className={item.status === "已接入" ? "ready" : ""}>{item.title}</span>
+          ))}
+        </div>
+      </section>
 
       <section className="portfolio-layout-grid">
         <article className="data-panel portfolio-summary-panel">
@@ -127,7 +150,7 @@ export default function PortfolioPage() {
         </section>
       </section>
 
-      <section className="portfolio-material-grid">
+      <section className="portfolio-material-grid portfolio-document-preview">
         <article className="data-panel">
           <div className="data-panel-inner">
             <div className="panel-title-row">

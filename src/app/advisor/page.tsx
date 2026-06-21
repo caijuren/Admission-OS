@@ -773,237 +773,6 @@ export default function AdvisorPage() {
               </div>
             </div>
           )}
-          <div className="advisor-draft-panel">
-            <div className="advisor-draft-head">
-              <div>
-                <h3>任务拆解</h3>
-                <span>把一个想法变成可确认写入的任务草稿</span>
-              </div>
-              {taskDrafts.length > 0 && (
-                <Button type="button" onClick={applyTaskDrafts} disabled={applyingDrafts}>
-                  {applyingDrafts ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />}
-                  确认写入
-                </Button>
-              )}
-            </div>
-            <div className="advisor-draft-input">
-              <textarea
-                value={taskIdea}
-                onChange={(event) => setTaskIdea(event.target.value)}
-                placeholder="例如：我想两周内把英语阅读补起来，每天一点，但不要安排太满。"
-              />
-              <Button type="button" onClick={generateTaskDrafts} disabled={!taskIdea.trim() || generatingDrafts}>
-                {generatingDrafts ? <Loader2 className="h-4 w-4 animate-spin" /> : <Sparkles className="h-4 w-4" />}
-                生成草稿
-              </Button>
-            </div>
-            {taskDrafts.length > 0 && (
-              <div className="advisor-draft-list">
-                {taskDrafts.map((draft, index) => (
-                  <article key={`${draft.title}-${index}`} className="advisor-draft-card">
-                    <div className="advisor-draft-card-head">
-                      <Input
-                        value={draft.title}
-                        onChange={(event) => updateTaskDraft(index, { title: event.target.value })}
-                        aria-label="任务标题"
-                      />
-                      <button type="button" aria-label="移除任务草稿" onClick={() => removeTaskDraft(index)}>
-                        <Trash2 className="h-4 w-4" />
-                      </button>
-                    </div>
-                    <textarea
-                      value={draft.description}
-                      onChange={(event) => updateTaskDraft(index, { description: event.target.value })}
-                      aria-label="任务描述"
-                    />
-                    <div className="advisor-draft-fields">
-                      <Input
-                        value={draft.category}
-                        onChange={(event) => updateTaskDraft(index, { category: event.target.value })}
-                        aria-label="分类"
-                      />
-                      <Input
-                        type="number"
-                        min={1}
-                        value={draft.target}
-                        onChange={(event) => updateTaskDraft(index, { target: Math.max(1, Number(event.target.value || 1)) })}
-                        aria-label="目标量"
-                      />
-                      <Input
-                        value={draft.unit}
-                        onChange={(event) => updateTaskDraft(index, { unit: event.target.value })}
-                        aria-label="单位"
-                      />
-                      <Input
-                        value={draft.dailyTarget}
-                        onChange={(event) => updateTaskDraft(index, { dailyTarget: event.target.value })}
-                        aria-label="执行频率"
-                      />
-                      <select
-                        value={draft.priority}
-                        onChange={(event) => updateTaskDraft(index, { priority: event.target.value as TaskDraft["priority"] })}
-                        aria-label="优先级"
-                      >
-                        <option value="高">高</option>
-                        <option value="中">中</option>
-                        <option value="低">低</option>
-                      </select>
-                      <select
-                        value={draft.executionMode}
-                        onChange={(event) => updateTaskDraft(index, { executionMode: event.target.value as TaskDraft["executionMode"] })}
-                        aria-label="执行方式"
-                      >
-                        <option value="孩子自主">孩子自主</option>
-                        <option value="家长陪练">家长陪练</option>
-                        <option value="亲子共学">亲子共学</option>
-                        <option value="家长验收">家长验收</option>
-                      </select>
-                    </div>
-                  </article>
-                ))}
-              </div>
-            )}
-          </div>
-          <div className="advisor-progress-panel">
-            <div className="advisor-draft-head">
-              <div>
-                <h3>进度汇报</h3>
-                <span>把今天完成情况匹配到任务，并生成日志</span>
-              </div>
-              {progressDrafts.length > 0 && (
-                <Button type="button" onClick={applyProgressDrafts} disabled={applyingProgress}>
-                  {applyingProgress ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />}
-                  确认同步
-                </Button>
-              )}
-            </div>
-            <div className="advisor-draft-input">
-              <textarea
-                value={progressReport}
-                onChange={(event) => setProgressReport(event.target.value)}
-                placeholder="例如：今天做了 2 篇英语阅读，数学错题整理了 30 分钟，文书大纲还没写完。"
-              />
-              <Button type="button" onClick={generateProgressDrafts} disabled={!progressReport.trim() || generatingProgress}>
-                {generatingProgress ? <Loader2 className="h-4 w-4 animate-spin" /> : <Sparkles className="h-4 w-4" />}
-                解析汇报
-              </Button>
-            </div>
-            {progressDrafts.length > 0 && (
-              <div className="advisor-progress-list">
-                {progressDrafts.map((draft, index) => (
-                  <article key={`${draft.taskId}-${index}`} className="advisor-progress-card">
-                    <div className="advisor-progress-card-head">
-                      <strong>{draft.taskTitle}</strong>
-                      <button type="button" aria-label="移除进度草稿" onClick={() => removeProgressDraft(index)}>
-                        <Trash2 className="h-4 w-4" />
-                      </button>
-                    </div>
-                    <div className="advisor-progress-fields">
-                      <Input
-                        value={draft.category}
-                        onChange={(event) => updateProgressDraft(index, { category: event.target.value })}
-                        aria-label="记录分类"
-                      />
-                      <Input
-                        type="number"
-                        min={0}
-                        value={draft.amount}
-                        onChange={(event) => updateProgressDraft(index, { amount: Math.max(0, Number(event.target.value || 0)) })}
-                        aria-label="完成量"
-                      />
-                      <Input
-                        value={draft.unit}
-                        onChange={(event) => updateProgressDraft(index, { unit: event.target.value })}
-                        aria-label="单位"
-                      />
-                    </div>
-                    <textarea
-                      value={draft.summary}
-                      onChange={(event) => updateProgressDraft(index, { summary: event.target.value })}
-                      aria-label="日志摘要"
-                    />
-                    <textarea
-                      value={draft.note}
-                      onChange={(event) => updateProgressDraft(index, { note: event.target.value })}
-                      aria-label="备注"
-                    />
-                  </article>
-                ))}
-              </div>
-            )}
-          </div>
-          <div className="advisor-diagnosis-panel">
-            <div className="advisor-draft-head">
-              <div>
-                <h3>计划诊断</h3>
-                <span>{diagnosis ? diagnosis.summary : "检查任务节奏、拆解粒度和推进风险"}</span>
-              </div>
-              <Button type="button" onClick={() => loadDiagnosis()} disabled={loadingDiagnosis}>
-                {loadingDiagnosis ? <Loader2 className="h-4 w-4 animate-spin" /> : <RefreshCw className="h-4 w-4" />}
-                重新诊断
-              </Button>
-            </div>
-            <div className="advisor-diagnosis-list">
-              {loadingDiagnosis && !diagnosis && (
-                <div className="advisor-diagnosis-empty">
-                  <Loader2 className="h-4 w-4 animate-spin" />
-                  正在分析当前计划...
-                </div>
-              )}
-              {diagnosis?.items.map((item) => (
-                <article key={item.id} className={cn("advisor-diagnosis-card", item.severity)}>
-                  <div>
-                    <span><AlertTriangle className="h-4 w-4" />{severityLabels[item.severity]}</span>
-                    <strong>{item.title}</strong>
-                  </div>
-                  <p>{item.evidence}</p>
-                  <em>{item.suggestion}</em>
-                  <button type="button" onClick={() => generateActionDrafts(item)} disabled={Boolean(generatingActions)}>
-                    {generatingActions === item.id ? <Loader2 className="h-4 w-4 animate-spin" /> : <Sparkles className="h-4 w-4" />}
-                    生成行动草稿
-                  </button>
-                </article>
-              ))}
-            </div>
-            {actionDrafts.length > 0 && (
-              <div className="advisor-action-panel">
-                <div className="advisor-action-head">
-                  <div>
-                    <strong>行动草稿</strong>
-                    <span>确认后才会修改任务</span>
-                  </div>
-                  <Button type="button" onClick={applyActionDrafts} disabled={applyingActions}>
-                    {applyingActions ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />}
-                    应用草稿
-                  </Button>
-                </div>
-                <div className="advisor-action-list">
-                  {actionDrafts.map((draft, index) => (
-                    <article key={draft.id || `${draft.type}-${index}`} className="advisor-action-card">
-                      <div>
-                        <span>{draft.type === "create_task" ? "新增任务" : "更新任务"}</span>
-                        <strong>{draft.title}</strong>
-                        <button type="button" aria-label="移除行动草稿" onClick={() => removeActionDraft(index)}>
-                          <Trash2 className="h-4 w-4" />
-                        </button>
-                      </div>
-                      <p>{draft.reason}</p>
-                      {draft.type === "update_task" ? (
-                        <em>
-                          {Object.entries(draft.patch)
-                            .filter(([, value]) => value !== undefined && value !== "")
-                            .map(([key, value]) => `${key}: ${value}`)
-                            .join("；")}
-                        </em>
-                      ) : (
-                        <em>{draft.task.category}｜{draft.task.target}{draft.task.unit}｜{draft.task.dailyTarget}</em>
-                      )}
-                    </article>
-                  ))}
-                </div>
-              </div>
-            )}
-          </div>
           <div className="advisor-message-list">
             {messages.map((message, index) => (
               <article key={message.id || `${message.role}-${index}`} className={cn("advisor-message", message.role === "user" && "user")}>
@@ -1031,6 +800,242 @@ export default function AdvisorPage() {
               <Send className="h-4 w-4" />
             </Button>
           </form>
+
+          <div className="advisor-tool-grid">
+            <div className="advisor-draft-panel">
+              <div className="advisor-draft-head">
+                <div>
+                  <h3>任务拆解</h3>
+                  <span>把一个想法变成可确认写入的任务草稿</span>
+                </div>
+                {taskDrafts.length > 0 && (
+                  <Button type="button" onClick={applyTaskDrafts} disabled={applyingDrafts}>
+                    {applyingDrafts ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />}
+                    确认写入
+                  </Button>
+                )}
+              </div>
+              <div className="advisor-draft-input">
+                <textarea
+                  value={taskIdea}
+                  onChange={(event) => setTaskIdea(event.target.value)}
+                  placeholder="例如：我想两周内把英语阅读补起来，每天一点，但不要安排太满。"
+                />
+                <Button type="button" onClick={generateTaskDrafts} disabled={!taskIdea.trim() || generatingDrafts}>
+                  {generatingDrafts ? <Loader2 className="h-4 w-4 animate-spin" /> : <Sparkles className="h-4 w-4" />}
+                  生成草稿
+                </Button>
+              </div>
+              {taskDrafts.length > 0 && (
+                <div className="advisor-draft-list">
+                  {taskDrafts.map((draft, index) => (
+                    <article key={`${draft.title}-${index}`} className="advisor-draft-card">
+                      <div className="advisor-draft-card-head">
+                        <Input
+                          value={draft.title}
+                          onChange={(event) => updateTaskDraft(index, { title: event.target.value })}
+                          aria-label="任务标题"
+                        />
+                        <button type="button" aria-label="移除任务草稿" onClick={() => removeTaskDraft(index)}>
+                          <Trash2 className="h-4 w-4" />
+                        </button>
+                      </div>
+                      <textarea
+                        value={draft.description}
+                        onChange={(event) => updateTaskDraft(index, { description: event.target.value })}
+                        aria-label="任务描述"
+                      />
+                      <div className="advisor-draft-fields">
+                        <Input
+                          value={draft.category}
+                          onChange={(event) => updateTaskDraft(index, { category: event.target.value })}
+                          aria-label="分类"
+                        />
+                        <Input
+                          type="number"
+                          min={1}
+                          value={draft.target}
+                          onChange={(event) => updateTaskDraft(index, { target: Math.max(1, Number(event.target.value || 1)) })}
+                          aria-label="目标量"
+                        />
+                        <Input
+                          value={draft.unit}
+                          onChange={(event) => updateTaskDraft(index, { unit: event.target.value })}
+                          aria-label="单位"
+                        />
+                        <Input
+                          value={draft.dailyTarget}
+                          onChange={(event) => updateTaskDraft(index, { dailyTarget: event.target.value })}
+                          aria-label="执行频率"
+                        />
+                        <select
+                          value={draft.priority}
+                          onChange={(event) => updateTaskDraft(index, { priority: event.target.value as TaskDraft["priority"] })}
+                          aria-label="优先级"
+                        >
+                          <option value="高">高</option>
+                          <option value="中">中</option>
+                          <option value="低">低</option>
+                        </select>
+                        <select
+                          value={draft.executionMode}
+                          onChange={(event) => updateTaskDraft(index, { executionMode: event.target.value as TaskDraft["executionMode"] })}
+                          aria-label="执行方式"
+                        >
+                          <option value="孩子自主">孩子自主</option>
+                          <option value="家长陪练">家长陪练</option>
+                          <option value="亲子共学">亲子共学</option>
+                          <option value="家长验收">家长验收</option>
+                        </select>
+                      </div>
+                    </article>
+                  ))}
+                </div>
+              )}
+            </div>
+
+            <div className="advisor-progress-panel">
+              <div className="advisor-draft-head">
+                <div>
+                  <h3>进度汇报</h3>
+                  <span>把今天完成情况匹配到任务，并生成日志</span>
+                </div>
+                {progressDrafts.length > 0 && (
+                  <Button type="button" onClick={applyProgressDrafts} disabled={applyingProgress}>
+                    {applyingProgress ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />}
+                    确认同步
+                  </Button>
+                )}
+              </div>
+              <div className="advisor-draft-input">
+                <textarea
+                  value={progressReport}
+                  onChange={(event) => setProgressReport(event.target.value)}
+                  placeholder="例如：今天做了 2 篇英语阅读，数学错题整理了 30 分钟，文书大纲还没写完。"
+                />
+                <Button type="button" onClick={generateProgressDrafts} disabled={!progressReport.trim() || generatingProgress}>
+                  {generatingProgress ? <Loader2 className="h-4 w-4 animate-spin" /> : <Sparkles className="h-4 w-4" />}
+                  解析汇报
+                </Button>
+              </div>
+              {progressDrafts.length > 0 && (
+                <div className="advisor-progress-list">
+                  {progressDrafts.map((draft, index) => (
+                    <article key={`${draft.taskId}-${index}`} className="advisor-progress-card">
+                      <div className="advisor-progress-card-head">
+                        <strong>{draft.taskTitle}</strong>
+                        <button type="button" aria-label="移除进度草稿" onClick={() => removeProgressDraft(index)}>
+                          <Trash2 className="h-4 w-4" />
+                        </button>
+                      </div>
+                      <div className="advisor-progress-fields">
+                        <Input
+                          value={draft.category}
+                          onChange={(event) => updateProgressDraft(index, { category: event.target.value })}
+                          aria-label="记录分类"
+                        />
+                        <Input
+                          type="number"
+                          min={0}
+                          value={draft.amount}
+                          onChange={(event) => updateProgressDraft(index, { amount: Math.max(0, Number(event.target.value || 0)) })}
+                          aria-label="完成量"
+                        />
+                        <Input
+                          value={draft.unit}
+                          onChange={(event) => updateProgressDraft(index, { unit: event.target.value })}
+                          aria-label="单位"
+                        />
+                      </div>
+                      <textarea
+                        value={draft.summary}
+                        onChange={(event) => updateProgressDraft(index, { summary: event.target.value })}
+                        aria-label="日志摘要"
+                      />
+                      <textarea
+                        value={draft.note}
+                        onChange={(event) => updateProgressDraft(index, { note: event.target.value })}
+                        aria-label="备注"
+                      />
+                    </article>
+                  ))}
+                </div>
+              )}
+            </div>
+
+            <div className="advisor-diagnosis-panel">
+              <div className="advisor-draft-head">
+                <div>
+                  <h3>计划诊断</h3>
+                  <span>{diagnosis ? diagnosis.summary : "检查任务节奏、拆解粒度和推进风险"}</span>
+                </div>
+                <Button type="button" onClick={() => loadDiagnosis()} disabled={loadingDiagnosis}>
+                  {loadingDiagnosis ? <Loader2 className="h-4 w-4 animate-spin" /> : <RefreshCw className="h-4 w-4" />}
+                  重新诊断
+                </Button>
+              </div>
+              <div className="advisor-diagnosis-list">
+                {loadingDiagnosis && !diagnosis && (
+                  <div className="advisor-diagnosis-empty">
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                    正在分析当前计划...
+                  </div>
+                )}
+                {diagnosis?.items.map((item) => (
+                  <article key={item.id} className={cn("advisor-diagnosis-card", item.severity)}>
+                    <div>
+                      <span><AlertTriangle className="h-4 w-4" />{severityLabels[item.severity]}</span>
+                      <strong>{item.title}</strong>
+                    </div>
+                    <p>{item.evidence}</p>
+                    <em>{item.suggestion}</em>
+                    <button type="button" onClick={() => generateActionDrafts(item)} disabled={Boolean(generatingActions)}>
+                      {generatingActions === item.id ? <Loader2 className="h-4 w-4 animate-spin" /> : <Sparkles className="h-4 w-4" />}
+                      生成行动草稿
+                    </button>
+                  </article>
+                ))}
+              </div>
+              {actionDrafts.length > 0 && (
+                <div className="advisor-action-panel">
+                  <div className="advisor-action-head">
+                    <div>
+                      <strong>行动草稿</strong>
+                      <span>确认后才会修改任务</span>
+                    </div>
+                    <Button type="button" onClick={applyActionDrafts} disabled={applyingActions}>
+                      {applyingActions ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />}
+                      应用草稿
+                    </Button>
+                  </div>
+                  <div className="advisor-action-list">
+                    {actionDrafts.map((draft, index) => (
+                      <article key={draft.id || `${draft.type}-${index}`} className="advisor-action-card">
+                        <div>
+                          <span>{draft.type === "create_task" ? "新增任务" : "更新任务"}</span>
+                          <strong>{draft.title}</strong>
+                          <button type="button" aria-label="移除行动草稿" onClick={() => removeActionDraft(index)}>
+                            <Trash2 className="h-4 w-4" />
+                          </button>
+                        </div>
+                        <p>{draft.reason}</p>
+                        {draft.type === "update_task" ? (
+                          <em>
+                            {Object.entries(draft.patch)
+                              .filter(([, value]) => value !== undefined && value !== "")
+                              .map(([key, value]) => `${key}: ${value}`)
+                              .join("；")}
+                          </em>
+                        ) : (
+                          <em>{draft.task.category}｜{draft.task.target}{draft.task.unit}｜{draft.task.dailyTarget}</em>
+                        )}
+                      </article>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
         </div>
       </section>
     </div>

@@ -1,21 +1,22 @@
 "use client";
 
-import { ChangeEvent, useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import {
-  BookOpen,
+  AlertTriangle,
   CalendarDays,
   CheckCircle2,
   ClipboardList,
+  Loader2,
   MessageSquareText,
-  Repeat,
   Save,
   Send,
+  Sparkles,
   Target,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 
 type TaskStatus = "ahead" | "normal" | "behind";
 type TaskPriority = "高" | "中" | "低";
@@ -71,10 +72,15 @@ type DailyPlanItem = {
   amount: number;
 };
 
-type ParsedLogItem = {
-  task: PlanTask;
+type ProgressDraft = {
+  taskId: string;
+  taskTitle: string;
+  goalId: string;
+  category: string;
   amount: number;
-  line: string;
+  unit: string;
+  summary: string;
+  note: string;
 };
 
 const weekDays = ["周一", "周二", "周三", "周四", "周五", "周六", "周日"];
@@ -120,30 +126,6 @@ function getSuggestedWeeklyAmount(task: PlanTask) {
   return Math.min(remaining, Math.max(1, Math.ceil(remaining / 8)));
 }
 
-function getTaskStatus(task: PlanTask): TaskStatus {
-  if (task.target && task.current >= task.target) return "ahead";
-  if (getProgress(task) < 20 && task.priority === "高") return "behind";
-  return "normal";
-}
-
-function getRhythmGroups(tasks: PlanTask[]) {
-  const daily = tasks.filter((task) => task.dailyTarget?.includes("每天"));
-  const severalTimes = tasks.filter((task) => task.dailyTarget?.includes("每周"));
-  const weekly = tasks.filter((task) => !daily.includes(task) && !severalTimes.includes(task));
-  const review = [
-    "周末核对本周完成量，少补录、多判断",
-    "看周报告：低记录学科下周优先补",
-    "只调整下周 2-3 个关键任务，不把计划排满",
-  ];
-
-  return [
-    { title: "每天保持", note: "适合阅读、听力、晨读、口语这类稳定输入", tasks: daily },
-    { title: "隔天推进", note: "适合 Unlock、写作、现代文阅读等需要间隔消化的任务", tasks: severalTimes },
-    { title: "本周推进", note: "适合练习册、项目、书单、阶段性任务", tasks: weekly },
-    { title: "周末复盘", note: "不追求每天完美，重点看一周有没有走偏", tasks: review },
-  ];
-}
-
 function getTaskDays(task: PlanTask) {
   const cadence = task.dailyTarget || "";
   if (cadence.includes("每天")) return [0, 1, 2, 3, 4, 5, 6];
@@ -173,36 +155,6 @@ function buildDailyPlan(tasks: PlanTask[]) {
     });
 
   return plan;
-}
-
-function normalizeText(value: string) {
-  return value.toLowerCase().replace(/\s+/g, "");
-}
-
-function parseNaturalLog(text: string, tasks: PlanTask[]) {
-  const lines = text
-    .split(/\n|；|;/)
-    .map((line) => line.trim())
-    .filter(Boolean);
-
-  return lines.flatMap((line) => {
-    const normalizedLine = normalizeText(line);
-    const amount = Number(line.match(/\d+(?:\.\d+)?/)?.[0] || 1);
-    const matchedTask = tasks
-      .filter((task) => Number(task.target || 0) > Number(task.current || 0))
-      .map((task) => {
-        const words = [task.title, task.category, task.description || ""]
-          .join(" ")
-          .split(/\s|\/|、|，|,|·|《|》|-|_/)
-          .map((word) => normalizeText(word))
-          .filter((word) => word.length >= 2);
-        const score = words.reduce((sum, word) => sum + (normalizedLine.includes(word) ? word.length : 0), 0);
-        return { task, score };
-      })
-      .sort((a, b) => b.score - a.score)[0]?.task;
-
-    return matchedTask ? [{ task: matchedTask, amount, line }] : [];
-  });
 }
 
 function buildDingTalkMessage(type: string, options: {
@@ -249,8 +201,11 @@ export default function WeeklyPage() {
   const [tasks, setTasks] = useState<PlanTask[]>([]);
   const [logs, setLogs] = useState<PlanLog[]>([]);
   const [loaded, setLoaded] = useState(false);
-  const [weeklyDone, setWeeklyDone] = useState<Record<string, number>>({});
-  const [naturalLog, setNaturalLog] = useState("");
+  const [logDialogOpen, setLogDialogOpen] = useState(false);
+  const [progressReport, setProgressReport] = useState("");
+  const [progressDrafts, setProgressDrafts] = useState<ProgressDraft[]>([]);
+  const [parsingProgress, setParsingProgress] = useState(false);
+  const [applyingProgress, setApplyingProgress] = useState(false);
   const [saved, setSaved] = useState(false);
   const [saveError, setSaveError] = useState("");
   const [pushFeedback, setPushFeedback] = useState("");
@@ -294,121 +249,71 @@ export default function WeeklyPage() {
     if (!summerGoal) return liveTasks;
     return liveTasks.filter((task) => (task.goalIds?.length ? task.goalIds : [task.goalId]).includes(summerGoal.id));
   }, [goals, summerGoal, tasks]);
-  const categories = useMemo(() => Array.from(new Set(weeklyTasks.map((task) => task.category || "未分类"))), [weeklyTasks]);
-  const rhythmGroups = useMemo(() => getRhythmGroups(weeklyTasks), [weeklyTasks]);
   const dailyPlan = useMemo(() => buildDailyPlan(weeklyTasks), [weeklyTasks]);
   const todayIndex = Math.max(0, (new Date().getDay() || 7) - 1);
   const todayItems = dailyPlan[todayIndex] || [];
   const todayTotal = todayItems.reduce((sum, item) => sum + item.amount, 0);
-  const parsedLogs = useMemo(() => parseNaturalLog(naturalLog, weeklyTasks), [naturalLog, weeklyTasks]);
   const suggestedTotal = useMemo(() => weeklyTasks.reduce((sum, task) => sum + getSuggestedWeeklyAmount(task), 0), [weeklyTasks]);
-  const doneTotal = Object.values(weeklyDone).reduce((sum, value) => sum + Number(value || 0), 0);
-  const weekProgress = suggestedTotal ? clamp(Math.round((doneTotal / suggestedTotal) * 100), 0, 100) : 0;
+  const completedTotal = weeklyTasks.reduce((sum, task) => sum + Math.min(Number(task.current || 0), Number(task.target || 0)), 0);
+  const targetTotal = weeklyTasks.reduce((sum, task) => sum + Number(task.target || 0), 0);
+  const overallProgress = targetTotal ? clamp(Math.round((completedTotal / targetTotal) * 100), 0, 100) : 0;
+  const activeDays = dailyPlan.filter((items) => items.length).length;
+  const highPriorityCount = weeklyTasks.filter((task) => task.priority === "高").length;
+  const recentLogs = logs.slice(0, 4);
 
-  useEffect(() => {
-    const liveTaskIds = new Set(weeklyTasks.map((task) => task.id));
-    setWeeklyDone((current) => Object.fromEntries(Object.entries(current).filter(([taskId]) => liveTaskIds.has(taskId))));
-  }, [weeklyTasks]);
-
-  function updateDone(taskId: string, event: ChangeEvent<HTMLInputElement>) {
+  function resetProgressDrafts() {
     setSaved(false);
     setSaveError("");
-    setWeeklyDone((current) => ({
-      ...current,
-      [taskId]: Math.max(0, Number(event.target.value || 0)),
-    }));
+    setProgressDrafts([]);
   }
 
-  async function saveWeeklyProgress() {
-    const changedEntries = Object.entries(weeklyDone).filter(([, value]) => Number(value || 0) > 0);
-    if (!changedEntries.length) return;
-
-    const nextTasks = tasks.map((task) => {
-      const delta = Number(weeklyDone[task.id] || 0);
-      if (!delta) return task;
-      const nextCurrent = clamp(Number(task.current || 0) + delta, 0, Number(task.target || 0));
-      const nextTask = { ...task, current: nextCurrent };
-      return { ...nextTask, status: getTaskStatus(nextTask) };
-    });
-    const logDate = new Date().toISOString().slice(0, 10);
-    const nextLogs = [
-      ...changedEntries.map(([taskId, value]) => {
-        const task = tasks.find((item) => item.id === taskId);
-        return {
-          id: `weekly-${Date.now()}-${taskId}`,
-          goalId: task?.goalId || summerGoal?.id || "",
-          date: logDate,
-          category: task?.category || "周计划",
-          summary: task?.title || "周计划任务",
-          amount: `${value}${task?.unit || ""}`,
-          note: `来自 ${week.label} 周计划`,
-        };
-      }),
-      ...logs,
-    ];
-
-    const response = await fetch("/api/data", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ goalTasks: nextTasks, goalLogs: nextLogs }),
-    });
-
-    if (!response.ok) {
-      setSaveError("同步失败，请稍后再试");
-      return;
-    }
-    setTasks(nextTasks);
-    setLogs(nextLogs);
-    setWeeklyDone({});
-    setSaved(true);
+  async function parseProgressReport() {
+    if (!progressReport.trim()) return;
+    setParsingProgress(true);
     setSaveError("");
-  }
-
-  async function saveNaturalLog() {
-    if (!parsedLogs.length) {
-      setSaveError("没有解析到可同步的任务，请尽量写出任务名称和完成量。");
-      return;
-    }
-
-    const deltaByTask = parsedLogs.reduce<Record<string, number>>((acc, item) => {
-      acc[item.task.id] = Number(acc[item.task.id] || 0) + item.amount;
-      return acc;
-    }, {});
-    const nextTasks = tasks.map((task) => {
-      const delta = Number(deltaByTask[task.id] || 0);
-      if (!delta) return task;
-      const nextCurrent = clamp(Number(task.current || 0) + delta, 0, Number(task.target || 0));
-      const nextTask = { ...task, current: nextCurrent };
-      return { ...nextTask, status: getTaskStatus(nextTask) };
-    });
-    const logDate = new Date().toISOString().slice(0, 10);
-    const nextLogs = [
-      ...parsedLogs.map((item) => ({
-        id: `natural-${Date.now()}-${item.task.id}-${Math.random().toString(16).slice(2, 6)}`,
-        goalId: item.task.goalId || summerGoal?.id || "",
-        date: logDate,
-        category: item.task.category || "周计划",
-        summary: item.task.title,
-        amount: `${item.amount}${item.task.unit || ""}`,
-        note: item.line,
-      })),
-      ...logs,
-    ];
-
-    const response = await fetch("/api/data", {
+    setSaved(false);
+    const response = await fetch("/api/ai/progress-drafts", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ goalTasks: nextTasks, goalLogs: nextLogs }),
+      body: JSON.stringify({ intent: "generate", report: progressReport }),
     });
-
+    const data = await response.json().catch(() => null) as { drafts?: ProgressDraft[]; error?: string } | null;
+    setParsingProgress(false);
     if (!response.ok) {
-      setSaveError("记录失败，请稍后再试");
+      setSaveError(data?.error || "解析失败，请稍后再试");
       return;
     }
+    setProgressDrafts(Array.isArray(data?.drafts) ? data.drafts : []);
+    if (!data?.drafts?.length) {
+      setSaveError("没有找到足够确定的任务匹配。可以写得更具体，或补充任务名称和数量。");
+      return;
+    }
+  }
 
-    setTasks(nextTasks);
-    setLogs(nextLogs);
-    setNaturalLog("");
+  async function applyProgressDrafts() {
+    if (!progressDrafts.length) return;
+    setApplyingProgress(true);
+    setSaveError("");
+    const response = await fetch("/api/ai/progress-drafts", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        intent: "apply",
+        date: new Date().toISOString().slice(0, 10),
+        drafts: progressDrafts,
+      }),
+    });
+    const data = await response.json().catch(() => null) as { data?: WeeklyData; error?: string } | null;
+    setApplyingProgress(false);
+    if (!response.ok) {
+      setSaveError(data?.error || "同步失败，请稍后再试");
+      return;
+    }
+    if (Array.isArray(data?.data?.goalTasks)) setTasks(data.data.goalTasks);
+    if (Array.isArray(data?.data?.goalLogs)) setLogs(data.data.goalLogs);
+    setProgressReport("");
+    setProgressDrafts([]);
+    setLogDialogOpen(false);
     setSaved(true);
     setSaveError("");
   }
@@ -435,14 +340,25 @@ export default function WeeklyPage() {
     <div className="weekly-plan-page">
       <section className="page-toolbar">
         <div>
-          <h1>本周建议</h1>
-          <span>{week.label} · 从目标地图自动拆解，不维护另一套任务</span>
+          <h1>周计划</h1>
+          <span>{week.label} · 只回答今天做什么，以及做完后怎么同步</span>
+        </div>
+        <div className="weekly-toolbar-actions compact">
+          <Button type="button" onClick={() => setLogDialogOpen(true)} className="bg-[#23B87A] hover:bg-[#1FA36C] rounded-xl">
+            <MessageSquareText className="w-4 h-4 mr-2" />
+            记录完成
+          </Button>
+          <Button type="button" variant="secondary" onClick={() => pushToDingTalk("today")} className="rounded-xl">
+            <Send className="w-4 h-4 mr-2" />
+            推送今日
+          </Button>
+          <Link className="secondary-action" href="/weekly/report">周报告</Link>
         </div>
       </section>
 
       {(saved || saveError) && (
         <div className={cn("weekly-save-feedback", saveError && "error")}>
-          {saveError || "本周完成量已同步到目标地图"}
+          {saveError || "完成记录已同步到目标地图"}
         </div>
       )}
 
@@ -461,149 +377,78 @@ export default function WeeklyPage() {
 
       <section className="weekly-plan-hero">
         <div>
-          <span>当前目标</span>
-          <h2>{summerGoal?.title || "暑假基础建立期"}</h2>
-          <p>{summerGoal?.description || "根据目标周期、剩余量、优先级和执行节奏，生成本周建议，再拆到每天执行。"}</p>
-          <div className="weekly-toolbar-actions">
-            <Link className="secondary-action" href="/weekly/report">查看周报告</Link>
-            <Button type="button" variant="secondary" onClick={() => pushToDingTalk("today")} className="rounded-xl">
-              <Send className="w-4 h-4 mr-2" />
-              推送今日
-            </Button>
-            <Button type="button" variant="secondary" onClick={() => pushToDingTalk("overall")} className="rounded-xl">
-              推送整体
-            </Button>
-            <Button type="button" variant="secondary" onClick={() => pushToDingTalk("report")} className="rounded-xl">
-              推送周报
-            </Button>
-            <Button type="button" onClick={saveWeeklyProgress} disabled={!doneTotal} className="bg-[#23B87A] hover:bg-[#1FA36C] rounded-xl">
-              <Save className="w-4 h-4 mr-2" />
-              {saved ? "已记录" : "记录本周完成"}
-            </Button>
-          </div>
+          <span>今日焦点</span>
+          <h2>{todayItems.length ? `${weekDays[todayIndex]}要完成 ${todayItems.length} 件事` : "今天没有硬性任务"}</h2>
+          <p>{todayItems.length ? "先按下面的顺序完成今日任务。完成后点“记录完成”，把 Word、聊天记录或一段话粘进来，系统解析后再写回目标地图。" : "可以用今天做补录、复盘或临时调整；目标地图有新任务后，这里会自动出现今日安排。"}</p>
         </div>
         <div className="weekly-plan-score">
-          <strong>{weekProgress}%</strong>
-          <span>本周完成度</span>
-          <div className="line-meter"><i style={{ width: `${weekProgress}%` }} /></div>
+          <strong>{overallProgress}%</strong>
+          <span>目标任务总进度</span>
+          <div className="line-meter"><i style={{ width: `${overallProgress}%` }} /></div>
         </div>
       </section>
 
       <section className="weekly-stat-grid">
-        <article><ClipboardList className="h-5 w-5" /><span>目标任务</span><strong>{weeklyTasks.length}</strong></article>
-        <article><Target className="h-5 w-5" /><span>建议总量</span><strong>{suggestedTotal}</strong></article>
-        <article><CalendarDays className="h-5 w-5" /><span>每日安排</span><strong>{dailyPlan.filter((items) => items.length).length}</strong></article>
-        <article><CheckCircle2 className="h-5 w-5" /><span>本周已填</span><strong>{doneTotal}</strong></article>
+        <article><ClipboardList className="h-5 w-5" /><span>执行任务</span><strong>{weeklyTasks.length}</strong></article>
+        <article><Target className="h-5 w-5" /><span>本周建议量</span><strong>{suggestedTotal}</strong></article>
+        <article><CalendarDays className="h-5 w-5" /><span>有安排天数</span><strong>{activeDays}</strong></article>
+        <article><CheckCircle2 className="h-5 w-5" /><span>高优先级</span><strong>{highPriorityCount}</strong></article>
       </section>
 
-      <section className="weekly-today-panel">
-        <div className="weekly-section-title">
-          <CalendarDays className="h-5 w-5 text-[#2F7DD3]" />
-          <div>
-            <h2>今日焦点</h2>
-            <p>{weekDays[todayIndex]} · {todayItems.length ? `${todayItems.length} 项任务 · 建议总量 ${todayTotal}` : "今天没有自动拆解任务"}</p>
+      <section className="weekly-execution-grid">
+        <section className="weekly-today-panel">
+          <div className="weekly-section-title">
+            <CalendarDays className="h-5 w-5 text-[#2F7DD3]" />
+            <div>
+              <h2>今天做什么</h2>
+              <p>{weekDays[todayIndex]} · {todayItems.length ? `${todayItems.length} 项任务 · 建议总量 ${todayTotal}` : "没有自动拆解任务"}</p>
+            </div>
           </div>
-        </div>
-        <div className="weekly-today-list">
-          {todayItems.length ? todayItems.map(({ task, amount }) => (
-            <article key={`today-${task.id}`}>
-              <div>
-                <strong>{task.title}</strong>
-                <span>{task.category} · {task.executionMode || "孩子自主"} · {task.dailyTarget || "节奏未配置"}</span>
-              </div>
-              <em>{amount}{task.unit}</em>
-            </article>
-          )) : (
-            <div className="weekly-today-empty">今天可以用于复盘、补录或机动调整。</div>
-          )}
-        </div>
-      </section>
-
-      <section className="weekly-recommendation-panel">
-        <div className="weekly-section-title">
-          <Target className="h-5 w-5 text-[#23B87A]" />
-          <div>
-            <h2>本周对标建议</h2>
-            <p>先看本周应该推进多少，再决定每天怎么排，不把周计划变成另一套任务库。</p>
-          </div>
-        </div>
-        <div className="weekly-recommendation-grid">
-          {weeklyTasks
-            .filter((task) => getSuggestedWeeklyAmount(task) > 0)
-            .slice(0, 6)
-            .map((task) => {
-              const suggested = getSuggestedWeeklyAmount(task);
-              return (
-                <article key={task.id}>
+          <div className="weekly-today-list">
+            {todayItems.length ? todayItems.map(({ task, amount }) => (
+              <article key={`today-${task.id}`}>
+                <div>
                   <strong>{task.title}</strong>
-                  <span>{task.category} · 总进度 {task.current}/{task.target}{task.unit}</span>
-                  <b>本周建议 {suggested}{task.unit}</b>
-                </article>
-              );
-            })}
-        </div>
-      </section>
-
-      {weeklyTasks.length ? (
-        <section className="weekly-workload-grid">
-          {categories.map((category) => {
-            const categoryTasks = weeklyTasks.filter((task) => (task.category || "未分类") === category);
-            return (
-              <article key={category} className="weekly-workload-column">
-                <div className="weekly-column-head">
-                  <BookOpen className="h-4 w-4" />
-                  <h2>{category}</h2>
-                  <span>{categoryTasks.length} 项</span>
+                  <span>{task.category} · {task.executionMode || "孩子自主"} · {task.dailyTarget || "节奏未配置"}</span>
                 </div>
-                <div className="weekly-task-stack">
-                  {categoryTasks.map((task) => {
-                    const suggested = getSuggestedWeeklyAmount(task);
-                    return (
-                      <div key={task.id} className="weekly-task-row">
-                        <div>
-                          <strong>{task.title}</strong>
-                          <span>{task.description || "未配置具体说明"}</span>
-                          <em>总进度 {task.current}/{task.target}{task.unit} · {task.dailyTarget || "节奏未配置"} · {task.executionMode || "孩子自主"}</em>
-                          <b>建议本周 {suggested}{task.unit}</b>
-                        </div>
-                        <label>
-                          <span>本周完成</span>
-                          <Input
-                            type="number"
-                            min="0"
-                            max={Math.max(0, task.target - task.current)}
-                            value={weeklyDone[task.id] ?? ""}
-                            placeholder={`${suggested}${task.unit}`}
-                            onChange={(event) => updateDone(task.id, event)}
-                          />
-                        </label>
-                      </div>
-                    );
-                  })}
-                </div>
+                <em>{amount}{task.unit}</em>
               </article>
-            );
-          })}
+            )) : (
+              <div className="weekly-today-empty">今天可以用于复盘、补录或机动调整。</div>
+            )}
+          </div>
         </section>
-      ) : (
-        <section className="weekly-empty-state">
-          <strong>还没有可生成周计划的任务</strong>
-          <span>先到目标地图里给暑假目标添加任务，周计划会自动同步过来。</span>
-          <Link className="secondary-action" href="/goals">去目标地图</Link>
-        </section>
-      )}
+
+        <aside className="weekly-recent-panel">
+          <div className="weekly-section-title">
+            <Sparkles className="h-5 w-5 text-[#23B87A]" />
+            <div>
+              <h2>最近记录</h2>
+              <p>只展示已同步的完成记录，避免重复填报。</p>
+            </div>
+          </div>
+          <div className="weekly-recent-list">
+            {recentLogs.length ? recentLogs.map((log) => (
+              <article key={log.id}>
+                <strong>{log.summary || log.category || "完成记录"}</strong>
+                <span>{log.date} · {log.amount || "已记录"}</span>
+              </article>
+            )) : <div className="weekly-today-empty">还没有完成记录。</div>}
+          </div>
+        </aside>
+      </section>
 
       <section className="weekly-daily-plan-panel">
         <div className="weekly-section-title">
           <CalendarDays className="h-5 w-5 text-[#2F7DD3]" />
           <div>
-            <h2>拆到每天</h2>
-            <p>根据执行节奏自动分配，可以作为每日任务分布的初稿。</p>
+            <h2>本周排程</h2>
+            <p>按任务节奏自动铺到 7 天，只作为执行视图；任务本身仍在目标地图维护。</p>
           </div>
         </div>
         <div className="weekly-daily-grid">
           {weekDays.map((day, index) => (
-            <article key={day} className="weekly-day-card">
+            <article key={day} className={cn("weekly-day-card", index === todayIndex && "today")}>
               <strong>{day}</strong>
               {dailyPlan[index].length ? dailyPlan[index].map(({ task, amount }) => (
                 <span key={`${day}-${task.id}`}>
@@ -616,58 +461,76 @@ export default function WeeklyPage() {
         </div>
       </section>
 
-      <section className="weekly-natural-log-panel">
-        <div className="weekly-section-title">
-          <MessageSquareText className="h-5 w-5 text-[#23B87A]" />
-          <div>
-            <h2>一段话记录今天</h2>
-            <p>可以连续写很多条，系统会按任务名称和完成量解析，并同步到整体进度。</p>
-          </div>
-        </div>
-        <textarea
-          className="weekly-natural-log-input"
-          value={naturalLog}
-          onChange={(event) => {
-            setNaturalLog(event.target.value);
-            setSaved(false);
-            setSaveError("");
-          }}
-          placeholder={"例如：\nRAZ 读了 1 本；计算练习做了 2 页；口语练习 20 分钟"}
-        />
-        <div className="weekly-natural-log-preview">
-          <strong>解析预览</strong>
-          {parsedLogs.length ? parsedLogs.map((item) => (
-            <span key={`${item.task.id}-${item.line}`}>
-              {item.task.title}
-              <em>+{item.amount}{item.task.unit}</em>
-            </span>
-          )) : <span className="empty">输入后会显示可同步的任务和完成量</span>}
-        </div>
-        <div className="weekly-toolbar-actions">
-          <Button type="button" onClick={saveNaturalLog} disabled={!naturalLog.trim()} className="bg-[#23B87A] hover:bg-[#1FA36C] rounded-xl">
-            <Save className="w-4 h-4 mr-2" />
-            解析并同步
-          </Button>
-        </div>
-      </section>
+      {!weeklyTasks.length && loaded && (
+        <section className="weekly-empty-state">
+          <strong>还没有可生成周计划的任务</strong>
+          <span>先到目标地图里给当前目标添加任务，周计划会自动同步过来。</span>
+          <Link className="secondary-action" href="/goals">去目标地图</Link>
+        </section>
+      )}
 
-      <section className="weekly-rhythm-reference">
-        <div className="weekly-section-title">
-          <Repeat className="h-5 w-5 text-[#2F7DD3]" />
-          <div>
-            <h2>节奏判断</h2>
-            <p>用来检查每天分配是否过密，必要时只保留最高优先级。</p>
+      <Dialog open={logDialogOpen} onOpenChange={(open) => {
+        setLogDialogOpen(open);
+        if (!open) resetProgressDrafts();
+      }}>
+        <DialogContent className="weekly-log-dialog">
+          <DialogHeader>
+            <DialogTitle>记录完成情况</DialogTitle>
+            <DialogDescription>
+              粘贴 Word、聊天记录或一段自然语言。系统只生成有把握的匹配，确认后再同步到目标地图。
+            </DialogDescription>
+          </DialogHeader>
+
+          <textarea
+            className="weekly-natural-log-input"
+            value={progressReport}
+            onChange={(event) => {
+              setProgressReport(event.target.value);
+              resetProgressDrafts();
+            }}
+            placeholder={"例如：\n今天 RAZ 读了 1 本，Unlock 做了 1 个单元，口语练习 20 分钟。\n数学计算练习完成 2 页。"}
+          />
+
+          <div className="weekly-dialog-actions">
+            <Button type="button" variant="secondary" onClick={parseProgressReport} disabled={!progressReport.trim() || parsingProgress} className="rounded-xl">
+              {parsingProgress ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <Sparkles className="w-4 h-4 mr-2" />}
+              {parsingProgress ? "解析中" : "解析为草稿"}
+            </Button>
           </div>
-        </div>
-        <div className="weekly-rhythm-grid compact">
-          {rhythmGroups.map((group) => (
-            <article key={group.title} className="weekly-rhythm-card">
-              <strong>{group.title}</strong>
-              <em>{group.note}</em>
-            </article>
-          ))}
-        </div>
-      </section>
+
+          <div className="weekly-draft-review">
+            <div className="weekly-draft-review-head">
+              <strong>待确认草稿</strong>
+              <span>{progressDrafts.length ? `${progressDrafts.length} 条` : "尚未解析"}</span>
+            </div>
+            {progressDrafts.length ? progressDrafts.map((draft) => (
+              <article key={`${draft.taskId}-${draft.summary}`}>
+                <div>
+                  <strong>{draft.taskTitle}</strong>
+                  <span>{draft.summary}</span>
+                  {draft.note && <em>{draft.note}</em>}
+                </div>
+                <b>+{draft.amount}{draft.unit}</b>
+              </article>
+            )) : (
+              <div className="weekly-draft-empty">
+                <AlertTriangle className="h-4 w-4" />
+                <span>解析后会在这里显示可确认的任务和完成量。不确定的内容不会自动写入。</span>
+              </div>
+            )}
+          </div>
+
+          <div className="weekly-dialog-actions end">
+            <Button type="button" variant="secondary" onClick={() => setLogDialogOpen(false)} className="rounded-xl">
+              取消
+            </Button>
+            <Button type="button" onClick={applyProgressDrafts} disabled={!progressDrafts.length || applyingProgress} className="bg-[#23B87A] hover:bg-[#1FA36C] rounded-xl">
+              {applyingProgress ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <Save className="w-4 h-4 mr-2" />}
+              {applyingProgress ? "同步中" : "确认同步"}
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

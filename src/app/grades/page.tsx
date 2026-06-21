@@ -177,7 +177,10 @@ export default function GradesPage() {
                 <GraduationCap className="h-8 w-8" />
                 <strong>缺少校内成绩样本</strong>
                 <span>先录入一次校内考试，驾驶舱才能判断自招成绩基础和名额到校稳定性。</span>
-                <button className="empty-action-button" onClick={() => setOpen(true)}>记录第一次成绩</button>
+                <button className="empty-action-button" onClick={() => setOpen(true)}>
+                  <Plus className="h-4 w-4" />
+                  记录第一次成绩
+                </button>
               </div>
             )}
           </div>
