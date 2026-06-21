@@ -1,5 +1,16 @@
 # EduOS Release Notes
 
+## v1.16.1 - Scroll Behavior Hotfix
+
+Release type: UI regression hotfix.
+
+### Highlights
+
+- Fixed long dialog scrolling so Reading records and other tall forms remain usable within the viewport.
+- Removed problematic sticky behavior from Goals, Weekly Plan, and AI Advisor surfaces.
+- Fixed the dashboard pathway map horizontal overflow.
+- Revalidated core desktop routes after the scroll behavior fix.
+
 ## v1.16.0 - Interaction Quality Pass
 
 Release type: final desktop interaction and release-readiness polish.

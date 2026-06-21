@@ -13158,3 +13158,65 @@ body {
     transition-duration: 0.01ms !important;
   }
 }
+
+/* ============================================
+   EduOS v1.16.1 Scroll Behavior Hotfix
+   ============================================ */
+
+.app-dialog,
+.weekly-log-dialog,
+.task-dialog,
+.pathway-dialog,
+.pathway-detail-dialog,
+.admission-tree-detail-dialog {
+  max-height: calc(100vh - 48px);
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+
+.app-dialog .app-form,
+.task-dialog .app-form,
+.weekly-log-dialog {
+  min-height: 0;
+}
+
+.summer-goals-page > .goal-map-panel,
+.advisor-context-panel,
+.weekly-plan-page .page-toolbar,
+.weekly-matrix-table thead th,
+.weekly-matrix-table tbody th {
+  position: static;
+  top: auto;
+  z-index: auto;
+}
+
+.advisor-context-panel {
+  max-height: none;
+  overflow: visible;
+}
+
+.goal-map-panel .goal-tree-list {
+  max-height: none;
+}
+
+.weekly-plan-page .weekly-matrix-table thead th,
+.weekly-plan-page .weekly-matrix-table tbody th {
+  position: static;
+  left: auto;
+  top: auto;
+  z-index: auto;
+}
+
+.command-main-grid .pathway-expedition {
+  overflow: hidden;
+}
+
+.command-main-grid .pathway-map-shell {
+  max-width: 100%;
+  overflow: hidden;
+}
+
+.command-main-grid .pathway-stage-node {
+  max-width: min(138px, 22vw);
+  overflow: hidden;
+}
