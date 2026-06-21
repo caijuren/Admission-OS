@@ -1,12 +1,13 @@
 {
   "name": "edu-os",
-  "version": "1.9.0",
+  "version": "1.16.0",
   "private": true,
   "scripts": {
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
     "lint": "eslint src src/middleware.ts --ext .ts,.tsx",
+    "smoke": "node scripts/smoke-check.mjs",
     "migrate:structured": "node scripts/migrate-structured-data.mjs"
   },
   "dependencies": {

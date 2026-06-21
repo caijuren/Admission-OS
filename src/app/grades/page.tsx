@@ -99,6 +99,25 @@ export default function GradesPage() {
         </Dialog>
       </section>
 
+      <section className="evidence-hero">
+        <div>
+          <span>Evidence System</span>
+          <h2>校内成绩证据库</h2>
+          <p>用分数、排名和考试类型判断校内稳定区间，让升学路径里的风险判断有真实样本。</p>
+        </div>
+        <div className="evidence-hero-score">
+          <strong>{stats.averageScore || 0}</strong>
+          <span>平均分</span>
+          <em>{events.length} 条成绩记录</em>
+        </div>
+      </section>
+
+      <section className="evidence-signal-grid">
+        <article><span>成绩样本</span><strong>{events.length ? "已启动" : "待录入"}</strong></article>
+        <article><span>最佳排名</span><strong>{stats.bestRanking || "-"}</strong></article>
+        <article><span>申请亮点</span><strong>{events.filter((event) => event.is_highlight).length}</strong></article>
+      </section>
+
       <section className="metric-grid">
         {[
           [GraduationCap, "最新分数", `${stats.latestScore}`, "分", "text-[#2F7DD3]"],

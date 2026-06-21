@@ -175,6 +175,15 @@ export default function AdvisorPage() {
     () => conversations.find((conversation) => conversation.id === activeConversationId),
     [activeConversationId, conversations]
   );
+  const diagnosisCounts = useMemo(() => {
+    const items = diagnosis?.items || [];
+    return {
+      danger: items.filter((item) => item.severity === "danger").length,
+      warn: items.filter((item) => item.severity === "warn").length,
+      info: items.filter((item) => item.severity === "info").length,
+    };
+  }, [diagnosis]);
+  const advisorSummary = diagnosis?.summary || "正在结合目标地图、周计划和成长记录生成诊断。";
 
   useEffect(() => {
     let cancelled = false;
@@ -749,6 +758,38 @@ export default function AdvisorPage() {
         </aside>
 
         <div className="advisor-chat-panel">
+          <section className="advisor-workspace-hero">
+            <div>
+              <span>Advisor Workspace</span>
+              <h2>计划诊断与行动建议</h2>
+              <p>{advisorSummary}</p>
+            </div>
+            <div className="advisor-workspace-score">
+              <strong>{diagnosisCounts.danger + diagnosisCounts.warn}</strong>
+              <span>待处理信号</span>
+              <em>{diagnosisCounts.danger} 风险 · {diagnosisCounts.warn} 提醒 · {diagnosisCounts.info} 观察</em>
+            </div>
+          </section>
+
+          <section className="advisor-decision-strip">
+            <article>
+              <span>诊断项</span>
+              <strong>{diagnosis?.items.length || 0}</strong>
+            </article>
+            <article>
+              <span>行动草稿</span>
+              <strong>{actionDrafts.length}</strong>
+            </article>
+            <article>
+              <span>任务草稿</span>
+              <strong>{taskDrafts.length}</strong>
+            </article>
+            <article>
+              <span>进度草稿</span>
+              <strong>{progressDrafts.length}</strong>
+            </article>
+          </section>
+
           <div className="advisor-chat-heading">
             <div>
               <h2>{activeConversation?.title || "新的 AI 对话"}</h2>

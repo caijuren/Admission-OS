@@ -200,6 +200,25 @@ export default function SkillTreePage() {
         </div>
       </section>
 
+      <section className="evidence-hero">
+        <div>
+          <span>Evidence System</span>
+          <h2>能力资产证据库</h2>
+          <p>把荣誉、项目和能力维度统一到申请材料视角，帮助判断哪些证据能支撑目标学校。</p>
+        </div>
+        <div className="evidence-hero-score">
+          <strong>{assetStats.highlights}</strong>
+          <span>升学证据</span>
+          <em>{assetStats.honors} 项荣誉 · {assetStats.projects} 个项目</em>
+        </div>
+      </section>
+
+      <section className="evidence-signal-grid">
+        <article><span>项目厚度</span><strong>{assetStats.projects ? "已启动" : "待建立"}</strong></article>
+        <article><span>荣誉资产</span><strong>{assetStats.honors}</strong></article>
+        <article><span>目标关联</span><strong>{assetStats.goals}</strong></article>
+      </section>
+
       <section className="metric-grid">
         {[
           ["荣誉资产", assetStats.honors, "text-[#FFB347]"],

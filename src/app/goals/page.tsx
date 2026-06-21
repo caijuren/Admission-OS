@@ -5,6 +5,7 @@ import {
   AlertTriangle,
   BookOpen,
   CalendarCheck2,
+  CheckCircle2,
   Compass,
   Edit3,
   FileText,
@@ -87,6 +88,17 @@ type PlanData = {
   goalPhases?: PlanPhase[];
 };
 
+type FeedbackState = {
+  tone: "success" | "error";
+  message: string;
+};
+
+type StrategySignal = {
+  tone: "good" | "warn" | "danger";
+  title: string;
+  detail: string;
+};
+
 const initialGoals = seedData.goals as PlanGoal[];
 const initialTasks = seedData.goalTasks as PlanTask[];
 const initialLogs = seedData.goalLogs as PlanLog[];
@@ -148,6 +160,7 @@ export default function GoalsPage() {
   const [editingGoal, setEditingGoal] = useState<PlanGoal | null>(null);
   const [editingTask, setEditingTask] = useState<PlanTask | null>(null);
   const [draggingGoalId, setDraggingGoalId] = useState("");
+  const [feedback, setFeedback] = useState<FeedbackState | null>(null);
 
   useEffect(() => {
     let cancelled = false;
@@ -236,23 +249,76 @@ export default function GoalsPage() {
     }
     return items;
   }, [activeGoal, activeTasks.length, childGoals, goals, summary.behind]);
+  const strategySignals = useMemo<StrategySignal[]>(() => {
+    const signals: StrategySignal[] = [];
+    if (summary.behind.length) {
+      signals.push({
+        tone: "danger",
+        title: "先处理落后任务",
+        detail: `${summary.behind.slice(0, 2).map((task) => task.title).join("、")} ${summary.behind.length > 2 ? "等任务需要校准节奏。" : "需要校准节奏。"}`,
+      });
+    }
+    if (activeTasks.length === 0) {
+      signals.push({
+        tone: "warn",
+        title: "目标缺少执行任务",
+        detail: "先拆出 2-4 个可追踪任务，周计划才能生成每日行动。",
+      });
+    }
+    if (activeGoal && activeGoal.focus?.length) {
+      signals.push({
+        tone: "good",
+        title: "达成标准已配置",
+        detail: `${activeGoal.focus.length} 条关键标准，可用于每周复盘。`,
+      });
+    }
+    if (!signals.length) {
+      signals.push({
+        tone: "good",
+        title: "当前目标结构稳定",
+        detail: "任务、记录和目标进度没有明显冲突。",
+      });
+    }
+    return signals.slice(0, 3);
+  }, [activeGoal, activeTasks.length, summary.behind]);
+
+  function showFeedback(tone: FeedbackState["tone"], message: string) {
+    setFeedback({ tone, message });
+  }
 
   async function persist(next: Partial<PlanData>) {
-    await fetch("/api/data", {
+    const response = await fetch("/api/data", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(next),
     });
+    if (!response.ok) throw new Error("保存失败，请稍后再试");
   }
 
-  async function saveGoals(nextGoals: PlanGoal[]) {
+  async function saveGoals(nextGoals: PlanGoal[], message = "目标地图已保存") {
+    const previousGoals = goals;
     setGoals(nextGoals);
-    await persist({ goals: nextGoals });
+    try {
+      await persist({ goals: nextGoals });
+      showFeedback("success", message);
+    } catch (error) {
+      setGoals(previousGoals);
+      showFeedback("error", error instanceof Error ? error.message : "保存失败，请稍后再试");
+      throw error;
+    }
   }
 
-  async function saveTasks(nextTasks: PlanTask[]) {
+  async function saveTasks(nextTasks: PlanTask[], message = "任务看板已保存") {
+    const previousTasks = tasks;
     setTasks(nextTasks);
-    await persist({ goalTasks: nextTasks });
+    try {
+      await persist({ goalTasks: nextTasks });
+      showFeedback("success", message);
+    } catch (error) {
+      setTasks(previousTasks);
+      showFeedback("error", error instanceof Error ? error.message : "保存失败，请稍后再试");
+      throw error;
+    }
   }
 
   async function handleGoalSubmit(event: FormEvent<HTMLFormElement>) {
@@ -270,10 +336,14 @@ export default function GoalsPage() {
       focus: splitFocus(String(form.get("focus") || "")),
     };
     const nextGoals = editingGoal ? goals.map((item) => (item.id === editingGoal.id ? goal : item)) : [...goals, goal];
-    await saveGoals(nextGoals);
-    setActiveGoalId(goal.id);
-    setEditingGoal(null);
-    setGoalOpen(false);
+    try {
+      await saveGoals(nextGoals, editingGoal ? "目标已更新，周计划会同步读取最新结构" : "目标已添加，可以继续拆成任务");
+      setActiveGoalId(goal.id);
+      setEditingGoal(null);
+      setGoalOpen(false);
+    } catch {
+      // Feedback is shown by saveGoals.
+    }
   }
 
   async function deleteGoal(goalId: string) {
@@ -287,11 +357,21 @@ export default function GoalsPage() {
     const removedIds = new Set(goals.filter((goal) => goal.id === goalId || goal.parentId === goalId).map((goal) => goal.id));
     const nextTasks = tasks.filter((task) => !(task.goalIds || [task.goalId]).some((goalId) => removedIds.has(goalId)));
     const nextLogs = logs.filter((log) => !removedIds.has(log.goalId));
+    const previous = { goals, tasks, logs, activeGoalId };
     setGoals(nextGoals);
     setTasks(nextTasks);
     setLogs(nextLogs);
     setActiveGoalId(nextGoals[0]?.id || "");
-    await persist({ goals: nextGoals, goalTasks: nextTasks, goalLogs: nextLogs });
+    try {
+      await persist({ goals: nextGoals, goalTasks: nextTasks, goalLogs: nextLogs });
+      showFeedback("success", "目标已删除，相关任务和记录已同步移除");
+    } catch (error) {
+      setGoals(previous.goals);
+      setTasks(previous.tasks);
+      setLogs(previous.logs);
+      setActiveGoalId(previous.activeGoalId);
+      showFeedback("error", error instanceof Error ? error.message : "删除失败，请稍后再试");
+    }
   }
 
   async function moveGoal(goalId: string, parentId: string) {
@@ -306,7 +386,11 @@ export default function GoalsPage() {
     collect(goalId);
     if (descendants.has(parentId)) return;
     const nextGoals = goals.map((goal) => goal.id === goalId ? { ...goal, parentId } : goal);
-    await saveGoals(nextGoals);
+    try {
+      await saveGoals(nextGoals, "目标层级已调整");
+    } catch {
+      // Feedback is shown by saveGoals.
+    }
   }
 
   async function handleTaskSubmit(event: FormEvent<HTMLFormElement>) {
@@ -330,15 +414,23 @@ export default function GoalsPage() {
       executionMode: String(form.get("executionMode") || "孩子自主") as ExecutionMode,
     };
     const nextTasks = editingTask ? tasks.map((item) => (item.id === editingTask.id ? task : item)) : [...tasks, task];
-    await saveTasks(nextTasks);
-    setEditingTask(null);
-    setTaskOpen(false);
+    try {
+      await saveTasks(nextTasks, editingTask ? "任务已更新，周计划会重新拆解执行表" : "任务已添加，周计划会自动纳入");
+      setEditingTask(null);
+      setTaskOpen(false);
+    } catch {
+      // Feedback is shown by saveTasks.
+    }
   }
 
   async function deleteTask(taskId: string) {
     const task = tasks.find((item) => item.id === taskId);
     if (!window.confirm(`确认删除任务“${task?.title || "当前任务"}”吗？`)) return;
-    await saveTasks(tasks.filter((task) => task.id !== taskId));
+    try {
+      await saveTasks(tasks.filter((task) => task.id !== taskId), "任务已删除");
+    } catch {
+      // Feedback is shown by saveTasks.
+    }
   }
 
   if (!activeGoal) {
@@ -373,6 +465,13 @@ export default function GoalsPage() {
           </button>
         </div>
       </section>
+
+      {feedback && (
+        <div className={cn("goal-save-feedback", feedback.tone === "error" && "error")}>
+          {feedback.tone === "success" ? <CheckCircle2 className="h-4 w-4" /> : <AlertTriangle className="h-4 w-4" />}
+          <span>{feedback.message}</span>
+        </div>
+      )}
 
       <section className="goal-map-panel">
           <div className="goal-panel-title with-action">
@@ -452,6 +551,32 @@ export default function GoalsPage() {
             <button className={cn(viewMode === "overview" && "active")} onClick={() => setViewMode("overview")}>目标说明</button>
             <button className={cn(viewMode === "board" && "active")} onClick={() => setViewMode("board")}>执行看板</button>
           </div>
+      </section>
+
+      <section className="goal-strategy-panel">
+        <div className="goal-strategy-main">
+          <span>Strategy Brief</span>
+          <h2>{activeGoal.title}</h2>
+          <p>{activeGoal.description || "还没有配置目标说明，可以先补充这个目标为什么重要、阶段结果是什么。"}</p>
+          <div className="goal-strategy-standards">
+            {(activeGoal.focus?.length ? activeGoal.focus : ["补充关键达成标准", "拆解可追踪任务", "每周至少记录一次"]).slice(0, 4).map((item) => (
+              <em key={item}>{item}</em>
+            ))}
+          </div>
+        </div>
+        <div className="goal-strategy-score">
+          <strong>{summary.progress || activeGoal.progress}%</strong>
+          <span>{summary.completed}/{summary.total} 任务完成</span>
+          <div className="line-meter"><i style={{ width: `${summary.progress || activeGoal.progress}%` }} /></div>
+        </div>
+        <div className="goal-strategy-signals">
+          {strategySignals.map((signal) => (
+            <article key={`${signal.title}-${signal.detail}`} className={signal.tone}>
+              <strong>{signal.title}</strong>
+              <span>{signal.detail}</span>
+            </article>
+          ))}
+        </div>
       </section>
 
       {viewMode === "overview" && (
@@ -603,6 +728,7 @@ export default function GoalsPage() {
                   <span>{item.tone === "danger" ? "冲突" : "提醒"}</span>
                   <strong>{item.title}</strong>
                   <em>{item.detail}</em>
+                  <b>{item.tone === "danger" ? "建议：优先打开周计划补记录或下调本周任务量。" : "建议：检查目标口径和关联任务。"}</b>
                 </div>
               )) : <div className="goal-muted-line">当前没有落后任务。</div>}
             </div>

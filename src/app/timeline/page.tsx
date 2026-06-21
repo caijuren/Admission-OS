@@ -77,6 +77,19 @@ export default function TimelinePage() {
         </div>
       </section>
 
+      <section className="evidence-hero">
+        <div>
+          <span>Evidence System</span>
+          <h2>成长证据流水</h2>
+          <p>把成绩、阅读、项目、荣誉和目标进展放到同一条时间线上，形成长期成长叙事。</p>
+        </div>
+        <div className="evidence-hero-score">
+          <strong>{events.length}</strong>
+          <span>总证据</span>
+          <em>{highlightCount} 条申请亮点</em>
+        </div>
+      </section>
+
       <section className="timeline-proof-strip">
         {[
           ["全部证据", events.length],

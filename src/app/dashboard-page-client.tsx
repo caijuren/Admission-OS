@@ -6,7 +6,10 @@ import Link from "next/link";
 import {
   AlertTriangle,
   BookOpen,
+  CalendarDays,
+  CheckCircle2,
   GraduationCap,
+  Route,
   Target,
   Trophy,
   TrendingUp,
@@ -397,6 +400,24 @@ export default function DashboardPage({ initialView = "panorama" }: DashboardPag
   const activeAdmissionModule = admissionModules.find((module) => module.id === activeAdmissionModuleId) || admissionModules[0];
   const currentPathwayStage = pathwayStages.find((stage) => stage.status === "current") || pathwayStages[0];
   const selectedPathwayStage = pathwayStages.find((stage) => stage.id === activePathwayId) || currentPathwayStage;
+  const commandActions = useMemo(() => {
+    const urgentTasks = tasks
+      .filter((task) => task.status === "behind")
+      .slice(0, 4);
+    if (urgentTasks.length) return urgentTasks;
+    return tasks
+      .filter((task) => task.target > task.current)
+      .slice(0, 4);
+  }, [tasks]);
+  const evidenceItems = useMemo(() => {
+    const items = [
+      { label: "校内成绩", value: gradeStats.examCount ? `${gradeStats.examCount} 次考试` : "待录入", href: "/grades" },
+      { label: "阅读表达", value: readingStats.totalBooks ? `${readingStats.totalBooks} 条素材` : "待沉淀", href: "/reading" },
+      { label: "竞赛证书", value: assetStats.honors ? `${assetStats.honors} 项证据` : "待补齐", href: "/records" },
+      { label: "项目成果", value: assetStats.projects ? `${assetStats.projects} 个项目` : "待建立", href: "/records" },
+    ];
+    return items;
+  }, [assetStats.honors, assetStats.projects, gradeStats.examCount, readingStats.totalBooks]);
 
   async function handlePathwaySubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -463,93 +484,200 @@ export default function DashboardPage({ initialView = "panorama" }: DashboardPag
       </section>
 
       {dashboardView === "panorama" && (
-        <section className="pathway-expedition">
-          <div className="pathway-map-shell" ref={pathwayMapRef}>
-            <div className="pathway-map-canvas" style={pathwayCanvasRect.width ? pathwayCanvasRect : undefined}>
-              <Image
-                className="pathway-map-image"
-                src="/assets/design/admission-mountain-bg.png"
-                alt=""
-                width={pathwayMapSize.width}
-                height={pathwayMapSize.height}
-                priority
-                sizes="(max-width: 1024px) 100vw, 80vw"
-              />
-              <div className="pathway-map-vignette" />
-              <svg className="pathway-route-svg" viewBox={`0 0 ${pathwayMapSize.width} ${pathwayMapSize.height}`} aria-hidden="true">
-                <defs>
-                  <filter id="pathway-route-glow" x="-12%" y="-18%" width="124%" height="136%">
-                    <feGaussianBlur stdDeviation="8" result="blur" />
-                    <feColorMatrix
-                      in="blur"
-                      type="matrix"
-                      values="1 0 0 0 1 0 0.72 0 0 0.5 0 0 0.18 0 0.04 0 0 0 0.82 0"
-                      result="goldGlow"
-                    />
-                    <feMerge>
-                      <feMergeNode in="goldGlow" />
-                      <feMergeNode in="SourceGraphic" />
-                    </feMerge>
-                  </filter>
-                  <linearGradient id="pathway-route-gold" x1="302" y1="542" x2="1143" y2="102" gradientUnits="userSpaceOnUse">
-                    <stop offset="0" stopColor="#f7b733" />
-                    <stop offset="0.45" stopColor="#ffd86b" />
-                    <stop offset="1" stopColor="#fff4b5" />
-                  </linearGradient>
-                </defs>
-                <path className="pathway-route-shadow" d={pathwayRoutePath} />
-                <path className="pathway-route-base" d={pathwayRoutePath} pathLength="1000" />
-                <path className="pathway-route-progress" d={pathwayRoutePath} pathLength="1000" />
-              </svg>
-              <div className="pathway-node-layer">
-                {pathwayStages.map((stage, index) => {
-                  const position = pathwayNodePositions[index] || pathwayNodePositions[pathwayNodePositions.length - 1];
-                  return (
-                    <div
-                      key={stage.id}
-                      className={cn("pathway-stage-anchor", selectedPathwayStage?.id === stage.id && "active")}
-                      style={{ left: `${position.left}%`, top: `${position.top}%` }}
-                    >
-                      <button
-                        className={cn("pathway-stage-dot", stage.status, selectedPathwayStage?.id === stage.id && "active")}
-                        onClick={() => {
-                          setActivePathwayId(stage.id);
-                          setPathwayDetailOpen(true);
-                        }}
-                        aria-label={stage.title}
-                      />
-                      <button
-                        className={cn("pathway-stage-node", stage.status, selectedPathwayStage?.id === stage.id && "active")}
-                        style={{ transform: `translate(${position.cardX}px, ${position.cardY}px)` }}
-                        onClick={() => {
-                          setActivePathwayId(stage.id);
-                          setPathwayDetailOpen(true);
-                        }}
-                      >
-                        <span>{pathwayStageLabels[stage.status]}</span>
-                        <strong>{stage.title}</strong>
-                        <em>{stage.period}</em>
-                        <p>{stage.summary}</p>
-                      </button>
-                    </div>
-                  );
-                })}
+        <section className="command-center">
+          <section className="command-hero">
+            <div className="command-hero-copy">
+              <span>Admission Command Center</span>
+              <h2>{profile.targetSchool || "目标学校待配置"}</h2>
+              <p>{profile.quote || "把长期目标拆成路径、任务和证据，保持每周可执行、可复盘、可调整。"}</p>
+              <div className="command-hero-meta">
+                <em>{profile.name || "当前学生"}</em>
+                <em>{profile.grade || "阶段待配置"}</em>
+                <em>{currentPathwayStage?.title || profile.currentStage}</em>
               </div>
             </div>
-            <div className="pathway-map-header">
-              <div>
-                <h2>交附嘉分登山路线</h2>
-                <p>先看当前阶段，再看下一段要补齐的学科、项目和证据。</p>
-              </div>
+            <div className="command-score-panel">
+              <span>自招准备度</span>
+              <strong>{admissionReadiness}%</strong>
+              <div className="line-meter"><i style={{ width: `${admissionReadiness}%` }} /></div>
+              <em>{admissionStatus} · {riskCount ? `${riskCount} 个风险` : "暂无明显风险"}</em>
             </div>
+          </section>
 
-            {pathwayStages.length === 0 && (
-              <div className="pathway-map-empty">
-                <strong>还没有路径全景</strong>
-                <span>路径数据加载后会显示从五年级到九年级的登山路线。</span>
+          <section className="command-kpi-grid">
+            <article>
+              <Route className="h-4 w-4" />
+              <div>
+                <span>当前阶段</span>
+                <strong>{currentPathwayStage?.title || "待配置"}</strong>
               </div>
-            )}
-          </div>
+            </article>
+            <article>
+              <CalendarDays className="h-4 w-4" />
+              <div>
+                <span>执行任务</span>
+                <strong>{tasks.length} 个</strong>
+              </div>
+            </article>
+            <article>
+              <CheckCircle2 className="h-4 w-4" />
+              <div>
+                <span>本周计划</span>
+                <strong>{activePlan ? `${activePlan.progress}%` : "待建立"}</strong>
+              </div>
+            </article>
+            <article className={riskCount ? "warn" : "good"}>
+              <AlertTriangle className="h-4 w-4" />
+              <div>
+                <span>风险信号</span>
+                <strong>{riskCount ? `${riskCount} 个` : "稳定"}</strong>
+              </div>
+            </article>
+          </section>
+
+          <section className="command-main-grid">
+            <section className="pathway-expedition">
+              <div className="command-section-head">
+                <div>
+                  <span>Admission Pathway</span>
+                  <h2>升学路径地图</h2>
+                </div>
+                <button type="button" onClick={() => setPathwayOpen(true)}>编辑路径</button>
+              </div>
+              <div className="pathway-map-shell" ref={pathwayMapRef}>
+                <div className="pathway-map-canvas" style={pathwayCanvasRect.width ? pathwayCanvasRect : undefined}>
+                  <Image
+                    className="pathway-map-image"
+                    src="/assets/design/admission-mountain-bg.png"
+                    alt=""
+                    width={pathwayMapSize.width}
+                    height={pathwayMapSize.height}
+                    priority
+                    sizes="(max-width: 1024px) 100vw, 80vw"
+                  />
+                  <div className="pathway-map-vignette" />
+                  <svg className="pathway-route-svg" viewBox={`0 0 ${pathwayMapSize.width} ${pathwayMapSize.height}`} aria-hidden="true">
+                    <defs>
+                      <filter id="pathway-route-glow" x="-12%" y="-18%" width="124%" height="136%">
+                        <feGaussianBlur stdDeviation="8" result="blur" />
+                        <feColorMatrix
+                          in="blur"
+                          type="matrix"
+                          values="1 0 0 0 1 0 0.72 0 0 0.5 0 0 0.18 0 0.04 0 0 0 0.82 0"
+                          result="goldGlow"
+                        />
+                        <feMerge>
+                          <feMergeNode in="goldGlow" />
+                          <feMergeNode in="SourceGraphic" />
+                        </feMerge>
+                      </filter>
+                      <linearGradient id="pathway-route-gold" x1="302" y1="542" x2="1143" y2="102" gradientUnits="userSpaceOnUse">
+                        <stop offset="0" stopColor="#d99a2b" />
+                        <stop offset="0.52" stopColor="#e8c16b" />
+                        <stop offset="1" stopColor="#fff4b5" />
+                      </linearGradient>
+                    </defs>
+                    <path className="pathway-route-shadow" d={pathwayRoutePath} />
+                    <path className="pathway-route-base" d={pathwayRoutePath} pathLength="1000" />
+                    <path className="pathway-route-progress" d={pathwayRoutePath} pathLength="1000" />
+                  </svg>
+                  <div className="pathway-node-layer">
+                    {pathwayStages.map((stage, index) => {
+                      const position = pathwayNodePositions[index] || pathwayNodePositions[pathwayNodePositions.length - 1];
+                      return (
+                        <div
+                          key={stage.id}
+                          className={cn("pathway-stage-anchor", selectedPathwayStage?.id === stage.id && "active")}
+                          style={{ left: `${position.left}%`, top: `${position.top}%` }}
+                        >
+                          <button
+                            className={cn("pathway-stage-dot", stage.status, selectedPathwayStage?.id === stage.id && "active")}
+                            onClick={() => {
+                              setActivePathwayId(stage.id);
+                              setPathwayDetailOpen(true);
+                            }}
+                            aria-label={stage.title}
+                          />
+                          <button
+                            className={cn("pathway-stage-node", stage.status, selectedPathwayStage?.id === stage.id && "active")}
+                            style={{ transform: `translate(${position.cardX}px, ${position.cardY}px)` }}
+                            onClick={() => {
+                              setActivePathwayId(stage.id);
+                              setPathwayDetailOpen(true);
+                            }}
+                          >
+                            <span>{pathwayStageLabels[stage.status]}</span>
+                            <strong>{stage.title}</strong>
+                            <em>{stage.period}</em>
+                            <p>{stage.summary}</p>
+                          </button>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+                <div className="pathway-map-header">
+                  <div>
+                    <h2>交附嘉分路径</h2>
+                    <p>先看当前阶段，再看下一段要补齐的学科、项目和证据。</p>
+                  </div>
+                </div>
+
+                {pathwayStages.length === 0 && (
+                  <div className="pathway-map-empty">
+                    <strong>还没有路径全景</strong>
+                    <span>路径数据加载后会显示从五年级到九年级的路线。</span>
+                  </div>
+                )}
+              </div>
+            </section>
+
+            <aside className="command-side-stack">
+              <section className="command-panel">
+                <div className="command-section-head compact">
+                  <div>
+                    <span>Next Actions</span>
+                    <h2>下一步行动</h2>
+                  </div>
+                  <Link href="/weekly">周计划</Link>
+                </div>
+                <div className="command-action-list">
+                  {commandActions.length ? commandActions.map((task) => (
+                    <Link key={task.id} href="/weekly">
+                      <strong>{task.title}</strong>
+                      <span>{task.category} · {task.current}/{task.target}{task.unit}</span>
+                    </Link>
+                  )) : (
+                    <div className="command-empty-line">当前没有待推进任务。</div>
+                  )}
+                </div>
+              </section>
+
+              <section className="command-panel">
+                <div className="command-section-head compact">
+                  <div>
+                    <span>Risk Signals</span>
+                    <h2>风险信号</h2>
+                  </div>
+                  <Link href="/goals">处理</Link>
+                </div>
+                <div className="command-risk-list">
+                  {(admissionRiskItems.length ? admissionRiskItems : ["当前暂无明显风险，保持每周复盘节奏"]).slice(0, 4).map((item) => (
+                    <span key={item}>{item}</span>
+                  ))}
+                </div>
+              </section>
+            </aside>
+          </section>
+
+          <section className="command-evidence-grid">
+            {evidenceItems.map((item) => (
+              <Link key={item.label} href={item.href}>
+                <span>{item.label}</span>
+                <strong>{item.value}</strong>
+              </Link>
+            ))}
+          </section>
         </section>
       )}
 

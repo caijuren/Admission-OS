@@ -136,6 +136,25 @@ export default function ReadingPage() {
         </Dialog>
       </section>
 
+      <section className="evidence-hero">
+        <div>
+          <span>Evidence System</span>
+          <h2>阅读表达证据库</h2>
+          <p>把阅读记录沉淀成可复用观点、表达素材和面谈证据，支撑长期语文表达与申请材料。</p>
+        </div>
+        <div className="evidence-hero-score">
+          <strong>{stats.totalBooks}</strong>
+          <span>阅读素材</span>
+          <em>{stats.monthlyBooks} 本来自本月</em>
+        </div>
+      </section>
+
+      <section className="evidence-signal-grid">
+        <article><span>证据厚度</span><strong>{stats.totalBooks ? "已启动" : "待建立"}</strong></article>
+        <article><span>表达素材</span><strong>{events.filter((event) => event.metadata.reusablePoint || event.metadata.quote).length}</strong></article>
+        <article><span>申请亮点</span><strong>{events.filter((event) => event.is_highlight).length}</strong></article>
+      </section>
+
       <section className="metric-grid">
         {[
           [BookMarked, "已读总数", `${stats.totalBooks}`, "本", "text-[#2F7DD3]"],

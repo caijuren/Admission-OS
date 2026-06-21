@@ -6,6 +6,7 @@ import {
   AlertTriangle,
   CalendarDays,
   CheckCircle2,
+  Clock3,
   Loader2,
   MessageSquareText,
   Save,
@@ -81,6 +82,12 @@ type ProgressDraft = {
   unit: string;
   summary: string;
   note: string;
+};
+
+type WeeklyDriftItem = {
+  tone: "warn" | "good" | "neutral";
+  title: string;
+  detail: string;
 };
 
 const weekDays = ["周一", "周二", "周三", "周四", "周五", "周六", "周日"];
@@ -286,7 +293,8 @@ export default function WeeklyPage() {
     return date;
   }), [week.start]);
   const todayIndex = Math.max(0, (new Date().getDay() || 7) - 1);
-  const todayItems = dailyPlan[todayIndex] || [];
+  const todayItems = useMemo(() => dailyPlan[todayIndex] || [], [dailyPlan, todayIndex]);
+  const todayDateKey = toDateKey(weekDates[todayIndex] || new Date());
   const completedTotal = weeklyTasks.reduce((sum, task) => sum + Math.min(Number(task.current || 0), Number(task.target || 0)), 0);
   const targetTotal = weeklyTasks.reduce((sum, task) => sum + Number(task.target || 0), 0);
   const overallProgress = targetTotal ? clamp(Math.round((completedTotal / targetTotal) * 100), 0, 100) : 0;
@@ -297,6 +305,11 @@ export default function WeeklyPage() {
     return logs.filter((log) => log.date >= startKey && log.date <= endKey);
   }, [logs, week.end, week.start]);
   const plannedCellCount = dailyPlan.reduce((sum, day) => sum + day.length, 0);
+  const completedTodayCount = todayItems.filter(({ task, amount }) => {
+    const log = weekLogs.find((item) => item.date === todayDateKey && logMatchesTask(item, task));
+    const status = getCellStatus(task, amount, log);
+    return status === "done" || status === "partial";
+  }).length;
   const completedCellCount = weeklyTasks.reduce((sum, task) => {
     return sum + weekDates.filter((date, dayIndex) => {
       const planned = dailyPlan[dayIndex].find((item) => item.task.id === task.id)?.amount || 0;
@@ -306,6 +319,50 @@ export default function WeeklyPage() {
     }).length;
   }, 0);
   const weeklyGoalText = summerGoal?.title || "本周目标待配置";
+  const todayCompletionText = todayItems.length ? `${completedTodayCount}/${todayItems.length} 已记录` : "今日无固定任务";
+  const completionRate = plannedCellCount ? clamp(Math.round((completedCellCount / plannedCellCount) * 100), 0, 100) : 0;
+  const driftItems = useMemo<WeeklyDriftItem[]>(() => {
+    const behindTasks = weeklyTasks.filter((task) => task.status === "behind");
+    const highPriorityPending = weeklyTasks.filter((task) => task.priority === "高" && getProgress(task) < 50);
+    const items: WeeklyDriftItem[] = [];
+
+    if (todayItems.length && completedTodayCount < todayItems.length) {
+      items.push({
+        tone: "warn",
+        title: "今日还有任务未记录",
+        detail: `今天 ${todayItems.length} 项，已记录 ${completedTodayCount} 项。`,
+      });
+    }
+    if (behindTasks.length) {
+      items.push({
+        tone: "warn",
+        title: "存在落后任务",
+        detail: `${behindTasks.slice(0, 2).map((task) => task.title).join("、")} ${behindTasks.length > 2 ? "等" : ""}`,
+      });
+    }
+    if (highPriorityPending.length) {
+      items.push({
+        tone: "warn",
+        title: "高优先级进度偏低",
+        detail: `${highPriorityPending.length} 项高优先级任务低于 50%。`,
+      });
+    }
+    if (!items.length && weeklyTasks.length) {
+      items.push({
+        tone: "good",
+        title: "本周节奏稳定",
+        detail: "没有明显偏差，继续按今日行动推进。",
+      });
+    }
+    if (!weeklyTasks.length) {
+      items.push({
+        tone: "neutral",
+        title: "等待任务同步",
+        detail: "先在目标地图配置任务，周计划会自动拆解。",
+      });
+    }
+    return items.slice(0, 3);
+  }, [completedTodayCount, todayItems, weeklyTasks]);
 
   function resetProgressDrafts() {
     setSaved(false);
@@ -434,10 +491,71 @@ export default function WeeklyPage() {
         </div>
       </section>
 
+      <section className="weekly-execution-grid">
+        <section className="weekly-today-panel">
+          <div className="weekly-section-title">
+            <CalendarDays className="h-5 w-5 text-[#2F7DD3]" />
+            <div>
+              <h2>今日行动</h2>
+              <p>{weekDays[todayIndex]} · {todayCompletionText}</p>
+            </div>
+            <Button type="button" size="sm" onClick={() => setLogDialogOpen(true)} className="weekly-inline-action bg-[#23B87A] hover:bg-[#1FA36C]">
+              <MessageSquareText className="w-4 h-4 mr-2" />
+              记录
+            </Button>
+          </div>
+          <div className="weekly-today-list">
+            {todayItems.length ? todayItems.map(({ task, amount }) => {
+              const log = weekLogs.find((item) => item.date === todayDateKey && logMatchesTask(item, task));
+              const status = getCellStatus(task, amount, log);
+              return (
+              <article key={`today-${task.id}`} className={cn(status === "done" && "done", status === "partial" && "partial")}>
+                <div>
+                  <strong>{task.title}</strong>
+                  <span>{task.category} · {task.executionMode || "孩子自主"} · {log?.amount ? `已记录 ${log.amount}` : task.dailyTarget || "节奏未配置"}</span>
+                </div>
+                <button type="button" onClick={() => setLogDialogOpen(true)} aria-label={`记录 ${task.title}`}>
+                  {status === "done" ? "已完成" : status === "partial" ? "补记录" : `${amount}${task.unit}`}
+                </button>
+              </article>
+            );
+            }) : (
+              <div className="weekly-today-empty">
+                <strong>今天没有固定拆解任务</strong>
+                <span>可以补录本周完成情况，或回到目标地图调整任务节奏。</span>
+                <div>
+                  <Button type="button" variant="secondary" size="sm" onClick={() => setLogDialogOpen(true)}>补录完成</Button>
+                  <Link className="secondary-action compact-link" href="/goals">调整任务</Link>
+                </div>
+              </div>
+            )}
+          </div>
+        </section>
+
+        <aside className="weekly-drift-panel">
+          <div className="weekly-section-title">
+            <Clock3 className="h-5 w-5 text-[#E68A00]" />
+            <div>
+              <h2>节奏与偏差</h2>
+              <p>先看今天，再决定是否调整本周安排。</p>
+            </div>
+          </div>
+          <div className="weekly-drift-list">
+            {driftItems.map((item) => (
+              <article key={`${item.title}-${item.detail}`} className={item.tone}>
+                <strong>{item.title}</strong>
+                <span>{item.detail}</span>
+              </article>
+            ))}
+          </div>
+        </aside>
+      </section>
+
       <section className="weekly-stat-grid">
         <article><Target className="h-5 w-5" /><span>本周任务</span><strong>{weeklyTasks.length}</strong></article>
         <article><CalendarDays className="h-5 w-5" /><span>计划格数</span><strong>{plannedCellCount}</strong></article>
         <article><CheckCircle2 className="h-5 w-5" /><span>已记录格数</span><strong>{completedCellCount}</strong></article>
+        <article><Clock3 className="h-5 w-5" /><span>执行覆盖率</span><strong>{completionRate}%</strong></article>
       </section>
 
       <section className="weekly-daily-plan-panel">
@@ -499,30 +617,7 @@ export default function WeeklyPage() {
         </div>
       </section>
 
-      <section className="weekly-execution-grid">
-        <section className="weekly-today-panel">
-          <div className="weekly-section-title">
-            <CalendarDays className="h-5 w-5 text-[#2F7DD3]" />
-            <div>
-              <h2>今日列详情</h2>
-              <p>{weekDays[todayIndex]} · {todayItems.length ? `${todayItems.length} 项任务` : "没有自动拆解任务"}</p>
-            </div>
-          </div>
-          <div className="weekly-today-list">
-            {todayItems.length ? todayItems.map(({ task, amount }) => (
-              <article key={`today-${task.id}`}>
-                <div>
-                  <strong>{task.title}</strong>
-                  <span>{task.category} · {task.executionMode || "孩子自主"} · {task.dailyTarget || "节奏未配置"}</span>
-                </div>
-                <em>{amount}{task.unit}</em>
-              </article>
-            )) : (
-              <div className="weekly-today-empty">今天可以用于复盘、补录或机动调整。</div>
-            )}
-          </div>
-        </section>
-
+      <section className="weekly-lower-grid">
         <aside className="weekly-recent-panel">
           <div className="weekly-section-title">
             <Sparkles className="h-5 w-5 text-[#23B87A]" />
@@ -537,7 +632,12 @@ export default function WeeklyPage() {
                 <strong>{log.summary || log.category || "完成记录"}</strong>
                 <span>{log.date} · {log.amount || "已记录"}</span>
               </article>
-            )) : <div className="weekly-today-empty">还没有完成记录。</div>}
+            )) : (
+              <div className="weekly-today-empty">
+                <strong>还没有完成记录</strong>
+                <span>从“记录完成”粘贴一句自然语言，确认后这里会立刻更新。</span>
+              </div>
+            )}
           </div>
         </aside>
       </section>
