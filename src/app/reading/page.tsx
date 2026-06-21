@@ -6,6 +6,7 @@ import {
   BookOpen,
   Calendar,
   Clock,
+  Image as ImageIcon,
   Plus,
   Star,
   TrendingUp,
@@ -23,6 +24,8 @@ const covers = ["bg-[#23B87A]", "bg-[#2F7DD3]", "bg-[#FFB347]", "bg-[#8FDDBE]", 
 export default function ReadingPage() {
   const [events, setEvents] = useState<GrowthEvent[]>([]);
   const [open, setOpen] = useState(false);
+  const [saveError, setSaveError] = useState("");
+  const [saving, setSaving] = useState(false);
 
   const loadEvents = () => {
     growthService.getReadingEvents().then(setEvents);
@@ -33,22 +36,45 @@ export default function ReadingPage() {
   }, []);
 
   const stats = useMemo(() => getReadingStats(events), [events]);
+  const todayString = new Date().toISOString().slice(0, 10);
 
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
+    setSaving(true);
+    setSaveError("");
     const form = new FormData(event.currentTarget);
-    await growthService.addReadingEvent({
-      student_id: STUDENT_ID,
-      bookTitle: String(form.get("bookTitle") || "未命名书籍"),
-      bookAuthor: String(form.get("bookAuthor") || "未知作者"),
-      bookCategory: String(form.get("bookCategory") || "阅读"),
-      rating: Number(form.get("rating") || 5),
-      date: String(form.get("date") || "2026-06"),
-      note: String(form.get("note") || ""),
-      isHighlight: form.get("isHighlight") === "on",
-    });
-    setOpen(false);
-    loadEvents();
+    const finishDate = String(form.get("finishDate") || new Date().toISOString().slice(0, 10));
+    try {
+      await growthService.addReadingEvent({
+        student_id: STUDENT_ID,
+        bookTitle: String(form.get("bookTitle") || "未命名书籍"),
+        bookAuthor: String(form.get("bookAuthor") || "未知作者"),
+        bookCategory: String(form.get("bookCategory") || "阅读"),
+        isbn: String(form.get("isbn") || "").trim(),
+        publisher: String(form.get("publisher") || "").trim(),
+        coverUrl: String(form.get("coverUrl") || "").trim(),
+        readingStatus: String(form.get("readingStatus") || "已读") as "想读" | "在读" | "已读" | "暂停",
+        startDate: String(form.get("startDate") || finishDate),
+        finishDate,
+        pages: Number(form.get("pages") || 0) || undefined,
+        reusablePoint: String(form.get("reusablePoint") || "").trim(),
+        quote: String(form.get("quote") || "").trim(),
+        useCases: String(form.get("useCases") || "")
+          .split(/,|，|、|\n/)
+          .map((item) => item.trim())
+          .filter(Boolean),
+        rating: Number(form.get("rating") || 5),
+        date: finishDate,
+        note: String(form.get("note") || ""),
+        isHighlight: form.get("isHighlight") === "on",
+      });
+      setOpen(false);
+      loadEvents();
+    } catch {
+      setSaveError("阅读记录保存失败，请确认已登录并稍后再试。");
+    } finally {
+      setSaving(false);
+    }
   };
 
   return (
@@ -74,20 +100,36 @@ export default function ReadingPage() {
               <label className="form-field"><span>书名</span><Input name="bookTitle" placeholder="例如 道德经" required /></label>
               <div className="form-grid two">
                 <label className="form-field"><span>作者</span><Input name="bookAuthor" placeholder="作者" /></label>
-                <label className="form-field"><span>分类</span><Input name="bookCategory" placeholder="古文 / 现代文 / 科普" /></label>
+                <label className="form-field"><span>ISBN</span><Input name="isbn" placeholder="978..." /></label>
+              </div>
+              <div className="form-grid three">
+                <label className="form-field"><span>分类</span><Input name="bookCategory" placeholder="古文 / 英文原版 / 科普" /></label>
+                <label className="form-field"><span>出版社</span><Input name="publisher" placeholder="出版社" /></label>
+                <label className="form-field"><span>状态</span><select name="readingStatus" defaultValue="已读"><option>想读</option><option>在读</option><option>已读</option><option>暂停</option></select></label>
+              </div>
+              <label className="form-field"><span>封面 URL</span><Input name="coverUrl" placeholder="https://.../cover.jpg" /></label>
+              <div className="form-grid three">
+                <label className="form-field"><span>开始日期</span><Input name="startDate" type="date" defaultValue={todayString} /></label>
+                <label className="form-field"><span>完成日期</span><Input name="finishDate" type="date" defaultValue={todayString} /></label>
+                <label className="form-field"><span>页数</span><Input name="pages" type="number" min="0" placeholder="可选" /></label>
               </div>
               <div className="form-grid two">
-                <label className="form-field"><span>阅读月份</span><Input name="date" type="month" defaultValue="2026-06" /></label>
                 <label className="form-field"><span>评分</span><Input name="rating" type="number" min="1" max="5" defaultValue="5" /></label>
+                <label className="form-field"><span>可用于</span><Input name="useCases" placeholder="作文、面谈、个人陈述" /></label>
               </div>
-              <label className="form-field"><span>阅读收获</span><Input name="note" placeholder="一句可复用的表达素材" /></label>
+              <label className="form-field"><span>摘要</span><Input name="note" placeholder="这本书讲了什么，和孩子有什么关系" /></label>
+              <label className="form-field"><span>可复用观点</span><Input name="reusablePoint" placeholder="一句可用于作文、面谈或材料表达的观点" /></label>
+              <label className="form-field"><span>金句 / 关键词</span><Input name="quote" placeholder="摘录或关键词" /></label>
               <label className="form-check">
                 <input name="isHighlight" type="checkbox" />
                 纳入自招证据
               </label>
+              {saveError && <div className="weekly-save-feedback error">{saveError}</div>}
               <div className="form-actions">
                 <Button type="button" variant="secondary" onClick={() => setOpen(false)}>取消</Button>
-                <Button type="submit" className="bg-[#23B87A] hover:bg-[#1FA36C]">保存到成长档案</Button>
+                <Button type="submit" disabled={saving} className="bg-[#23B87A] hover:bg-[#1FA36C]">
+                  {saving ? "保存中" : "保存到成长档案"}
+                </Button>
               </div>
             </form>
           </DialogContent>
@@ -127,8 +169,13 @@ export default function ReadingPage() {
           <div className="space-y-3">
         {events.map((event, index) => (
           <div key={event.id} className="reading-row group">
-                <div className={cn("reading-cover", covers[index % covers.length])}>
-                  <BookOpen className="w-6 h-6 text-white/75" />
+                <div className={cn("reading-cover", !event.metadata.coverUrl && covers[index % covers.length])}>
+                  {event.metadata.coverUrl ? (
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img src={event.metadata.coverUrl} alt="" />
+                  ) : (
+                    <BookOpen className="w-6 h-6 text-white/75" />
+                  )}
                 </div>
                 <div className="flex-1 min-w-0 flex items-center justify-between gap-4">
                   <div className="flex-1 min-w-0">
@@ -139,12 +186,23 @@ export default function ReadingPage() {
                       <span className="text-[10px] px-1.5 py-0.5 rounded bg-[#F1F5F9] text-[#6B7280]">
                         {event.metadata.bookCategory || "阅读"}
                       </span>
+                      {event.metadata.readingStatus && (
+                        <span className="text-[10px] px-1.5 py-0.5 rounded bg-[#EAFBF4] text-[#16724D]">
+                          {event.metadata.readingStatus}
+                        </span>
+                      )}
                     </div>
-                    <p className="text-[12px] text-[#94A3B8] mt-0.5">{event.metadata.bookAuthor || event.description}</p>
+                    <p className="text-[12px] text-[#94A3B8] mt-0.5">
+                      {[event.metadata.bookAuthor, event.metadata.publisher, event.metadata.isbn ? `ISBN ${event.metadata.isbn}` : ""].filter(Boolean).join(" · ") || event.description}
+                    </p>
                     <div className="flex items-center gap-3 mt-2">
                       <div className="flex items-center gap-1">
                         <Calendar className="w-3 h-3 text-[#94A3B8]" />
-                        <span className="text-[11px] text-[#94A3B8]">{formatMonth(event.date)}</span>
+                        <span className="text-[11px] text-[#94A3B8]">
+                          {event.metadata.startDate && event.metadata.finishDate
+                            ? `${event.metadata.startDate} - ${event.metadata.finishDate}`
+                            : formatMonth(event.date)}
+                        </span>
                       </div>
                       <div className="flex items-center gap-1">
                         {Array.from({ length: event.metadata.rating || 0 }).map((_, i) => (
@@ -152,8 +210,17 @@ export default function ReadingPage() {
                         ))}
                       </div>
                     </div>
+                    {(event.metadata.reusablePoint || event.metadata.quote) && (
+                      <div className="reading-expression-line">
+                        {event.metadata.reusablePoint && <span>{event.metadata.reusablePoint}</span>}
+                        {event.metadata.quote && <em>{event.metadata.quote}</em>}
+                      </div>
+                    )}
                   </div>
-                  <span className="evidence-status-pill">{event.is_highlight ? "证据" : "已入账"}</span>
+                  <div className="reading-side-meta">
+                    {event.metadata.pages ? <span>{event.metadata.pages} 页</span> : <ImageIcon className="h-4 w-4" />}
+                    <span className="evidence-status-pill">{event.is_highlight ? "证据" : "已入账"}</span>
+                  </div>
                 </div>
           </div>
         ))}

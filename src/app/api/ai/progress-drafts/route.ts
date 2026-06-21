@@ -215,6 +215,7 @@ export async function POST(request: NextRequest) {
       const logs: PlanLog[] = drafts.map((draft) => ({
         id: uid("log"),
         goalId: draft.goalId,
+        taskId: draft.taskId,
         date,
         category: draft.category,
         summary: draft.summary,

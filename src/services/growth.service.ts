@@ -73,23 +73,48 @@ export class GrowthService {
     bookTitle: string;
     bookAuthor: string;
     bookCategory: string;
+    isbn?: string;
+    publisher?: string;
+    coverUrl?: string;
+    readingStatus?: "想读" | "在读" | "已读" | "暂停";
+    startDate?: string;
+    finishDate?: string;
+    pages?: number;
+    reusablePoint?: string;
+    quote?: string;
+    useCases?: string[];
     rating: number;
     date: string;
     note?: string;
     isHighlight?: boolean;
   }): Promise<GrowthEvent> {
+    const descriptionParts = [
+      data.bookAuthor ? `${data.bookAuthor} 著` : "",
+      data.publisher || "",
+      data.note || "",
+    ].filter(Boolean);
     const event = await this.eventRepo.create({
       student_id: data.student_id,
       type: "reading",
       category: "阅读",
       title: `完成《${data.bookTitle}》`,
-      description: data.note || `${data.bookAuthor} 著`,
-      date: data.date,
+      description: descriptionParts.join(" · "),
+      date: data.finishDate || data.date,
       tags: [{ id: crypto.randomUUID(), name: data.bookCategory, color: "#3b82f6" }],
       metadata: {
         bookTitle: data.bookTitle,
         bookAuthor: data.bookAuthor,
         bookCategory: data.bookCategory,
+        isbn: data.isbn,
+        publisher: data.publisher,
+        coverUrl: data.coverUrl,
+        readingStatus: data.readingStatus || "已读",
+        startDate: data.startDate,
+        finishDate: data.finishDate || data.date,
+        pages: data.pages,
+        reusablePoint: data.reusablePoint,
+        quote: data.quote,
+        useCases: data.useCases || [],
         rating: data.rating,
       },
       is_highlight: data.isHighlight || false,

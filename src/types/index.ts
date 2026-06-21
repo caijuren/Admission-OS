@@ -54,6 +54,16 @@ export interface EventMetadata {
   bookTitle?: string;
   bookAuthor?: string;
   bookCategory?: string;
+  isbn?: string;
+  publisher?: string;
+  coverUrl?: string;
+  readingStatus?: "想读" | "在读" | "已读" | "暂停";
+  startDate?: string;
+  finishDate?: string;
+  pages?: number;
+  reusablePoint?: string;
+  quote?: string;
+  useCases?: string[];
   rating?: number;
   
   // For exam events

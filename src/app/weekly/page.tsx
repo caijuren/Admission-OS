@@ -6,7 +6,6 @@ import {
   AlertTriangle,
   CalendarDays,
   CheckCircle2,
-  ClipboardList,
   Loader2,
   MessageSquareText,
   Save,
@@ -54,6 +53,7 @@ type PlanTask = {
 type PlanLog = {
   id: string;
   goalId: string;
+  taskId?: string;
   date: string;
   category?: string;
   summary?: string;
@@ -108,6 +108,14 @@ function getWeekRange() {
   };
 }
 
+function formatWeekDate(date: Date) {
+  return `${date.getMonth() + 1}/${date.getDate()}`;
+}
+
+function toDateKey(date: Date) {
+  return date.toISOString().slice(0, 10);
+}
+
 function getSuggestedWeeklyAmount(task: PlanTask) {
   const remaining = Math.max(0, Number(task.target || 0) - Number(task.current || 0));
   if (!remaining) return 0;
@@ -155,6 +163,28 @@ function buildDailyPlan(tasks: PlanTask[]) {
     });
 
   return plan;
+}
+
+function parseLogAmount(log?: PlanLog) {
+  const value = Number((log?.amount || "").match(/\d+(?:\.\d+)?/)?.[0] || 0);
+  return Number.isFinite(value) ? value : 0;
+}
+
+function logMatchesTask(log: PlanLog, task: PlanTask) {
+  if (log.taskId) return log.taskId === task.id;
+  const summary = (log.summary || "").trim();
+  const haystack = [summary, log.category, log.note].filter(Boolean).join(" ");
+  return haystack.includes(task.title) || (summary.length > 1 && task.title.includes(summary));
+}
+
+function getCellStatus(task: PlanTask, plannedAmount: number, log?: PlanLog) {
+  if (!plannedAmount && !log) return "idle";
+  if (!log) return "pending";
+  const done = parseLogAmount(log);
+  if (!plannedAmount) return "done";
+  if (done >= plannedAmount) return "done";
+  if (done > 0) return "partial";
+  return "missed";
 }
 
 function buildDingTalkMessage(type: string, options: {
@@ -250,16 +280,32 @@ export default function WeeklyPage() {
     return liveTasks.filter((task) => (task.goalIds?.length ? task.goalIds : [task.goalId]).includes(summerGoal.id));
   }, [goals, summerGoal, tasks]);
   const dailyPlan = useMemo(() => buildDailyPlan(weeklyTasks), [weeklyTasks]);
+  const weekDates = useMemo(() => weekDays.map((_, index) => {
+    const date = new Date(week.start);
+    date.setDate(week.start.getDate() + index);
+    return date;
+  }), [week.start]);
   const todayIndex = Math.max(0, (new Date().getDay() || 7) - 1);
   const todayItems = dailyPlan[todayIndex] || [];
-  const todayTotal = todayItems.reduce((sum, item) => sum + item.amount, 0);
-  const suggestedTotal = useMemo(() => weeklyTasks.reduce((sum, task) => sum + getSuggestedWeeklyAmount(task), 0), [weeklyTasks]);
   const completedTotal = weeklyTasks.reduce((sum, task) => sum + Math.min(Number(task.current || 0), Number(task.target || 0)), 0);
   const targetTotal = weeklyTasks.reduce((sum, task) => sum + Number(task.target || 0), 0);
   const overallProgress = targetTotal ? clamp(Math.round((completedTotal / targetTotal) * 100), 0, 100) : 0;
-  const activeDays = dailyPlan.filter((items) => items.length).length;
-  const highPriorityCount = weeklyTasks.filter((task) => task.priority === "高").length;
   const recentLogs = logs.slice(0, 4);
+  const weekLogs = useMemo(() => {
+    const startKey = toDateKey(week.start);
+    const endKey = toDateKey(week.end);
+    return logs.filter((log) => log.date >= startKey && log.date <= endKey);
+  }, [logs, week.end, week.start]);
+  const plannedCellCount = dailyPlan.reduce((sum, day) => sum + day.length, 0);
+  const completedCellCount = weeklyTasks.reduce((sum, task) => {
+    return sum + weekDates.filter((date, dayIndex) => {
+      const planned = dailyPlan[dayIndex].find((item) => item.task.id === task.id)?.amount || 0;
+      const log = weekLogs.find((item) => item.date === toDateKey(date) && logMatchesTask(item, task));
+      const status = getCellStatus(task, planned, log);
+      return status === "done" || status === "partial";
+    }).length;
+  }, 0);
+  const weeklyGoalText = summerGoal?.title || "本周目标待配置";
 
   function resetProgressDrafts() {
     setSaved(false);
@@ -341,7 +387,7 @@ export default function WeeklyPage() {
       <section className="page-toolbar">
         <div>
           <h1>周计划</h1>
-          <span>{week.label} · 只回答今天做什么，以及做完后怎么同步</span>
+          <span>{week.label} · 围绕本周目标追踪每天完成情况</span>
         </div>
         <div className="weekly-toolbar-actions compact">
           <Button type="button" onClick={() => setLogDialogOpen(true)} className="bg-[#23B87A] hover:bg-[#1FA36C] rounded-xl">
@@ -377,22 +423,80 @@ export default function WeeklyPage() {
 
       <section className="weekly-plan-hero">
         <div>
-          <span>今日焦点</span>
-          <h2>{todayItems.length ? `${weekDays[todayIndex]}要完成 ${todayItems.length} 件事` : "今天没有硬性任务"}</h2>
-          <p>{todayItems.length ? "先按下面的顺序完成今日任务。完成后点“记录完成”，把 Word、聊天记录或一段话粘进来，系统解析后再写回目标地图。" : "可以用今天做补录、复盘或临时调整；目标地图有新任务后，这里会自动出现今日安排。"}</p>
+          <span>本周目标</span>
+          <h2>{weeklyGoalText}</h2>
+          <p>{summerGoal?.description || "本周计划从目标地图读取任务，按每天实际完成情况更新。重点看任务是否每天推进，而不是堆统计数字。"}</p>
         </div>
         <div className="weekly-plan-score">
           <strong>{overallProgress}%</strong>
-          <span>目标任务总进度</span>
+          <span>目标总体进度</span>
           <div className="line-meter"><i style={{ width: `${overallProgress}%` }} /></div>
         </div>
       </section>
 
       <section className="weekly-stat-grid">
-        <article><ClipboardList className="h-5 w-5" /><span>执行任务</span><strong>{weeklyTasks.length}</strong></article>
-        <article><Target className="h-5 w-5" /><span>本周建议量</span><strong>{suggestedTotal}</strong></article>
-        <article><CalendarDays className="h-5 w-5" /><span>有安排天数</span><strong>{activeDays}</strong></article>
-        <article><CheckCircle2 className="h-5 w-5" /><span>高优先级</span><strong>{highPriorityCount}</strong></article>
+        <article><Target className="h-5 w-5" /><span>本周任务</span><strong>{weeklyTasks.length}</strong></article>
+        <article><CalendarDays className="h-5 w-5" /><span>计划格数</span><strong>{plannedCellCount}</strong></article>
+        <article><CheckCircle2 className="h-5 w-5" /><span>已记录格数</span><strong>{completedCellCount}</strong></article>
+      </section>
+
+      <section className="weekly-daily-plan-panel">
+        <div className="weekly-section-title">
+          <CalendarDays className="h-5 w-5 text-[#2F7DD3]" />
+          <div>
+            <h2>本周任务执行表</h2>
+            <p>行是任务，列是周一到周日。绿色代表已完成，黄色代表部分完成，灰色代表当天不安排。</p>
+          </div>
+        </div>
+        <div className="weekly-matrix-wrap">
+          <table className="weekly-matrix-table">
+            <thead>
+              <tr>
+                <th>任务</th>
+                {weekDays.map((day, index) => (
+                  <th key={day} className={cn(index === todayIndex && "today")}>
+                    <span>{day}</span>
+                    <em>{formatWeekDate(weekDates[index])}</em>
+                  </th>
+                ))}
+                <th>本周进度</th>
+              </tr>
+            </thead>
+            <tbody>
+              {weeklyTasks.map((task) => {
+                const taskPlanTotal = dailyPlan.reduce((sum, day) => sum + (day.find((item) => item.task.id === task.id)?.amount || 0), 0);
+                const taskWeekLogs = weekLogs.filter((log) => logMatchesTask(log, task));
+                const taskDoneTotal = taskWeekLogs.reduce((sum, log) => sum + parseLogAmount(log), 0);
+                return (
+                  <tr key={task.id}>
+                    <th>
+                      <strong>{task.title}</strong>
+                      <span>{task.category} · {task.executionMode || "孩子自主"} · {task.dailyTarget || "节奏未配置"}</span>
+                    </th>
+                    {weekDates.map((date, dayIndex) => {
+                      const planned = dailyPlan[dayIndex].find((item) => item.task.id === task.id)?.amount || 0;
+                      const log = weekLogs.find((item) => item.date === toDateKey(date) && logMatchesTask(item, task));
+                      const status = getCellStatus(task, planned, log);
+                      return (
+                        <td key={`${task.id}-${dayIndex}`} className={cn("weekly-matrix-cell", status, dayIndex === todayIndex && "today")}>
+                          <span>{status === "idle" ? "—" : status === "pending" ? "待完成" : status === "partial" ? "部分" : status === "missed" ? "未做" : "完成"}</span>
+                          <em>{log?.amount || (planned ? `${planned}${task.unit}` : "")}</em>
+                        </td>
+                      );
+                    })}
+                    <td className="weekly-matrix-progress">
+                      <strong>{taskDoneTotal || task.current}/{taskPlanTotal || task.target}{task.unit}</strong>
+                      <div className="line-meter"><i style={{ width: `${taskPlanTotal ? clamp(Math.round((taskDoneTotal / taskPlanTotal) * 100), 0, 100) : getProgress(task)}%` }} /></div>
+                    </td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
+          {!weeklyTasks.length && loaded && (
+            <div className="weekly-today-empty">先到目标地图添加任务，这里会自动生成本周执行表。</div>
+          )}
+        </div>
       </section>
 
       <section className="weekly-execution-grid">
@@ -400,8 +504,8 @@ export default function WeeklyPage() {
           <div className="weekly-section-title">
             <CalendarDays className="h-5 w-5 text-[#2F7DD3]" />
             <div>
-              <h2>今天做什么</h2>
-              <p>{weekDays[todayIndex]} · {todayItems.length ? `${todayItems.length} 项任务 · 建议总量 ${todayTotal}` : "没有自动拆解任务"}</p>
+              <h2>今日列详情</h2>
+              <p>{weekDays[todayIndex]} · {todayItems.length ? `${todayItems.length} 项任务` : "没有自动拆解任务"}</p>
             </div>
           </div>
           <div className="weekly-today-list">
@@ -436,29 +540,6 @@ export default function WeeklyPage() {
             )) : <div className="weekly-today-empty">还没有完成记录。</div>}
           </div>
         </aside>
-      </section>
-
-      <section className="weekly-daily-plan-panel">
-        <div className="weekly-section-title">
-          <CalendarDays className="h-5 w-5 text-[#2F7DD3]" />
-          <div>
-            <h2>本周排程</h2>
-            <p>按任务节奏自动铺到 7 天，只作为执行视图；任务本身仍在目标地图维护。</p>
-          </div>
-        </div>
-        <div className="weekly-daily-grid">
-          {weekDays.map((day, index) => (
-            <article key={day} className={cn("weekly-day-card", index === todayIndex && "today")}>
-              <strong>{day}</strong>
-              {dailyPlan[index].length ? dailyPlan[index].map(({ task, amount }) => (
-                <span key={`${day}-${task.id}`}>
-                  {task.title}
-                  <em>{amount}{task.unit}</em>
-                </span>
-              )) : <span className="empty">留给复盘或机动</span>}
-            </article>
-          ))}
-        </div>
       </section>
 
       {!weeklyTasks.length && loaded && (

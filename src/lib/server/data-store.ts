@@ -96,6 +96,7 @@ export type AiActionLog = {
 export type PlanLog = {
   id: string;
   goalId: string;
+  taskId?: string;
   date: string;
   category?: string;
   summary?: string;
